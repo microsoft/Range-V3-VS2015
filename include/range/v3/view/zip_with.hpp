@@ -119,6 +119,13 @@ namespace ranges
         } // namespace detail
         /// \endcond
 
+#ifdef WORKAROUND_215191
+        template<typename T>
+        struct single_pass_helper {
+            static const bool value = SinglePass<range_iterator_t<T>>::value;
+        };
+#endif
+
         /// \addtogroup group-views
         /// @{
         template<typename Fun, typename...Rngs>
@@ -144,6 +151,7 @@ namespace ranges
                 friend sentinel;
                 using fun_ref_ = semiregular_ref_or_val_t<function_type<Fun>, true>;
                 fun_ref_ fun_;
+
                 std::tuple<range_iterator_t<Rngs>...> its_;
 
                 template<std::size_t...Is>
@@ -154,15 +162,31 @@ namespace ranges
                 )
                 template<typename Sent>
                 friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
+#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+                -> decltype(get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{}))
+                {
+                    return get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{});
+                }
+#else
                 RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
                 (
                     get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{})
                 )
+#endif
             public:
                 using difference_type =
                     common_type_t<range_difference_t<Rngs>...>;
+
                 using single_pass =
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215191
+                    meta::or_c<single_pass_helper<Rngs>::value...>;
+#else
+                    meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>::value...>;
+#endif
+#else
                     meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>()...>;
+#endif
                 using value_type =
                     detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rngs>{}...))>;
 
@@ -189,18 +213,30 @@ namespace ranges
                         false,
                         [](bool a, bool b) { return a || b; });
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>::value...>::value)
+#else
                 CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>()...>::value)
+#endif
                 void prev()
                 {
                     tuple_for_each(its_, detail::dec);
                 }
-                CONCEPT_REQUIRES(meta::and_c<(bool) RandomAccessRange<Rngs>()...>::value)
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+#else
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+#endif
                 void advance(difference_type n)
                 {
                     using std::placeholders::_1;
                     tuple_for_each(its_, std::bind(detail::advance_, _1, n));
                 }
-                CONCEPT_REQUIRES(meta::and_c<(bool) RandomAccessRange<Rngs>()...>::value)
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+#else
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+#endif
                 difference_type distance_to(cursor const &that) const
                 {
                     // Return the smallest distance (in magnitude) of any of the iterator
@@ -241,9 +277,19 @@ namespace ranges
 
             using end_cursor_t =
                 meta::if_<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    meta::and_c<
+                        (bool) BoundedRange<Rngs>::value...,
+#ifdef WORKAROUND_215191
+                        !single_pass_helper<Rngs>::value...>,
+#else
+                        !SinglePass<range_iterator_t<Rngs>>::value...>,
+#endif
+#else
                     meta::and_c<
                         (bool) BoundedRange<Rngs>()...,
                         !SinglePass<range_iterator_t<Rngs>>()...>,
+#endif
                     cursor,
                     sentinel>;
 
@@ -255,12 +301,20 @@ namespace ranges
             {
                 return {fun_, tuple_transform(rngs_, end)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
+#endif
             cursor begin_cursor() const
             {
                 return {fun_, tuple_transform(rngs_, begin)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
+#endif
             end_cursor_t end_cursor() const
             {
                 return {fun_, tuple_transform(rngs_, end)};
@@ -275,7 +329,11 @@ namespace ranges
               : fun_(as_function(std::move(fun)))
               , rngs_{std::move(rngs)...}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>()...>::value)
+#endif
             constexpr size_type_ size() const
             {
                 return range_cardinality<iter_zip_with_view>::value >= 0 ?
@@ -306,15 +364,30 @@ namespace ranges
         {
             struct iter_zip_with_fn
             {
+#ifdef WORKAROUND_213933
+                template<typename Fun, typename ...Rngs>
+                struct Concept {
+                    static const bool value = meta::and_<
+                    InputRange<Rngs>...,
+                    Callable<Fun, range_iterator_t<Rngs>...>,
+                    Callable<Fun, copy_tag, range_iterator_t<Rngs>...>,
+                    Callable<Fun, move_tag, range_iterator_t<Rngs>...>>::value;
+                };
+#else
                 template<typename Fun, typename ...Rngs>
                 using Concept = meta::and_<
                     InputRange<Rngs>...,
                     Callable<Fun, range_iterator_t<Rngs>...>,
                     Callable<Fun, copy_tag, range_iterator_t<Rngs>...>,
                     Callable<Fun, move_tag, range_iterator_t<Rngs>...>>;
+#endif
 
                 template<typename...Rngs, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Fun, Rngs...>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Fun, Rngs...>())>
+#endif
                 iter_zip_with_view<Fun, all_t<Rngs>...> operator()(Fun fun, Rngs &&... rngs) const
                 {
                     return iter_zip_with_view<Fun, all_t<Rngs>...>{
@@ -325,7 +398,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Fun, typename...Rngs,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Fun, Rngs...>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Fun, Rngs...>())>
+#endif
                 void operator()(Fun, Rngs &&...) const
                 {
                     CONCEPT_ASSERT_MSG(meta::and_<InputRange<Rngs>...>(),
@@ -356,14 +433,28 @@ namespace ranges
 
             struct zip_with_fn
             {
+#ifdef WORKAROUND_213933
+                template<typename Fun, typename ...Rngs>
+                struct Concept {
+                    static const bool value = meta::and_<
+                    InputRange<Rngs>...,
+                    Callable<Fun, range_reference_t<Rngs> &&...>>::value;
+                };
+#else
                 template<typename Fun, typename ...Rngs>
                 using Concept = meta::and_<
                     InputRange<Rngs>...,
                     Callable<Fun, range_reference_t<Rngs> &&...>>;
+#endif
 
                 template<typename...Rngs, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Fun, Rngs...>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Fun, Rngs...>())>
-                zip_with_view<Fun, all_t<Rngs>...> operator()(Fun fun, Rngs &&... rngs) const
+#endif
+                zip_with_view<Fun, all_t<Rngs>...>
+                operator()(Fun fun, Rngs &&... rngs) const
                 {
                     return zip_with_view<Fun, all_t<Rngs>...>{
                         std::move(fun),
@@ -373,7 +464,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Fun, typename...Rngs,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Fun, Rngs...>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Fun, Rngs...>())>
+#endif
                 void operator()(Fun, Rngs &&...) const
                 {
                     CONCEPT_ASSERT_MSG(meta::and_<InputRange<Rngs>...>(),

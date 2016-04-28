@@ -47,9 +47,17 @@ namespace ranges
                     return **it;
                 }
                 auto indirect_move(range_iterator_t<Rng> it) const ->
+#ifdef WORKAROUND_INDIRECT_MOVE
+                    decltype(ranges::detail_msvc::indirect_move(*it))
+#else
                     decltype(ranges::indirect_move(*it))
+#endif
                 {
+#ifdef WORKAROUND_INDIRECT_MOVE
+                    return ranges::detail_msvc::indirect_move(*it);
+#else
                     return ranges::indirect_move(*it);
+#endif
                 }
             };
             adaptor begin_adaptor() const
@@ -65,7 +73,11 @@ namespace ranges
             explicit indirect_view(Rng rng)
               : view_adaptor_t<indirect_view>{std::move(rng)}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(this->base());
@@ -84,7 +96,11 @@ namespace ranges
                     Readable<range_value_t<Rng>>>;
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 indirect_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     CONCEPT_ASSERT(InputRange<Rng>());
@@ -92,7 +108,11 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

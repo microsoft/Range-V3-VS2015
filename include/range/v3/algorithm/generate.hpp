@@ -32,9 +32,15 @@ namespace ranges
         struct generate_fn
         {
             template<typename O, typename S, typename F,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Function<F>::value &&
+                    OutputIterator<O, concepts::Function::result_t<F>>::value &&
+                    IteratorRange<O, S>::value)>
+#else
                 CONCEPT_REQUIRES_(Function<F>() &&
                     OutputIterator<O, concepts::Function::result_t<F>>() &&
                     IteratorRange<O, S>())>
+#endif
             tagged_pair<tag::out(O), tag::fun(F)> operator()(O begin, S end, F fun) const
             {
                 for(; begin != end; ++begin)
@@ -44,8 +50,13 @@ namespace ranges
 
             template<typename Rng, typename F,
                 typename O = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Function<F>::value &&
+                    OutputRange<Rng, concepts::Function::result_t<F>>::value)>
+#else
                 CONCEPT_REQUIRES_(Function<F>() &&
                     OutputRange<Rng, concepts::Function::result_t<F>>())>
+#endif
             tagged_pair<tag::out(range_safe_iterator_t<Rng>), tag::fun(F)>
             operator()(Rng &&rng, F fun) const
             {

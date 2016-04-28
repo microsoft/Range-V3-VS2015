@@ -75,14 +75,22 @@ namespace ranges
                         ++it;
                     toggl_ = !toggl_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
+#endif
                 void prev(range_iterator_t<Rng> & it)
                 {
                     toggl_ = !toggl_;
                     if(toggl_)
                         --it;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 range_difference_t<Rng> distance_to(range_iterator_t<Rng> it,
                     range_iterator_t<Rng> other_it, cursor_adaptor const &other) const
                 {
@@ -93,7 +101,11 @@ namespace ranges
                         return d * 2 + (toggl_ != other.toggl_);
                     return other.toggl_ - toggl_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 void advance(range_iterator_t<Rng> &it, range_difference_t<Rng> n)
                 {
                     ranges::advance(it, n >= 0 ? (n + toggl_) / 2 : (n - !toggl_) / 2);
@@ -104,7 +116,11 @@ namespace ranges
             struct sentinel_adaptor : adaptor_base
             {
                 bool empty(range_iterator_t<Rng> it, cursor_adaptor const &other,
+#ifdef BUGFIX
+                    range_sentinel_t<Rng> sent) const
+#else
                     range_sentinel_t<Rng> sent)
+#endif
                 {
                     return it == sent;
                 }
@@ -113,12 +129,20 @@ namespace ranges
             {
                 return {val_, ranges::empty(this->mutable_base())};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BoundedRange<Rng>::value && !SinglePass<range_iterator_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(BoundedRange<Rng>() && !SinglePass<range_iterator_t<Rng>>())
+#endif
             cursor_adaptor end_adaptor() const
             {
                 return {val_, true};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(!BoundedRange<Rng>::value || SinglePass<range_iterator_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(!BoundedRange<Rng>() || SinglePass<range_iterator_t<Rng>>())
+#endif
             sentinel_adaptor end_adaptor() const
             {
                 return {};
@@ -128,7 +152,11 @@ namespace ranges
             intersperse_view(Rng rng, range_value_t<Rng> val)
               : view_adaptor_t<intersperse_view>{std::move(rng)}, val_(std::move(val))
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 auto tmp = ranges::size(this->mutable_base());
@@ -142,7 +170,11 @@ namespace ranges
             {
             private:
                 friend view_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename T, CONCEPT_REQUIRES_(SemiRegular<T>::value)>
+#else
                 template<typename T, CONCEPT_REQUIRES_(SemiRegular<T>())>
+#endif
                 static auto bind(intersperse_fn intersperse, T t)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -157,7 +189,11 @@ namespace ranges
                     SemiRegular<range_value_t<Rng>>>;
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 intersperse_view<all_t<Rng>> operator()(Rng && rng, range_value_t<Rng> val) const
                 {
                     return {all(std::forward<Rng>(rng)), {std::move(val)}};
@@ -165,7 +201,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, T>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, T>())>
+#endif
                 void operator()(Rng &&, T &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

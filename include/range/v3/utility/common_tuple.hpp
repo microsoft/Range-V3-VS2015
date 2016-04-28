@@ -33,6 +33,42 @@ namespace ranges
             {
                 return std::tuple<Us...>{std::get<Is>(std::forward<Tup>(tup))...};
             }
+
+#ifdef WORKAROUND_215598
+            template<typename... T>
+            struct and_c_class
+            {
+                static const bool value = meta::and_c<T::value...>::value;
+            };
+
+            template<typename, typename, bool>
+            struct and_c_Constructible {};
+            template<typename... Ts, typename... Us>
+            struct and_c_Constructible<meta::list<Ts...>, meta::list<Us...>, true> : and_c_class<Constructible<Ts, Us>...>
+            {
+            };
+
+            template<typename, typename, bool>
+            struct and_c_Assignable {};
+            template<typename... Ts, typename... Us>
+            struct and_c_Assignable<meta::list<Ts...>, meta::list<Us...>, true> : and_c_class<Assignable<Ts, Us &&>...>
+            {
+            };
+
+            template<typename, typename, bool>
+            struct and_c_EqualityComparable {};
+            template<typename... Ts, typename... Us>
+            struct and_c_EqualityComparable<meta::list<Ts...>, meta::list<Us...>, true> : and_c_class<EqualityComparable<Ts, Us &&>...>
+            {
+            };
+
+            template<typename, typename, bool>
+            struct and_c_TotallyOrdered {};
+            template<typename... Ts, typename... Us>
+            struct and_c_TotallyOrdered<meta::list<Ts...>, meta::list<Us...>, true> : and_c_class<TotallyOrdered<Ts, Us &&>...>
+            {
+            };
+#endif
         }
         /// \endcond
 
@@ -64,57 +100,138 @@ namespace ranges
             };
         public:
             // Construction
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool) DefaultConstructible<Ts>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool) DefaultConstructible<Ts>()...>::value)
+#endif
             common_tuple()
                 noexcept(meta::and_c<std::is_nothrow_default_constructible<Ts>::value...>::value)
               : std::tuple<Ts...>{}
             {}
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>()...>::value)>
+#endif
             explicit common_tuple(Us &&... us)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us &&>::value...>::value)
+#endif
               : std::tuple<Ts...>{std::forward<Us>(us)...}
             {}
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &>()...>::value)>
+#endif
             common_tuple(std::tuple<Us...> &that)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us &>::value...>::value)
+#endif
               : common_tuple(that, meta::make_index_sequence<sizeof...(Ts)>{})
             {}
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us const &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us const &>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us const &>()...>::value)>
+#endif
             common_tuple(std::tuple<Us...> const &that)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us const &>::value...>::value)
+#endif
               : common_tuple(that, meta::make_index_sequence<sizeof...(Ts)>{})
             {}
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>()...>::value)>
+#endif
             common_tuple(std::tuple<Us...> &&that)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us &&>::value...>::value)
+#endif
               : common_tuple(std::move(that), meta::make_index_sequence<sizeof...(Ts)>{})
             {}
 
             // Assignment
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Assignable<meta::list<Ts &...>, meta::list<Us &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &>()...>::value)>
+#endif
             common_tuple &operator=(std::tuple<Us...> &that)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_assignable<Ts &, Us &>::value...>::value)
+#endif
             {
                 (void)tuple_transform(base(), that, element_assign_{});
                 return *this;
             }
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Assignable<meta::list<Ts &...>, meta::list<Us const &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us const &>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us const &>()...>::value)>
+#endif
             common_tuple &operator=(std::tuple<Us...> const & that)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_assignable<Ts &, Us const &>::value...>::value)
+#endif
             {
                 (void)tuple_transform(base(), that, element_assign_{});
                 return *this;
             }
             template<typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Assignable<meta::list<Ts &...>, meta::list<Us &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &&>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &&>()...>::value)>
+#endif
             common_tuple &operator=(std::tuple<Us...> &&that)
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_assignable<Ts &, Us &&>::value...>::value)
+#endif
             {
                 (void)tuple_transform(base(), std::move(that), element_assign_{});
                 return *this;
@@ -122,28 +239,116 @@ namespace ranges
 
             // Conversion
             template<typename ...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Us...>, meta::list<Ts &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts &>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts &>()...>::value)>
+#endif
             operator std::tuple<Us...> () &
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Us, Ts &>::value...>::value)
+#endif
             {
                 return detail::to_std_tuple<Us...>(*this, meta::make_index_sequence<sizeof...(Ts)>{});
             }
             template<typename ...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Us...>, meta::list<const Ts &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts const &>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts const &>()...>::value)>
+#endif
             operator std::tuple<Us...> () const &
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Us, Ts const &>::value...>::value)
+#endif
             {
                 return detail::to_std_tuple<Us...>(*this, meta::make_index_sequence<sizeof...(Ts)>{});
             }
             template<typename ...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+                CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Us...>, meta::list<Ts &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
+#else
+                CONCEPT_REQUIRES_(meta::and_c<(bool)Constructible<Us, Ts &&>::value...>::value)>
+#endif
+#else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts &&>()...>::value)>
+#endif
             operator std::tuple<Us...> () &&
+#ifdef WORKAROUND_215598_NOEXCEPT
+#else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Us, Ts &&>::value...>::value)
+#endif
             {
                 return detail::to_std_tuple<Us...>(std::move(*this), meta::make_index_sequence<sizeof...(Ts)>{});
             }
 
         // Logical operators
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef WORKAROUND_215598
+#define LOGICAL_OP(OP, CONCEPT)\
+            CONCEPT_REQUIRES_FRIEND(meta::and_c<(bool)CONCEPT<Ts>::value...>::value)\
+                friend bool operator OP(common_tuple const &a, common_tuple const &b)\
+            {\
+                return a.base() OP b.base(); \
+            }\
+                template<typename...Us, \
+                CONCEPT_REQUIRES_FRIEND_(detail::and_c_##CONCEPT<meta::list<Ts...>, meta::list<Us...>, sizeof...(Ts) == sizeof...(Us)>::value)>\
+                friend bool operator OP(common_tuple const &a, common_tuple<Us...> const &b)\
+            {\
+                return a.base() OP b.base(); \
+            }\
+                template<typename...Us, \
+                CONCEPT_REQUIRES_FRIEND_(detail::and_c_##CONCEPT<meta::list<Ts...>, meta::list<Us...>, sizeof...(Ts) == sizeof...(Us)>::value)>\
+                friend bool operator OP(common_tuple const &a, std::tuple<Us...> const &b)\
+            {\
+                return a.base() OP b; \
+            }\
+                template<typename...Us, \
+                CONCEPT_REQUIRES_FRIEND_(detail::and_c_##CONCEPT<meta::list<Ts...>, meta::list<Us...>, sizeof...(Ts) == sizeof...(Us)>::value)>\
+                friend bool operator OP(std::tuple<Us...> const &a, common_tuple const &b)\
+            {\
+                return a OP b.base(); \
+            }\
+                /**/
+#else
+#define LOGICAL_OP(OP, CONCEPT)\
+            CONCEPT_REQUIRES_FRIEND(meta::and_c<(bool)CONCEPT<Ts>::value...>::value)\
+                friend bool operator OP(common_tuple const &a, common_tuple const &b)\
+            {\
+                return a.base() OP b.base(); \
+            }\
+                template<typename...Us, \
+                CONCEPT_REQUIRES_FRIEND_(meta::and_c<(bool)CONCEPT<Ts, Us>::value...>::value)>\
+                friend bool operator OP(common_tuple const &a, common_tuple<Us...> const &b)\
+            {\
+                return a.base() OP b.base(); \
+            }\
+                template<typename...Us, \
+                CONCEPT_REQUIRES_FRIEND_(meta::and_c<(bool)CONCEPT<Ts, Us>::value...>::value)>\
+                friend bool operator OP(common_tuple const &a, std::tuple<Us...> const &b)\
+            {\
+                return a.base() OP b; \
+            }\
+                template<typename...Us, \
+                CONCEPT_REQUIRES_FRIEND_(meta::and_c<(bool)CONCEPT<Ts, Us>::value...>::value)>\
+                friend bool operator OP(std::tuple<Us...> const &a, common_tuple const &b)\
+            {\
+                return a OP b.base(); \
+            }\
+                /**/
+#endif
+#else
 #define LOGICAL_OP(OP, CONCEPT)\
             CONCEPT_REQUIRES(meta::and_c<(bool) CONCEPT<Ts>()...>::value)\
             friend bool operator OP(common_tuple const &a, common_tuple const &b)\
@@ -169,6 +374,7 @@ namespace ranges
                 return a OP b.base();\
             }\
             /**/
+#endif
             LOGICAL_OP(==, EqualityComparable)
             LOGICAL_OP(!=, EqualityComparable)
             LOGICAL_OP(<, TotallyOrdered)
@@ -211,35 +417,55 @@ namespace ranges
             }
         public:
             // Construction
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(DefaultConstructible<F>::value && DefaultConstructible<S>::value)
+#else
             CONCEPT_REQUIRES(DefaultConstructible<F>() && DefaultConstructible<S>())
+#endif
             common_pair()
                 noexcept(std::is_nothrow_default_constructible<F>::value &&
                     std::is_nothrow_default_constructible<S>::value)
               : std::pair<F, S>{}
             {}
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F, F2 &&>::value && Constructible<S, S2 &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F, F2 &&>() && Constructible<S, S2 &&>())>
+#endif
             common_pair(F2 &&f2, S2 &&s2)
                 noexcept(std::is_nothrow_constructible<F, F2 &&>::value &&
                     std::is_nothrow_constructible<S, S2 &&>::value)
               : std::pair<F, S>{std::forward<F2>(f2), std::forward<S2>(s2)}
             {}
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F, F2 &>::value && Constructible<S, S2 &>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F, F2 &>() && Constructible<S, S2 &>())>
+#endif
             common_pair(std::pair<F2, S2> &that)
                 noexcept(std::is_nothrow_constructible<F, F2 &>::value &&
                     std::is_nothrow_constructible<S, S2 &>::value)
               : std::pair<F, S>{that.first, that.second}
             {}
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F, F2 const &>::value && Constructible<S, S2 const &>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F, F2 const &>() && Constructible<S, S2 const &>())>
+#endif
             common_pair(std::pair<F2, S2> const &that)
                 noexcept(std::is_nothrow_constructible<F, F2 const &>::value &&
                     std::is_nothrow_constructible<S, S2 const &>::value)
               : std::pair<F, S>{that.first, that.second}
             {}
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F, F2 &&>::value && Constructible<S, S2 &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F, F2 &&>() && Constructible<S, S2 &&>())>
+#endif
             common_pair(std::pair<F2, S2> &&that)
                 noexcept(std::is_nothrow_constructible<F, F2 &&>::value &&
                     std::is_nothrow_constructible<S, S2 &&>::value)
@@ -248,7 +474,11 @@ namespace ranges
 
             // Conversion
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F2, F &>::value && Constructible<S2, S &>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F2, F &>() && Constructible<S2, S &>())>
+#endif
             operator std::pair<F2, S2> () &
                 noexcept(std::is_nothrow_constructible<F2, F &>::value &&
                     std::is_nothrow_constructible<S2, S &>::value)
@@ -256,7 +486,11 @@ namespace ranges
                 return {this->first, this->second};
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F2, F const &>::value && Constructible<S2, S const &>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F2, F const &>() && Constructible<S2, S const &>())>
+#endif
             operator std::pair<F2, S2> () const &
                 noexcept(std::is_nothrow_constructible<F2, F const &>::value &&
                     std::is_nothrow_constructible<S2, S const &>::value)
@@ -264,7 +498,11 @@ namespace ranges
                 return {this->first, this->second};
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<F2, F &&>::value && Constructible<S2, S &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<F2, F &&>() && Constructible<S2, S &&>())>
+#endif
             operator std::pair<F2, S2> () &&
                 noexcept(std::is_nothrow_constructible<F2, F &&>::value &&
                     std::is_nothrow_constructible<S2, S &&>::value)
@@ -274,7 +512,11 @@ namespace ranges
 
             // Assignment
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Assignable<F &, F2 &>::value && Assignable<S &, S2 &>::value)>
+#else
                 CONCEPT_REQUIRES_(Assignable<F &, F2 &>() && Assignable<S &, S2 &>())>
+#endif
             common_pair &operator=(std::pair<F2, S2> &that)
                 noexcept(std::is_nothrow_assignable<F &, F2 &>::value &&
                          std::is_nothrow_assignable<S &, S2 &>::value)
@@ -284,7 +526,11 @@ namespace ranges
                 return *this;
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Assignable<F &, F2 const &>::value && Assignable<S &, S2 const &>::value)>
+#else
                 CONCEPT_REQUIRES_(Assignable<F &, F2 const &>() && Assignable<S &, S2 const &>())>
+#endif
             common_pair &operator=(std::pair<F2, S2> const & that)
                 noexcept(std::is_nothrow_assignable<F &, F2 const &>::value &&
                          std::is_nothrow_assignable<S &, S2 const &>::value)
@@ -294,7 +540,11 @@ namespace ranges
                 return *this;
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Assignable<F &, F2 &&>::value && Assignable<S &, S2 &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Assignable<F &, F2 &&>() && Assignable<S &, S2 &&>())>
+#endif
             common_pair &operator=(std::pair<F2, S2> &&that)
                 noexcept(std::is_nothrow_assignable<F &, F2 &&>::value &&
                          std::is_nothrow_assignable<S &, S2 &&>::value)
@@ -305,52 +555,111 @@ namespace ranges
             }
 
             // Logical operators
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(EqualityComparable<F>::value && EqualityComparable<S>::value)
+#else
             CONCEPT_REQUIRES(EqualityComparable<F>() && EqualityComparable<S>())
+#endif
             friend bool operator ==(common_pair const &a, common_pair const &b)
             {
                 return a.first == b.first && a.second == b.second;
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
+#endif
             friend bool operator ==(common_pair const &a, common_pair<F2, S2> const &b)
             {
                 return a.first == b.first && a.second == b.second;
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
+#endif
             friend bool operator ==(common_pair const &a, std::pair<F2, S2> const &b)
             {
                 return a.first == b.first && a.second == b.second;
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
+#endif
             friend bool operator ==(std::pair<F2, S2> const &a, common_pair const &b)
             {
                 return a.first == b.first && a.second == b.second;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(EqualityComparable<F>::value && EqualityComparable<S>::value)
+#else
             CONCEPT_REQUIRES(EqualityComparable<F>() && EqualityComparable<S>())
+#endif
             friend bool operator <(common_pair const &a, common_pair const &b)
             {
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
+#endif
             friend bool operator <(common_pair const &a, common_pair<F2, S2> const &b)
             {
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
+#endif
             friend bool operator <(common_pair const &a, std::pair<F2, S2> const &b)
             {
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
             template<typename F2, typename S2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
+#endif
             friend bool operator <(std::pair<F2, S2> const &a, common_pair const &b)
             {
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#define LOGICAL_OP(OP, CONCEPT, RET)\
+            CONCEPT_REQUIRES_FRIEND(CONCEPT<F>::value && CONCEPT<S>::value)\
+            friend bool operator OP(common_pair const &a, common_pair const &b)\
+            {\
+                return RET;\
+            }\
+            template<typename F2, typename S2,\
+                CONCEPT_REQUIRES_FRIEND_(CONCEPT<F, F2>::value && CONCEPT<S, S2>::value)>\
+            friend bool operator OP(common_pair const &a, common_pair<F2, S2> const &b)\
+            {\
+                return RET;\
+            }\
+            template<typename F2, typename S2,\
+                CONCEPT_REQUIRES_FRIEND_(CONCEPT<F, F2>::value && CONCEPT<S, S2>::value)>\
+            friend bool operator OP(common_pair const &a, std::pair<F2, S2> const &b)\
+            {\
+                return RET;\
+            }\
+            template<typename F2, typename S2,\
+                CONCEPT_REQUIRES_FRIEND_(CONCEPT<F, F2>::value && CONCEPT<S, S2>::value)>\
+            friend bool operator OP(std::pair<F2, S2> const &a, common_pair const &b)\
+            {\
+                return RET;\
+            }\
+            /**/
+#else
 #define LOGICAL_OP(OP, CONCEPT, RET)\
             CONCEPT_REQUIRES(CONCEPT<F>() && CONCEPT<S>())\
             friend bool operator OP(common_pair const &a, common_pair const &b)\
@@ -376,6 +685,7 @@ namespace ranges
                 return RET;\
             }\
             /**/
+#endif
             LOGICAL_OP(!=, EqualityComparable, !(a == b))
             LOGICAL_OP(<=, TotallyOrdered, !(b < a))
             LOGICAL_OP(>, TotallyOrdered, (b < a))

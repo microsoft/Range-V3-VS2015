@@ -35,13 +35,21 @@ namespace ranges
             {
                 // tuple value
                 template<typename ...Its,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>::value && sizeof...(Its) != 2)>
+#else
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>() && sizeof...(Its) != 2)>
+#endif
                 auto operator()(copy_tag, Its...) const ->
                     std::tuple<iterator_value_t<Its>...>;
 
                 // tuple reference
                 template<typename ...Its,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>::value && sizeof...(Its) != 2)>
+#else
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>() && sizeof...(Its) != 2)>
+#endif
                 auto operator()(Its const &...its) const
                     noexcept(meta::and_c<noexcept(iterator_reference_t<Its>(*its))...>::value)
                 RANGES_DECLTYPE_AUTO_RETURN
@@ -51,7 +59,11 @@ namespace ranges
 
                 // tuple rvalue reference
                 template<typename ...Its,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>::value && sizeof...(Its) != 2)>
+#else
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>() && sizeof...(Its) != 2)>
+#endif
                 auto operator()(move_tag, Its const &...its) const
                     noexcept(meta::and_c<
                         noexcept(iterator_rvalue_reference_t<Its>(iter_move(its)))...>::value)
@@ -62,13 +74,21 @@ namespace ranges
 
                 // pair value
                 template<typename It1, typename It2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Readable<It1>::value && Readable<It2>::value)>
+#else
                     CONCEPT_REQUIRES_(Readable<It1>() && Readable<It2>())>
+#endif
                 auto operator()(copy_tag, It1, It2) const ->
                     std::pair<iterator_value_t<It1>, iterator_value_t<It2>>;
 
                 // pair reference
                 template<typename It1, typename It2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Readable<It1>::value && Readable<It2>::value)>
+#else
                     CONCEPT_REQUIRES_(Readable<It1>() && Readable<It2>())>
+#endif
                 auto operator()(It1 const &it1, It2 const &it2) const
                     noexcept(noexcept(iterator_reference_t<It1>(*it1)) &&
                              noexcept(iterator_reference_t<It2>(*it2)))
@@ -79,7 +99,11 @@ namespace ranges
 
                 // pair rvalue reference
                 template<typename It1, typename It2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Readable<It1>::value && Readable<It2>::value)>
+#else
                     CONCEPT_REQUIRES_(Readable<It1>() && Readable<It2>())>
+#endif
                 auto operator()(move_tag, It1 const &it1, It2 const &it2) const
                     noexcept(noexcept(iterator_rvalue_reference_t<It1>(iter_move(it1))) &&
                              noexcept(iterator_rvalue_reference_t<It2>(iter_move(it2))))
@@ -112,8 +136,19 @@ namespace ranges
                 template<typename ...Rngs>
                 using Concept = meta::and_<InputRange<Rngs>...>;
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename ...Rngs>
+                struct Concept_helper {
+                    static const bool value = meta::and_<InputRange<Rngs>...>::value;
+                };
+#endif
+
                 template<typename...Rngs,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept_helper<Rngs...>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rngs...>())>
+#endif
                 zip_view<all_t<Rngs>...> operator()(Rngs &&... rngs) const
                 {
                     CONCEPT_ASSERT(meta::and_<Range<Rngs>...>());
@@ -122,7 +157,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename...Rngs,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept_helper<Rngs...>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rngs...>())>
+#endif
                 void operator()(Rngs &&... rngs) const
                 {
                     CONCEPT_ASSERT_MSG(meta::and_<InputRange<Rngs>...>(),

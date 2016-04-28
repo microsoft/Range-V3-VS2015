@@ -30,6 +30,25 @@ namespace ranges
         /// \cond
         namespace detail
         {
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+            template <typename T>
+            using begin_cursor_t_void_t = void;
+            template <class T, class V = void> struct begin_cursor_t_helper {};
+            template <class T> struct begin_cursor_t_helper<T, begin_cursor_t_void_t<decltype(range_access::begin_cursor(std::declval<T &>(), 42))>> {
+                typedef decltype(range_access::begin_cursor(std::declval<T &>(), 42)) type;
+            };
+            template<typename T>
+            using begin_cursor_t = typename begin_cursor_t_helper<T>::type;
+
+            template <typename T>
+            using end_cursor_t_void_t = void;
+            template <class T, class V = void> struct end_cursor_t_helper {};
+            template <class T> struct end_cursor_t_helper<T, end_cursor_t_void_t<decltype(range_access::end_cursor(std::declval<T &>(), 42))>> {
+                typedef decltype(range_access::end_cursor(std::declval<T &>(), 42)) type;
+            };
+            template<typename T>
+            using end_cursor_t = typename end_cursor_t_helper<T>::type;
+#else
             template<typename Derived>
             using begin_cursor_t =
                 decltype(range_access::begin_cursor(std::declval<Derived &>(), 42));
@@ -37,6 +56,7 @@ namespace ranges
             template<typename Derived>
             using end_cursor_t =
                 decltype(range_access::end_cursor(std::declval<Derived &>(), 42));
+#endif
 
             template<typename Derived>
             using facade_iterator_t =
@@ -80,24 +100,40 @@ namespace ranges
                 return {};
             }
         public:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
+#else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
+#endif
             detail::facade_iterator_t<D> begin()
             {
                 return {range_access::begin_cursor(derived(), 42)};
             }
             /// \overload
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
+#else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
+#endif
             detail::facade_iterator_t<D const> begin() const
             {
                 return {range_access::begin_cursor(derived(), 42)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
+#else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
+#endif
             detail::facade_sentinel_t<D> end()
             {
                 return {range_access::end_cursor(derived(), 42)};
             }
             /// \overload
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
+#else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
+#endif
             detail::facade_sentinel_t<D const> end() const
             {
                 return {range_access::end_cursor(derived(), 42)};

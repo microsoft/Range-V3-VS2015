@@ -36,7 +36,11 @@ namespace ranges
                 ///
                 /// \pre `Rng` is a model of the `Range` concept
                 template<typename I, typename V2, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(BinarySearchable<I, V2, C, P>::value)>
+#else
                     CONCEPT_REQUIRES_(BinarySearchable<I, V2, C, P>())>
+#endif
                 I operator()(I begin, iterator_difference_t<I> d, V2 const &val, C pred_ = C{},
                     P proj_ = P{}) const
                 {

@@ -59,11 +59,31 @@ namespace ranges
             struct Range
             {
                 // Associated types
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+                template <typename T>
+                using iterator_t_helper_void_t = void;
+                template <class T, class V = void> struct iterator_t_helper {};
+                template <class T> struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(val<T>()))>> {
+                    typedef decltype(begin(val<T>())) type;
+                };
+                template<typename T>
+                using iterator_t = typename iterator_t_helper<T>::type;
+
+                template <typename T>
+                using sentinel_t_helper_void_t = void;
+                template <class T, class V = void> struct sentinel_t_helper {};
+                template <class T> struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(val<T>()))>> {
+                    typedef decltype(end(val<T>())) type;
+                };
+                template<typename T>
+                using sentinel_t = typename sentinel_t_helper<T>::type;
+#else
                 template<typename T>
                 using iterator_t = decltype(begin(val<T>()));
 
                 template<typename T>
                 using sentinel_t = decltype(end(val<T>()));
+#endif
 
                 template<typename T>
                 using difference_t = concepts::WeaklyIncrementable::difference_t<iterator_t<T>>;
@@ -384,7 +404,11 @@ namespace ranges
             struct is_view_impl_
               : std::integral_constant<
                     bool,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    Range<T>::value && (!ContainerLike_<T>::value || DerivedFrom<T, view_base>::value)
+#else
                     Range<T>() && (!ContainerLike_<T>() || DerivedFrom<T, view_base>())
+#endif
                 >
             {};
 
@@ -399,7 +423,11 @@ namespace ranges
             struct is_sized_range_impl_
               : std::integral_constant<
                     bool,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    (SizedRangeLike_<T>::value)
+#else
                     (SizedRangeLike_<T>())
+#endif
                 >
             {};
 

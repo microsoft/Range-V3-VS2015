@@ -217,7 +217,15 @@ namespace ranges
             public:
                 // BUGBUG what about rvalue_reference and common_reference?
                 using reference = common_reference_t<range_reference_t<constify_if<Rngs>>...>;
+#ifdef WORKAROUND_215191
+                template<typename T>
+                struct helper {
+                    using type = SinglePass<range_iterator_t<T>>;
+                };
+                using single_pass = meta::fast_or<typename helper<Rngs>::type...>;
+#else
                 using single_pass = meta::fast_or<SinglePass<range_iterator_t<Rngs>>...>;
+#endif
                 cursor() = default;
                 cursor(concat_view_t &rng, begin_tag)
                   : rng_(&rng), its_{meta::size_t<0>{}, begin(std::get<0>(rng.rngs_))}
@@ -240,12 +248,20 @@ namespace ranges
                 {
                     return its_ == pos.its_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool)BidirectionalRange<Rngs>::value...>::value)
+#else
                 CONCEPT_REQUIRES(meta::and_c<(bool)BidirectionalRange<Rngs>()...>::value)
+#endif
                 void prev()
                 {
                     its_.apply_i(prev_fun{this});
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+#else
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+#endif
                 void advance(difference_type n)
                 {
                     if(n > 0)
@@ -253,7 +269,11 @@ namespace ranges
                     else if(n < 0)
                         its_.apply_i(advance_rev_fun{this, n});
                 }
-                CONCEPT_REQUIRES(meta::and_c<(bool) RandomAccessRange<Rngs>()...>::value)
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+#else
+                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+#endif
                 difference_type distance_to(cursor const &that) const
                 {
                     if(its_.which() <= that.its_.which())
@@ -261,6 +281,7 @@ namespace ranges
                     return -cursor::distance_to_(meta::size_t<0>{}, that, *this);
                 }
             };
+
             template<bool IsConst>
             struct sentinel
             {
@@ -284,18 +305,34 @@ namespace ranges
             {
                 return {*this, begin_tag{}};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            meta::if_<meta::and_c<(bool)BoundedRange<Rngs>::value...>, cursor<false>, sentinel<false>>
+#else
             meta::if_<meta::and_c<(bool)BoundedRange<Rngs>()...>, cursor<false>, sentinel<false>>
+#endif
             end_cursor()
             {
                 return {*this, end_tag{}};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>()...>())
+#endif
             cursor<true> begin_cursor() const
             {
                 return {*this, begin_tag{}};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>()...>())
+#endif
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            meta::if_<meta::and_c<(bool)BoundedRange<Rngs>::value...>, cursor<true>, sentinel<true>>
+#else
             meta::if_<meta::and_c<(bool)BoundedRange<Rngs>()...>, cursor<true>, sentinel<true>>
+#endif
             end_cursor() const
             {
                 return {*this, end_tag{}};
@@ -305,7 +342,11 @@ namespace ranges
             explicit concat_view(Rngs...rngs)
               : rngs_{std::move(rngs)...}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(meta::and_c<(bool)SizedRange<Rngs>::value...>::value)
+#else
             CONCEPT_REQUIRES(meta::and_c<(bool)SizedRange<Rngs>()...>::value)
+#endif
             constexpr size_type_ size() const
             {
                 return range_cardinality<concat_view>::value >= 0 ?

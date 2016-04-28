@@ -72,8 +72,19 @@ namespace ranges
             template<typename T, typename U>
             using _builtin_common_t = meta::_t<_builtin_common<T, U>>;
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+            template <typename T>
+            using _cond_res_void_t = void;
+            template <class T, class U, class V = void> struct _cond_res_helper {};
+            template <class T, class U> struct _cond_res_helper<T, U, _cond_res_void_t<decltype(true ? std::declval<T>() : std::declval<U>())>> {
+                typedef decltype(true ? std::declval<T>() : std::declval<U>()) type;
+            };
+            template<typename T, typename U>
+            using _cond_res = typename _cond_res_helper<T, U>::type;
+#else
             template<typename T, typename U>
             using _cond_res = decltype(true ? std::declval<T>() : std::declval<U>());
+#endif
 
             template<typename T, typename U, typename R = _builtin_common_t<T &, U &>>
             using _rref_res =
@@ -82,7 +93,7 @@ namespace ranges
             template <class T, class U>
             using _lref_res = _cond_res<_copy_cv<T, U> &, _copy_cv<U, T> &>;
 
-        #if !defined(__GNUC__) || defined(__clang__)
+        #if (!defined(_MSC_VER) && !defined(__GNUC__)) || defined(__clang__)
             template<typename T, typename U, typename /*= void*/>
             struct _builtin_common
               : meta::lazy::let<

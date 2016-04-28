@@ -34,7 +34,11 @@ namespace ranges
         struct equal_to
         {
             template<typename T, typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(EqualityComparable<T, U>::value)>
+#else
                 CONCEPT_REQUIRES_(EqualityComparable<T, U>())>
+#endif
             constexpr bool operator()(T && t, U && u) const
             {
                 return (T &&) t == (U &&) u;
@@ -44,7 +48,11 @@ namespace ranges
         struct less
         {
             template<typename T, typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(WeaklyOrdered<T, U>::value)>
+#else
                 CONCEPT_REQUIRES_(WeaklyOrdered<T, U>())>
+#endif
             constexpr bool operator()(T && t, U && u) const
             {
                 return (T &&) t < (U &&) u;
@@ -54,7 +62,11 @@ namespace ranges
         struct ordered_less
         {
             template<typename T, typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(TotallyOrdered<T, U>::value)>
+#else
                 CONCEPT_REQUIRES_(TotallyOrdered<T, U>())>
+#endif
             constexpr bool operator()(T && t, U && u) const
             {
                 return (T &&) t < (U &&) u;
@@ -190,8 +202,19 @@ namespace ranges
             constexpr auto&& as_function = static_const<as_function_fn>::value;
         }
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        template <typename T>
+        using function_type_void_t = void;
+        template <class T, class V = void> struct function_type_helper {};
+        template <class T> struct function_type_helper<T, function_type_void_t<decltype(as_function(std::declval<T>()))>> {
+            typedef decltype(as_function(std::declval<T>())) type;
+        };
+        template<typename T>
+        using function_type = typename function_type_helper<T>::type;
+#else
         template<typename T>
         using function_type = decltype(as_function(std::declval<T>()));
+#endif
 
         template<typename Pred>
         struct logical_negate
@@ -206,28 +229,44 @@ namespace ranges
             {}
 
             template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Predicate<Pred, T>::value)>
+#else
                 CONCEPT_REQUIRES_(Predicate<Pred, T>())>
+#endif
             bool operator()(T && t)
             {
                 return !pred_((T &&) t);
             }
             /// \overload
             template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Predicate<Pred const, T>::value)>
+#else
                 CONCEPT_REQUIRES_(Predicate<Pred const, T>())>
+#endif
             constexpr bool operator()(T && t) const
             {
                 return !pred_((T &&) t);
             }
             /// \overload
             template<typename T, typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Predicate<Pred, T, U>::value)>
+#else
                 CONCEPT_REQUIRES_(Predicate<Pred, T, U>())>
+#endif
             bool operator()(T && t, U && u)
             {
                 return !pred_((T &&) t, (U &&) u);
             }
             /// \overload
             template<typename T, typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Predicate<Pred const, T, U>::value)>
+#else
                 CONCEPT_REQUIRES_(Predicate<Pred const, T, U>())>
+#endif
             constexpr bool operator()(T && t, U && u) const
             {
                 return !pred_((T &&) t, (U &&) u);
@@ -335,7 +374,7 @@ namespace ranges
 
         template<typename Fn>
         struct indirected
-          : private function_type<Fn>
+            : private function_type<Fn>
         {
         private:
             using BaseFn = function_type<Fn>;
@@ -504,7 +543,11 @@ namespace ranges
 
         // Evaluate the pipe with an argument
         template<typename Arg, typename Pipe,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(!is_pipeable<Arg>::value && is_pipeable<Pipe>::value)>
+#else
             CONCEPT_REQUIRES_(!is_pipeable<Arg>() && is_pipeable<Pipe>())>
+#endif
         auto operator|(Arg && arg, Pipe pipe)
         RANGES_DECLTYPE_AUTO_RETURN
         (
@@ -513,7 +556,11 @@ namespace ranges
 
         // Compose two pipes
         template<typename Pipe0, typename Pipe1,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(is_pipeable<Pipe0>::value && is_pipeable<Pipe1>::value)>
+#else
             CONCEPT_REQUIRES_(is_pipeable<Pipe0>() && is_pipeable<Pipe1>())>
+#endif
         auto operator|(Pipe0 pipe0, Pipe1 pipe1)
         RANGES_DECLTYPE_AUTO_RETURN
         (
@@ -668,7 +715,11 @@ namespace ranges
 
         struct ref_fn : pipeable<ref_fn>
         {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>::value)>
+#else
             template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>())>
+#endif
             reference_wrapper<T> operator()(T & t) const
             {
                 return {t};
@@ -694,14 +745,30 @@ namespace ranges
             constexpr auto&& ref = static_const<ref_fn>::value;
         }
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        template <typename T>
+        using ref_t_void_t = void;
+        template <class T, class V = void> struct ref_t_helper {};
+        template <class T> struct ref_t_helper<T, ref_t_void_t<decltype(ref(std::declval<T>()))>> {
+            typedef decltype(ref(std::declval<T>())) type;
+        };
+        template<typename T>
+        using ref_t = typename ref_t_helper<T>::type;
+#else
         template<typename T>
         using ref_t = decltype(ref(std::declval<T>()));
+#endif
 
         struct rref_fn : pipeable<rref_fn>
         {
             template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>::value &&
+                    !std::is_lvalue_reference<T>::value)>
+#else
                 CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>() &&
                     !std::is_lvalue_reference<T>::value)>
+#endif
             reference_wrapper<T, true> operator()(T && t) const
             {
                 return {std::move(t)};
@@ -726,7 +793,11 @@ namespace ranges
 
         struct unwrap_reference_fn : pipeable<unwrap_reference_fn>
         {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper<T>::value)>
+#else
             template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper<T>())>
+#endif
             T && operator()(T && t) const noexcept
             {
                 return std::forward<T>(t);
@@ -874,13 +945,22 @@ namespace ranges
 
         struct protect_fn
         {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename F, CONCEPT_REQUIRES_(std::is_bind_expression<uncvref_t<F>>::value)>
+#else
             template<typename F, CONCEPT_REQUIRES_(std::is_bind_expression<uncvref_t<F>>())>
+#endif
             detail::protect<uncvref_t<F>> operator()(F && f) const
             {
                 return {std::forward<F>(f)};
             }
             /// \overload
+
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename F, CONCEPT_REQUIRES_(!std::is_bind_expression<uncvref_t<F>>::value)>
+#else
             template<typename F, CONCEPT_REQUIRES_(!std::is_bind_expression<uncvref_t<F>>())>
+#endif
             F operator()(F && f) const
             {
                 return std::forward<F>(f);

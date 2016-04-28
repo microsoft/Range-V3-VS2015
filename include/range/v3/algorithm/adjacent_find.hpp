@@ -36,8 +36,13 @@ namespace ranges
             /// \pre `Rng` is a model of the `Range` concept
             /// \pre `C` is a model of the `BinaryPredicate` concept
             template<typename I, typename S, typename C = equal_to, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value &&
+                    IndirectCallableRelation<C, Project<I, P>>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardIterator<I>() && IteratorRange<I, S>() &&
                     IndirectCallableRelation<C, Project<I, P>>())>
+#endif
             I
             operator()(I begin, S end, C pred_ = C{}, P proj_ = P{}) const
             {
@@ -55,8 +60,13 @@ namespace ranges
             /// \overload
             template<typename Rng, typename C = equal_to, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardRange<Rng>::value &&
+                    IndirectCallableRelation<C, Project<I, P>>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardRange<Rng>() &&
                     IndirectCallableRelation<C, Project<I, P>>())>
+#endif
             range_safe_iterator_t<Rng>
             operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {

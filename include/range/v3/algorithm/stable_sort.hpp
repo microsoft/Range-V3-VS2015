@@ -151,8 +151,13 @@ namespace ranges
 
         public:
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Sortable<I, C, P>::value && RandomAccessIterator<I>::value &&
+                    IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(Sortable<I, C, P>() && RandomAccessIterator<I>() &&
                     IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end_, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto && pred = as_function(pred_);
@@ -172,7 +177,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Sortable<I, C, P>::value && RandomAccessRange<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Sortable<I, C, P>() && RandomAccessRange<Rng>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(pred), std::move(proj));

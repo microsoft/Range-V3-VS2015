@@ -99,7 +99,11 @@ namespace ranges
             }
         public:
             template<typename I, typename S, typename C, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Partitionable<I, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(Partitionable<I, C, P>() && IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end, C pred, P proj = P{}) const
             {
                 return partition_fn::impl(std::move(begin), std::move(end), std::move(pred),
@@ -108,7 +112,11 @@ namespace ranges
 
             template<typename Rng, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Partitionable<I, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Partitionable<I, C, P>() && Range<Rng>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred, P proj = P{}) const
             {
                 return partition_fn::impl(begin(rng), end(rng), std::move(pred),

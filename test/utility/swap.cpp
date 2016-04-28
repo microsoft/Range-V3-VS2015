@@ -74,7 +74,10 @@ int main()
     CHECK(a == 42);
     CHECK(b == 0);
 
+#ifdef WORKAROUND_CLASS_RVALUE_AS_LVALUE
+#else
     CONCEPT_ASSERT(!ranges::Swappable<std::pair<int,int>&&,std::pair<int,int>&&>());
+#endif
     CONCEPT_ASSERT(ranges::Swappable<std::pair<int&,int&>&&,std::pair<int&,int&>&&>());
 
     int c=24,d=82;

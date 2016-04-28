@@ -66,7 +66,11 @@ namespace ranges
                 /// If it is container-like, turn it into an range, being careful
                 /// to preserve the Sized-ness of the range.
                 template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!View<T>::value),
+#else
                     CONCEPT_REQUIRES_(!View<T>()),
+#endif
                     typename I = range_iterator_t<T>,
                     typename S = range_sentinel_t<T>,
                     typename SIC = sized_range_concept<T>,
@@ -82,7 +86,11 @@ namespace ranges
 
             public:
                 template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<T>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<T>())>
+#endif
                 auto operator()(T && t) const ->
                     decltype(all_fn::from_range(std::forward<T>(t), view_concept<T>()))
                 {
@@ -90,7 +98,11 @@ namespace ranges
                 }
 
                 template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<T &>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<T &>())>
+#endif
                 ranges::reference_wrapper<T> operator()(std::reference_wrapper<T> ref) const
                 {
                     return ranges::ref(ref.get());
@@ -104,9 +116,22 @@ namespace ranges
                 constexpr auto&& all = static_const<all_fn>::value;
             }
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+            template <typename T>
+            using all_t_void_t = void;
+            template <class T, class V = void> struct all_t_helper {};
+            template <class T> struct all_t_helper<T, all_t_void_t<decltype(all(std::declval<T>()))>> {
+                typedef meta::_t<std::decay<decltype(all(std::declval<T>()))>> type;
+            };
+
+            template<typename Rng>
+            using all_t =
+                typename all_t_helper<Rng>::type;
+#else
             template<typename Rng>
             using all_t =
                 meta::_t<std::decay<decltype(all(std::declval<Rng>()))>>;
+#endif
         }
         /// @}
     }

@@ -46,8 +46,13 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Comparable<I1, I2, C, P1, P2>::value &&
+                    IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(Comparable<I1, I2, C, P1, P2>() &&
                     IteratorRange<I1, S1>() && IteratorRange<I2, S2>())>
+#endif
             bool operator()(I1 begin1, S1 end1, I2 begin2, S2 end2,
                 C pred_ = C{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -68,8 +73,13 @@ namespace ranges
                 typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Comparable<I1, I2, C, P1, P2>::value &&
+                    Range<Rng1>::value && Range<Rng2>::value)>
+#else
                 CONCEPT_REQUIRES_(Comparable<I1, I2, C, P1, P2>() &&
                     Range<Rng1>() && Range<Rng2>())>
+#endif
             bool operator()(Rng1 && rng1, Rng2 && rng2,
                 C pred = C{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -89,8 +99,13 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     IteratorRange<I1, S1>() && IteratorRange<I2, S2>())>
+#endif
             tagged_tuple<tag::in1(I1), tag::in2(I2), tag::out(O)>
             operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, O out,
                 C pred_ = C{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
@@ -128,8 +143,13 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    Range<Rng1>::value && Range<Rng2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     Range<Rng1>() && Range<Rng2>())>
+#endif
             tagged_tuple<tag::in1(range_safe_iterator_t<Rng1>), tag::in2(range_safe_iterator_t<Rng2>), tag::out(O)>
             operator()(Rng1 &&rng1, Rng2 &&rng2, O out, C pred = C{}, P1 proj1 = P1{},
                 P2 proj2 = P2{}) const
@@ -150,8 +170,13 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     IteratorRange<I1, S1>() && IteratorRange<I2, S2>())>
+#endif
             O operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, O out,
                 C pred_ = C{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -180,8 +205,13 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    Range<Rng1>::value && Range<Rng2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     Range<Rng1>() && Range<Rng2>())>
+#endif
             O operator()(Rng1 && rng1, Rng2 && rng2, O out,
                 C pred = C{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -201,8 +231,13 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     IteratorRange<I1, S1>() && IteratorRange<I2, S2>())>
+#endif
             tagged_pair<tag::in1(I1), tag::out(O)> operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, O out,
                 C pred_ = C{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -233,8 +268,13 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    Range<Rng1>::value && Range<Rng2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     Range<Rng1>() && Range<Rng2>())>
+#endif
             tagged_pair<tag::in1(range_safe_iterator_t<Rng1>), tag::out(O)> operator()(Rng1 &&rng1, Rng2 && rng2, O out,
                 C pred = C{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -254,8 +294,13 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     IteratorRange<I1, S1>() && IteratorRange<I2, S2>())>
+#endif
             tagged_tuple<tag::in1(I1), tag::in2(I2), tag::out(O)> operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, O out,
                 C pred_ = C{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -295,8 +340,13 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
+                    Range<Rng1>::value && Range<Rng2>::value)>
+#else
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>() &&
                     Range<Rng1>() && Range<Rng2>())>
+#endif
             tagged_tuple<tag::in1(range_safe_iterator_t<Rng1>), tag::in2(range_safe_iterator_t<Rng2>), tag::out(O)>
             operator()(Rng1 &&rng1, Rng2 &&rng2, O out,
                 C pred = C{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const

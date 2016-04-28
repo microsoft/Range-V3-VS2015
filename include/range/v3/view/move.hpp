@@ -64,7 +64,11 @@ namespace ranges
             explicit move_view(Rng rng)
               : view_adaptor_t<move_view>{std::move(rng)}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(this->base());
@@ -76,14 +80,22 @@ namespace ranges
             struct move_fn
             {
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 move_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return move_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!InputRange<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

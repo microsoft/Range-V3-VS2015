@@ -35,7 +35,11 @@ namespace ranges
             {
             private:
                 friend action_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename F, typename P = ident, CONCEPT_REQUIRES_(!Range<F>::value)>
+#else
                 template<typename F, typename P = ident, CONCEPT_REQUIRES_(!Range<F>())>
+#endif
                 static auto bind(transform_fn transform, F fun, P proj = P{})
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -58,7 +62,11 @@ namespace ranges
                 using Concept = concepts::models<ConceptImpl, Rng, F, P>;
 
                 template<typename Rng, typename F, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, F, P>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, F, P>())>
+#endif
                 Rng operator()(Rng && rng, F fun, P proj = P{}) const
                 {
                     ranges::transform(rng, begin(rng), std::move(fun), std::move(proj));
@@ -67,7 +75,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename F, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, F, P>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, F, P>())>
+#endif
                 void operator()(Rng &&, F &&, P && = P{}) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

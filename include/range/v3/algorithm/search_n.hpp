@@ -50,7 +50,11 @@ namespace ranges
         {
         private:
             template<typename I, typename D, typename V, typename C, typename P,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>())>
+#endif
             static I sized_impl(I const begin_, I end, D d, D count, V const &val,
                 C &pred, P &proj)
             {
@@ -155,7 +159,11 @@ namespace ranges
             }
         public:
             template<typename I, typename S, typename V, typename C = equal_to, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Searchnable<I, V, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(Searchnable<I, V, C, P>() && IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end, iterator_difference_t<I> count, V const &val,
                 C pred_ = C{}, P proj_ = P{}) const
             {
@@ -173,7 +181,11 @@ namespace ranges
 
             template<typename Rng, typename V, typename C = equal_to, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Searchnable<I, V, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Searchnable<I, V, C, P>() && Range<Rng>())>
+#endif
             range_safe_iterator_t<Rng>
             operator()(Rng &&rng, iterator_difference_t<I> count, V const &val, C pred_ = C{},
                 P proj_ = P{}) const

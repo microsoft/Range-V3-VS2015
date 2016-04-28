@@ -10,5 +10,7 @@
 ///
 
 /// \note Works with GCC and Clang
+#ifndef NO_GCC_WARNING_PRAGMA
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wshadow"
+#endif

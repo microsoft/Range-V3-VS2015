@@ -42,7 +42,11 @@ namespace ranges
         struct remove_copy_if_fn
         {
             template<typename I, typename S, typename O, typename C, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>() && IteratorRange<I, S>())>
+#endif
             tagged_pair<tag::in(I), tag::out(O)> operator()(I begin, S end, O out, C pred_, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -61,7 +65,11 @@ namespace ranges
 
             template<typename Rng, typename O, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>::value && InputRange<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>() && InputRange<Rng>())>
+#endif
             tagged_pair<tag::in(range_safe_iterator_t<Rng>), tag::out(O)> operator()(Rng &&rng, O out, C pred, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(out), std::move(pred), std::move(proj));

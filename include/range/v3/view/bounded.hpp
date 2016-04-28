@@ -59,17 +59,29 @@ namespace ranges
             {
                 return iterator{ranges::end(rng_)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(View<Rng const>::value)
+#else
             CONCEPT_REQUIRES(View<Rng const>())
+#endif
             iterator begin() const
             {
                 return iterator{ranges::begin(rng_)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(View<Rng const>::value)
+#else
             CONCEPT_REQUIRES(View<Rng const>())
+#endif
             iterator end() const
             {
                 return iterator{ranges::end(rng_)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedView<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedView<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(rng_);
@@ -89,20 +101,32 @@ namespace ranges
             struct bounded_fn
             {
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && !BoundedRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && !BoundedRange<Rng>())>
+#endif
                 bounded_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return bounded_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && BoundedRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && BoundedRange<Rng>())>
+#endif
                 all_t<Rng> operator()(Rng && rng) const
                 {
                     return all(std::forward<Rng>(rng));
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Range<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!Range<Rng>())>
+#endif
                 void operator()(Rng && rng) const
                 {
                     CONCEPT_ASSERT_MSG(Range<Rng>(),

@@ -43,8 +43,13 @@ namespace ranges
         {
             template <typename I, typename S, typename O, typename BOp = plus,
                       typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                      CONCEPT_REQUIRES_(IteratorRange<I, S>::value &&
+                                        PartialSummable<I, O, BOp, P>::value)>
+#else
                       CONCEPT_REQUIRES_(IteratorRange<I, S>() &&
                                         PartialSummable<I, O, BOp, P>())>
+#endif
             std::pair<I, O>
             operator()(I begin, S end, O result, BOp bop_ = BOp{},
                        P proj_ = P{}) const
@@ -71,8 +76,13 @@ namespace ranges
 
             template <typename I, typename S, typename O, typename S2,
                       typename BOp = plus, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                      CONCEPT_REQUIRES_(IteratorRange<I, S>::value && IteratorRange<O, S2>::value &&
+                                        PartialSummable<I, O, BOp, P>::value)>
+#else
                       CONCEPT_REQUIRES_(IteratorRange<I, S>() && IteratorRange<O, S2>() &&
                                         PartialSummable<I, O, BOp, P>())>
+#endif
             std::pair<I, O>
             operator()(I begin, S end, O result, S2 end_result, BOp bop_ = BOp{},
                        P proj_ = P{}) const
@@ -101,8 +111,13 @@ namespace ranges
             template <typename Rng, typename ORef, typename BOp = plus,
                       typename P = ident, typename I = range_iterator_t<Rng>,
                       typename O = uncvref_t<ORef>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                      CONCEPT_REQUIRES_(Range<Rng &>::value &&
+                                        PartialSummable<I, O, BOp, P>::value)>
+#else
                       CONCEPT_REQUIRES_(Range<Rng &>() &&
                                         PartialSummable<I, O, BOp, P>())>
+#endif
             std::pair<I, O>
             operator()(Rng &rng, ORef &&result, BOp bop = BOp{}, P proj = P{}) const
             {
@@ -113,8 +128,13 @@ namespace ranges
             template <typename Rng, typename ORng, typename BOp = plus,
                       typename P = ident, typename I = range_iterator_t<Rng>,
                       typename O = range_iterator_t<ORng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                      CONCEPT_REQUIRES_(Range<Rng &>::value && Range<ORng &>::value &&
+                                        PartialSummable<I, O, BOp, P>::value)>
+#else
                       CONCEPT_REQUIRES_(Range<Rng &>() && Range<ORng &>() &&
                                         PartialSummable<I, O, BOp, P>())>
+#endif
             std::pair<I, O>
             operator()(Rng &rng, ORng &result, BOp bop = BOp{}, P proj = P{}) const
             {

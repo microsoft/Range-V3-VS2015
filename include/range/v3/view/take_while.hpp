@@ -64,7 +64,11 @@ namespace ranges
             {
                 return {pred_};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Callable<Pred const, range_iterator_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(Callable<Pred const, range_iterator_t<Rng>>())
+#endif
             sentinel_adaptor<true> end_adaptor() const
             {
                 return {pred_};
@@ -108,14 +112,22 @@ namespace ranges
                     CallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
+#endif
                 iter_take_while_view<all_t<Rng>, Pred> operator()(Rng && rng, Pred pred) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(pred)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>
+#endif
                 void operator()(Rng &&, Pred) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
@@ -147,14 +159,22 @@ namespace ranges
                     IndirectCallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
+#endif
                 take_while_view<all_t<Rng>, Pred> operator()(Rng && rng, Pred pred) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(pred)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>
+#endif
                 void operator()(Rng &&, Pred) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

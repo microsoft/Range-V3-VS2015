@@ -30,7 +30,11 @@ namespace ranges
         {
             /// \return `begin(rng)[n]`
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             auto operator()(Rng &&rng, range_difference_t<Rng> n) const ->
                 decltype(begin(rng)[n])

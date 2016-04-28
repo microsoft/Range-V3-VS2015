@@ -44,7 +44,11 @@ namespace ranges
                 is_finite<Rng>::value ? finite : range_cardinality<Rng>::value>
         {
         private:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_ASSERT(ForwardRange<Rng>::value);
+#else
             CONCEPT_ASSERT(ForwardRange<Rng>());
+#endif
             using offset_t =
                 meta::if_<
                     BidirectionalRange<Rng>,
@@ -64,7 +68,11 @@ namespace ranges
             {
                 RANGES_ASSERT(0 < n_);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 auto sz = ranges::distance(this->base());
@@ -99,13 +107,21 @@ namespace ranges
                 RANGES_ASSERT(0 == offset());
                 offset() = ranges::advance(it, n_, end_);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(BidirectionalRange<Rng>())
+#endif
             void prev(range_iterator_t<Rng> &it)
             {
                 ranges::advance(it, -n_ + offset());
                 offset() = 0;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
             range_difference_t<Rng> distance_to(range_iterator_t<Rng> const &here,
                 range_iterator_t<Rng> const &there, adaptor const &that) const
             {
@@ -113,7 +129,11 @@ namespace ranges
                 //RANGES_ASSERT(0 == ((there - here) + that.offset() - offset()) % n_);
                 return ((there - here) + that.offset() - offset()) / n_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
             void advance(range_iterator_t<Rng> &it, range_difference_t<Rng> n)
             {
                 if(0 < n)
@@ -133,7 +153,11 @@ namespace ranges
             private:
                 friend view_access;
                 template<typename Int,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                     CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(chunk_fn chunk, Int n)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -141,7 +165,11 @@ namespace ranges
                 )
             public:
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ForwardRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(ForwardRange<Rng>())>
+#endif
                 chunk_view<all_t<Rng>> operator()(Rng && rng, range_difference_t<Rng> n) const
                 {
                     return {all(std::forward<Rng>(rng)), n};
@@ -151,7 +179,11 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
             private:
                 template<typename Int,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Integral<Int>::value)>
+#else
                     CONCEPT_REQUIRES_(!Integral<Int>())>
+#endif
                 static detail::null_pipe bind(chunk_fn, Int)
                 {
                     CONCEPT_ASSERT_MSG(Integral<Int>(),
@@ -160,7 +192,11 @@ namespace ranges
                 }
             public:
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!(ForwardRange<Rng>::value && Integral<T>::value))>
+#else
                     CONCEPT_REQUIRES_(!(ForwardRange<Rng>() && Integral<T>()))>
+#endif
                 void operator()(Rng &&, T) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

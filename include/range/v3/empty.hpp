@@ -28,7 +28,11 @@ namespace ranges
         {
             /// \return `begin(rng) == end(rng)`
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             bool operator()(Rng &&rng) const
             {

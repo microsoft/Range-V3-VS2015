@@ -32,8 +32,13 @@ namespace ranges
         struct count_fn
         {
             template<typename I, typename S, typename V, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
+                    IndirectCallableRelation<equal_to, Project<I, P>, V const *>::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
                     IndirectCallableRelation<equal_to, Project<I, P>, V const *>())>
+#endif
             iterator_difference_t<I>
             operator()(I begin, S end, V const & val, P proj_ = P{}) const
             {
@@ -47,8 +52,13 @@ namespace ranges
 
             template<typename Rng, typename V, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputRange<Rng>::value &&
+                    IndirectCallableRelation<equal_to, Project<I, P>, V const *>::value)>
+#else
                 CONCEPT_REQUIRES_(InputRange<Rng>() &&
                     IndirectCallableRelation<equal_to, Project<I, P>, V const *>())>
+#endif
             iterator_difference_t<I>
             operator()(Rng &&rng, V const & val, P proj = P{}) const
             {

@@ -182,9 +182,20 @@ namespace ranges
             )
 
         private:
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+            template <typename T>
+            using random_access_cursor_difference_t_void_t = void;
+            template <class T, class V = void> struct random_access_cursor_difference_t_helper {};
+            template <class T> struct random_access_cursor_difference_t_helper<T, random_access_cursor_difference_t_void_t<decltype(range_access::distance_to(std::declval<T>(), std::declval<T>()))>> {
+                typedef decltype(range_access::distance_to(std::declval<T>(), std::declval<T>())) type;
+            };
+            template<typename T>
+            using random_access_cursor_difference_t = typename random_access_cursor_difference_t_helper<T>::type;
+#else
             template<typename Cur>
             using random_access_cursor_difference_t =
                 decltype(range_access::distance_to(std::declval<Cur>(), std::declval<Cur>()));
+#endif
 
             template<typename Cur, typename Enable = void>
             struct cursor_difference2

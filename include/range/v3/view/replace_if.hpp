@@ -49,7 +49,11 @@ namespace ranges
                 operator()(copy_tag, I const &i) const;
 
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Callable<Pred const, iterator_reference_t<I>>::value)>
+#else
                     CONCEPT_REQUIRES_(!Callable<Pred const, iterator_reference_t<I>>())>
+#endif
                 common_reference_t<unwrap_reference_t<Val const &>, iterator_reference_t<I>>
                 operator()(I const &i)
                 {
@@ -59,7 +63,11 @@ namespace ranges
                     return (decltype(x) &&) x;
                 }
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Callable<Pred const, iterator_reference_t<I>>::value)>
+#else
                     CONCEPT_REQUIRES_(Callable<Pred const, iterator_reference_t<I>>())>
+#endif
                 common_reference_t<unwrap_reference_t<Val const &>, iterator_reference_t<I>>
                 operator()(I const &i) const
                 {
@@ -70,7 +78,11 @@ namespace ranges
                 }
 
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Callable<Pred const, iterator_rvalue_reference_t<I>>::value)>
+#else
                     CONCEPT_REQUIRES_(!Callable<Pred const, iterator_rvalue_reference_t<I>>())>
+#endif
                 common_reference_t<unwrap_reference_t<Val const &>, iterator_rvalue_reference_t<I>>
                 operator()(move_tag, I const &i)
                 {
@@ -80,7 +92,11 @@ namespace ranges
                     return (decltype(x) &&) x;
                 }
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Callable<Pred const, iterator_rvalue_reference_t<I>>::value)>
+#else
                     CONCEPT_REQUIRES_(Callable<Pred const, iterator_rvalue_reference_t<I>>())>
+#endif
                 common_reference_t<unwrap_reference_t<Val const &>, iterator_rvalue_reference_t<I>>
                 operator()(move_tag, I const &i) const
                 {
@@ -117,7 +133,11 @@ namespace ranges
                     CommonReference<unwrap_reference_t<Val const &>, range_rvalue_reference_t<Rng>>>;
 
                 template<typename Rng, typename Pred, typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Pred, Val>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred, Val>())>
+#endif
                 replace_if_view<all_t<Rng>, Pred, Val>
                 operator()(Rng && rng, Pred pred, Val new_value) const
                 {
@@ -126,7 +146,11 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
                 template<typename Rng, typename Pred, typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Pred, Val>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred, Val>())>
+#endif
                 void operator()(Rng && rng, Pred pred, Val new_value) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

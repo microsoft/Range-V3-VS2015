@@ -35,9 +35,15 @@ namespace ranges
         struct copy_if_fn
         {
             template<typename I, typename S, typename O, typename F, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
+                    WeaklyIncrementable<O>::value && IndirectCallablePredicate<F, Project<I, P> >::value &&
+                    IndirectlyCopyable<I, O>::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
                     WeaklyIncrementable<O>() && IndirectCallablePredicate<F, Project<I, P> >() &&
                     IndirectlyCopyable<I, O>())>
+#endif
             tagged_pair<tag::in(I), tag::out(O)>
             operator()(I begin, S end, O out, F pred_, P proj_ = P{}) const
             {
@@ -57,8 +63,13 @@ namespace ranges
 
             template<typename Rng, typename O, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputRange<Rng>::value && WeaklyIncrementable<O>::value &&
+                    IndirectCallablePredicate<F, Project<I, P> >::value && IndirectlyCopyable<I, O>::value)>
+#else
                 CONCEPT_REQUIRES_(InputRange<Rng>() && WeaklyIncrementable<O>() &&
                     IndirectCallablePredicate<F, Project<I, P> >() && IndirectlyCopyable<I, O>())>
+#endif
             tagged_pair<tag::in(range_safe_iterator_t<Rng>), tag::out(O)>
             operator()(Rng &&rng, O out, F pred, P proj = P{}) const
             {

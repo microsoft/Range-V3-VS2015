@@ -90,15 +90,46 @@ namespace ranges
         }
         /// \endcond
 
+#ifdef WORKAROUND_INDIRECT_MOVE
+        namespace detail_msvc
+#else
         namespace
+#endif
         {
             constexpr auto&& indirect_move =
                 static_const<adl_move_detail::indirect_move_fn>::value;
         }
+#ifdef WORKAROUND_INDIRECT_MOVE
+        using namespace detail_msvc;
+#endif
+
+#ifdef WORKAROUND_SFINAE_FUNCTION_DECLTYPE
+        namespace detail_msvc
+        {
+            template <typename T>
+            using reference_t_void_t = void;
+            template <class T, class V = void> struct reference_t_helper {};
+            template <class T> struct reference_t_helper<T, reference_t_void_t<decltype(*std::declval<T>())>> {
+                typedef decltype(*std::declval<T>()) type;
+            };
+            template<typename T>
+            using reference_t = typename reference_t_helper<T>::type;
+        }
+#endif
 
         namespace detail
         {
+            // impact algorithm\swap_ranges.cpp
             template<typename I, typename O>
+#ifdef WORKAROUND_SFINAE_FUNCTION_DECLTYPE
+            typename meta::detail::_and_<
+                std::is_constructible<
+                    meta::_t<value_type<I>>,
+                    decltype(indirect_move(std::declval<I>()))>,
+                std::is_assignable<
+                    detail_msvc::reference_t<O>,
+                    decltype(indirect_move(std::declval<I>()))>>::type
+#else
             meta::and_<
                 std::is_constructible<
                     meta::_t<value_type<I>>,
@@ -106,6 +137,7 @@ namespace ranges
                 std::is_assignable<
                     decltype(*std::declval<O>()),
                     decltype(indirect_move(std::declval<I>()))>>
+#endif
             is_indirectly_movable_(int);
 
             template<typename I, typename O>

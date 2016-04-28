@@ -104,8 +104,19 @@ namespace ranges
         struct sanitize_fn
         {
         private:
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+            template <typename T>
+            using result_t_helper_void_t = void;
+            template <class T, class V = void> struct result_t_helper {};
+            template <class T> struct result_t_helper<T, result_t_helper_void_t<decltype(std::declval<sanitize_fn const &>()(std::declval<T>()))>> {
+                typedef decltype(std::declval<sanitize_fn const &>()(std::declval<T>())) type;
+            };
+            template<typename T>
+            using result_t = typename result_t_helper<T>::type;
+#else
             template<typename T>
             using result_t = decltype(std::declval<sanitize_fn const &>()(std::declval<T>()));
+#endif
 
             template<typename Res, typename Tuple, typename ...Ts, std::size_t...Is>
             constexpr Res sanitize_tuple(Tuple &&tup,

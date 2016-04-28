@@ -64,8 +64,13 @@ namespace ranges
                     range_cardinality<range_value_t<Rng>>>::value>
         {
         private:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_ASSERT(Range<Rng>::value);
+            CONCEPT_ASSERT(Range<range_value_t<Rng>>::value);
+#else
             CONCEPT_ASSERT(Range<Rng>());
             CONCEPT_ASSERT(Range<range_value_t<Rng>>());
+#endif
             using size_t_ = common_type_t<range_size_t<Rng>, range_size_t<range_value_t<Rng>>>;
 
             friend range_access;
@@ -134,9 +139,18 @@ namespace ranges
                     return *it_;
                 }
                 auto indirect_move(range_iterator_t<Rng> const &) const ->
+#ifdef WORKAROUND_INDIRECT_MOVE
+                    // adaptor_cursor::indirect_move is incorrectly found during qualified name lookup
+                    decltype(ranges::detail_msvc::indirect_move(it_))
+#else
                     decltype(ranges::indirect_move(it_))
+#endif
                 {
+#ifdef WORKAROUND_INDIRECT_MOVE
+                    return ranges::detail_msvc::indirect_move(it_);
+#else
                     return ranges::indirect_move(it_);
+#endif
                 }
                 void distance_to() = delete;
             };
@@ -158,7 +172,11 @@ namespace ranges
             explicit join_view(Rng rng)
               : view_adaptor_t<join_view>{std::move(rng)}, cur_{}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 && SizedRange<range_value_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 && SizedRange<range_value_t<Rng>>())
+#endif
             constexpr size_t_ size() const
             {
                 return range_cardinality<join_view>::value >= 0 ?
@@ -177,6 +195,15 @@ namespace ranges
                     range_cardinality<ValRng>>::value>
         {
         private:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_ASSERT(InputRange<Rng>::value);
+            CONCEPT_ASSERT(ForwardRange<ValRng>::value);
+            CONCEPT_ASSERT(InputRange<range_value_t<Rng>>::value);
+            CONCEPT_ASSERT(Common<range_value_t<range_value_t<Rng>>, range_value_t<ValRng>>::value);
+            CONCEPT_ASSERT(SemiRegular<concepts::Common::value_t<
+                range_value_t<range_value_t<Rng>>,
+                range_value_t<ValRng >> >::value);
+#else
             CONCEPT_ASSERT(InputRange<Rng>());
             CONCEPT_ASSERT(ForwardRange<ValRng>());
             CONCEPT_ASSERT(InputRange<range_value_t<Rng>>());
@@ -184,6 +211,7 @@ namespace ranges
             CONCEPT_ASSERT(SemiRegular<concepts::Common::value_t<
                 range_value_t<range_value_t<Rng>>,
                 range_value_t<ValRng>>>());
+#endif
             using size_t_ = common_type_t<range_size_t<Rng>, range_size_t<range_value_t<Rng>>>;
 
             friend range_access;
@@ -300,8 +328,13 @@ namespace ranges
               : view_adaptor_t<join_view>{std::move(rng)}
               , cur_{}, val_(std::move(val))
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 &&
+                SizedRange<range_value_t<Rng>>::value && SizedRange<ValRng>::value)
+#else
             CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 &&
                 SizedRange<range_value_t<Rng>>() && SizedRange<ValRng>())
+#endif
             constexpr size_t_ size() const
             {
                 return range_cardinality<join_view>::value >= 0 ?
@@ -328,13 +361,21 @@ namespace ranges
                         Rng>>;
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(JoinableRange_<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>())>
+#endif
                 join_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return join_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
                 template<typename Rng, typename Val = range_value_t<range_value_t<Rng>>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(JoinableRange_<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>())>
+#endif
                 join_view<all_t<Rng>, single_view<Val>> operator()(Rng && rng, meta::id_t<Val> v) const
                 {
                     CONCEPT_ASSERT_MSG(SemiRegular<Val>(),
@@ -344,7 +385,11 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), single(std::move(v))};
                 }
                 template<typename Rng, typename ValRng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(JoinableRange_<Rng>::value && ForwardRange<ValRng>::value)>
+#else
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>() && ForwardRange<ValRng>())>
+#endif
                 join_view<all_t<Rng>, all_t<ValRng>> operator()(Rng && rng, ValRng && val) const
                 {
                     CONCEPT_ASSERT_MSG(Common<range_value_t<ValRng>,
@@ -361,7 +406,11 @@ namespace ranges
                 }
             private:
                friend view_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+               template<typename T, CONCEPT_REQUIRES_(!JoinableRange_<T>::value)>
+#else
                template<typename T, CONCEPT_REQUIRES_(!JoinableRange_<T>())>
+#endif
                static auto bind(join_fn join, T && t)
                RANGES_DECLTYPE_AUTO_RETURN
                (

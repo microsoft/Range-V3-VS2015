@@ -33,8 +33,13 @@ namespace ranges
         struct any_of_fn
         {
             template<typename I, typename S, typename F, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
+                    IndirectCallablePredicate<F, Project<I, P> >::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
                     IndirectCallablePredicate<F, Project<I, P> >())>
+#endif
             bool
             operator()(I first, S last, F pred, P proj = P{}) const
             {
@@ -48,7 +53,11 @@ namespace ranges
 
             template<typename Rng, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<F, Project<I, P> >::value)>
+#else
                 CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<F, Project<I, P> >())>
+#endif
             bool
             operator()(Rng &&rng, F pred, P proj = P{}) const
             {

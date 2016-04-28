@@ -101,7 +101,11 @@ namespace ranges
             public:
                 // Advance a certain number of steps:
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
                     CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void operator()(I &i, iterator_difference_t<I> n) const
                 {
@@ -111,14 +115,22 @@ namespace ranges
                 }
                 // Advance to a certain position:
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
                     CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void operator()(I &i, I s) const
                 {
                     i = std::move(s);
                 }
                 template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(IteratorRange<I, S>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void operator()(I &i, S s) const
                 {
@@ -126,7 +138,11 @@ namespace ranges
                 }
                 // Advance a certain number of times, with a bound:
                 template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(IteratorRange<I, S>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 iterator_difference_t<I> operator()(I &it, iterator_difference_t<I> n, S bound) const
                 {
@@ -199,7 +215,11 @@ namespace ranges
         struct next_fn
         {
             template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
                 CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             I operator()(I it) const
             {
@@ -207,7 +227,11 @@ namespace ranges
                 return it;
             }
             template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
                 CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             I operator()(I it, iterator_difference_t<I> n) const
             {
@@ -215,7 +239,11 @@ namespace ranges
                 return it;
             }
             template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             I operator()(I it, S s) const
             {
@@ -223,7 +251,11 @@ namespace ranges
                 return it;
             }
             template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             I operator()(I it, iterator_difference_t<I> n, S bound) const
             {
@@ -283,7 +315,11 @@ namespace ranges
             }
         public:
             template<typename I, typename S, typename D = iterator_difference_t<I>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value && Integral<D>::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() && Integral<D>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             std::pair<D, I> operator()(I begin, S end, D d = 0) const
             {
@@ -316,7 +352,11 @@ namespace ranges
             }
         public:
             template<typename I, typename S, typename D = iterator_difference_t<I>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value && Integral<D>::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() && Integral<D>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             D operator()(I begin, S end, D d = 0) const
             {
@@ -366,7 +406,11 @@ namespace ranges
             }
         public:
             template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             int operator()(I begin, S end, iterator_difference_t<I> n) const
             {
@@ -385,7 +429,11 @@ namespace ranges
         // Like distance(b,e), but guaranteed to be O(1)
         struct iter_size_fn
         {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, typename S, CONCEPT_REQUIRES_(SizedIteratorRange<I, S>::value)>
+#else
             template<typename I, typename S, CONCEPT_REQUIRES_(SizedIteratorRange<I, S>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             iterator_size_t<I> operator()(I begin, S end) const
             {
@@ -404,7 +452,11 @@ namespace ranges
         struct iter_swap_fn
         {
             template<typename Readable0, typename Readable1,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IndirectlySwappable<Readable0, Readable1>::value)>
+#else
                 CONCEPT_REQUIRES_(IndirectlySwappable<Readable0, Readable1>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             void operator()(Readable0 a, Readable1 b) const
                 noexcept(is_nothrow_indirectly_swappable<Readable0, Readable1>::value)
@@ -423,7 +475,11 @@ namespace ranges
         struct iter_move_fn
         {
             template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Readable<I>::value)>
+#else
                 CONCEPT_REQUIRES_(Readable<I>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             iterator_rvalue_reference_t<I> operator()(I const &i) const
                 noexcept(noexcept(indirect_move(i)))
@@ -569,7 +625,11 @@ namespace ranges
                   : it_(std::move(it))
                 {}
                 template<typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ConvertibleTo<U, I>::value)>
+#else
                     CONCEPT_REQUIRES_(ConvertibleTo<U, I>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 reverse_cursor(reverse_cursor<U> const &u)
                   : it_(u.base())
@@ -602,13 +662,21 @@ namespace ranges
                 {
                     ++it_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void advance(iterator_difference_t<I> n)
                 {
                     it_ -= n;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
+#endif
                 RANGES_CXX14_CONSTEXPR
                 iterator_difference_t<I>
                 distance_to(reverse_cursor const &that) const

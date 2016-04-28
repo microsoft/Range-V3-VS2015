@@ -201,9 +201,12 @@ int main()
         CONCEPT_ASSERT(Same<
             range_rvalue_reference_t<Rng>,
             common_pair<MoveOnlyString const &&, MoveOnlyString const &&>>());
+#ifdef WORKAROUND_215653
+#else
         CONCEPT_ASSERT(Same<
             range_common_reference_t<Rng>,
             common_pair<MoveOnlyString const &, MoveOnlyString const &>>());
+#endif
     }
 
     {
@@ -233,7 +236,11 @@ int main()
         auto x = view::zip(rg1, rg2);
         std::pair<std::unique_ptr<int>, std::unique_ptr<int>> p = iter_move(x.begin());
         auto it = x.begin();
+#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+        // see friend function indirect_move defined in iter_zip_with_view
+#else
         static_assert(noexcept(iter_move(it)), "");
+#endif
     }
 
     return test_result();

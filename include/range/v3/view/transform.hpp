@@ -98,12 +98,20 @@ namespace ranges
             {
                 return {fun_};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>>())
+#endif
             adaptor<true> begin_adaptor() const
             {
                 return {fun_};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>>())
+#endif
             meta::if_<use_sentinel_t, adaptor_base, adaptor<true>> end_adaptor() const
             {
                 return {fun_};
@@ -114,7 +122,11 @@ namespace ranges
               : view_adaptor_t<iter_transform_view>{std::move(rng)}
               , fun_(as_function(std::move(fun)))
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             constexpr range_size_t<Rng> size() const
             {
                 return ranges::size(this->base());
@@ -167,8 +179,13 @@ namespace ranges
             public:
                 using difference_type = difference_type_;
                 using single_pass = meta::or_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    (bool)SinglePass<range_iterator_t<Rng1>>::value,
+                    (bool)SinglePass<range_iterator_t<Rng2>>::value>;
+#else
                     (bool) SinglePass<range_iterator_t<Rng1>>(),
                     (bool) SinglePass<range_iterator_t<Rng2>>()>;
+#endif
                 using value_type =
                     detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rng1>{},
                         range_iterator_t<Rng2>{}))>;
@@ -194,19 +211,31 @@ namespace ranges
                     // one reaches the end.
                     return it1_ == that.it1_ || it2_ == that.it2_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalRange<Rng1>::value && BidirectionalRange<Rng2>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng1>() && BidirectionalRange<Rng2>())
+#endif
                 void prev()
                 {
                     --it1_;
                     --it2_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
+#endif
                 void advance(difference_type n)
                 {
                     ranges::advance(it1_, n);
                     ranges::advance(it2_, n);
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
+#endif
                 difference_type distance_to(cursor const &that) const
                 {
                     // Return the smallest distance (in magnitude) of any of the iterator
@@ -237,9 +266,15 @@ namespace ranges
 
             using end_cursor_t =
                 meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    BoundedRange<Rng1>::value && BoundedRange<Rng2>::value &&
+                        !SinglePass<range_iterator_t<Rng1>>::value &&
+                        !SinglePass<range_iterator_t<Rng2>>::value,
+#else
                     BoundedRange<Rng1>() && BoundedRange<Rng2>() &&
                         !SinglePass<range_iterator_t<Rng1>>() &&
                         !SinglePass<range_iterator_t<Rng2>>(),
+#endif
                     cursor,
                     sentinel>;
 
@@ -251,12 +286,20 @@ namespace ranges
             {
                 return {fun_, ranges::end(rng1_), ranges::end(rng2_)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Range<Rng1 const>::value && Range<Rng2 const>::value)
+#else
             CONCEPT_REQUIRES(Range<Rng1 const>() && Range<Rng2 const>())
+#endif
             cursor begin_cursor() const
             {
                 return {fun_, ranges::begin(rng1_), ranges::begin(rng2_)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Range<Rng1 const>::value && Range<Rng2 const>::value)
+#else
             CONCEPT_REQUIRES(Range<Rng1 const>() && Range<Rng2 const>())
+#endif
             end_cursor_t end_cursor() const
             {
                 return {fun_, ranges::end(rng1_), ranges::end(rng2_)};
@@ -268,7 +311,11 @@ namespace ranges
               , rng1_(std::move(rng1))
               , rng2_(std::move(rng2))
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng1>::value && SizedRange<Rng2>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng1>() && SizedRange<Rng2>())
+#endif
             constexpr size_type_ size() const
             {
                 return range_cardinality<iter_transform2_view>::value >= 0 ?
@@ -318,14 +365,22 @@ namespace ranges
                     Callable<Fun, move_tag, range_iterator_t<Rng1>, range_iterator_t<Rng2>>>;
 
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
+#endif
                 iter_transform_view<all_t<Rng>, Fun> operator()(Rng && rng, Fun fun) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(fun)};
                 }
 
                 template<typename Rng1, typename Rng2, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept2<Rng1, Rng2, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept2<Rng1, Rng2, Fun>())>
+#endif
                 iter_transform2_view<all_t<Rng1>, all_t<Rng2>, Fun>
                 operator()(Rng1 && rng1, Rng2 && rng2, Fun fun) const
                 {
@@ -334,7 +389,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>
+#endif
                 void operator()(Rng && rng, Fun fun) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
@@ -355,7 +414,11 @@ namespace ranges
                 }
 
                 template<typename Rng1, typename Rng2, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept2<Rng1, Rng2, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept2<Rng1, Rng2, Fun>())>
+#endif
                 void operator()(Rng1 && rng1, Rng2 && rng2, Fun fun) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng1>(),
@@ -411,14 +474,22 @@ namespace ranges
                     Callable<Fun, range_reference_t<Rng1> &&, range_reference_t<Rng2> &&>>;
 
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
+#endif
                 transform_view<all_t<Rng>, Fun> operator()(Rng && rng, Fun fun) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(fun)};
                 }
 
                 template<typename Rng1, typename Rng2, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept2<Rng1, Rng2, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept2<Rng1, Rng2, Fun>())>
+#endif
                 transform2_view<all_t<Rng1>, all_t<Rng2>, Fun>
                 operator()(Rng1 && rng1, Rng2 && rng2, Fun fun) const
                 {
@@ -428,7 +499,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>
+#endif
                 void operator()(Rng && rng, Fun fun) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
@@ -441,7 +516,11 @@ namespace ranges
                 }
 
                 template<typename Rng1, typename Rng2, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept2<Rng1, Rng2, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept2<Rng1, Rng2, Fun>())>
+#endif
                 void operator()(Rng1 && rng1, Rng2 && rng2, Fun fun) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng1>(),

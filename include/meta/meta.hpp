@@ -15,6 +15,22 @@
 #ifndef META_HPP
 #define META_HPP
 
+#if _MSC_VER >= 1900
+#define WORKAROUND_SFINAE_CONSTEXPR
+#define WORKAROUND_SFINAE_CONSTEXPR_2
+#define WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#define WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+// constexpr + static member array
+#define WORKAROUND_210794
+// pack expansion + alias
+//   found in test\utility\meta.cpp
+#define WORKAROUND_214588
+// decltype + pack expansion + partial specialization
+#define WORKAROUND_218738
+// also see VSO 218943
+#define WORKAROUND_CANONICALMEMBER
+#endif
+
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
@@ -122,6 +138,13 @@ namespace meta
             {
                 return nullptr;
             }
+#ifdef WORKAROUND_218738
+            template <typename T>
+            constexpr id<T> *_nullptr_v_id()
+            {
+                return nullptr;
+            }
+#endif
         } // namespace detail
 
         /// An empty type.
@@ -185,6 +208,13 @@ namespace meta
         template <char Ch>
         using char_ = std::integral_constant<char, Ch>;
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        template<typename T>
+        struct value_type_helper
+        {
+            using type = decltype(T::type::value);
+        };
+#endif
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Math operations
         /// An integral constant wrapper around the result of incrementing the wrapped integer \c
@@ -195,7 +225,11 @@ namespace meta
         /// An integral constant wrapper around the result of decrementing the wrapped integer \c
         /// T::type::value.
         template <typename T>
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        using dec = std::integral_constant<_t<value_type_helper<T>>, T::type::value - 1>;
+#else
         using dec = std::integral_constant<decltype(T::type::value), T::type::value - 1>;
+#endif
 
         /// An integral constant wrapper around the result of adding the two wrapped integers
         /// \c T::type::value and \c U::type::value.
@@ -632,8 +666,18 @@ namespace meta
         {
             // Indirection through defer_i here needed to avoid Core issue 1430
             // http://open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1430
+#ifdef WORKAROUND_214588
+            template<typename T1, typename T2>
+            struct helper {
+                static const T1 value = T2::type::value;
+            };
+
+            template <typename... Ts>
+            using apply = _t<defer_i<T, F, helper<T, Ts>::value...>>;
+#else
             template <typename... Ts>
             using apply = _t<defer_i<T, F, Ts::type::value...>>;
+#endif
         };
 
         /// Turn a trait \p C into a Alias Class.
@@ -884,25 +928,66 @@ namespace meta
 
         /// Logically negate the Boolean parameter
         /// \ingroup logical
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <bool Bool>
+        struct not_c_helper {
+            static const bool value = !Bool;
+        };
+        template <bool Bool>
+        using not_c = bool_<not_c_helper<Bool>::value>;
+#else
         template <bool Bool>
         using not_c = bool_<!Bool>;
+#endif
 
         /// Logically negate the integral constant-wrapped Boolean parameter.
         /// \ingroup logical
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <typename Bool>
+        struct not_helper {
+            typedef not_c<Bool::type::value> type;
+        };
+        template <typename Bool>
+        using not_ = _t<not_helper<Bool>>;
+#else
         template <typename Bool>
         using not_ = not_c<Bool::type::value>;
+#endif
+
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <bool Bool>
+        struct and_c_helper {
+            static const bool value = Bool || true;
+        };
+#endif
 
         /// Logically and together all the Boolean parameters
         /// \ingroup logical
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <bool... Bools>
+        using and_c = std::is_same<integer_sequence<bool, Bools...>,
+                                    integer_sequence<bool, and_c_helper<Bools>::value...>>;
+#else
         template <bool... Bools>
         using and_c = std::is_same<integer_sequence<bool, Bools...>,
                                    integer_sequence<bool, (Bools || true)...>>;
+#endif
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <typename Bool>
+        struct fast_and_helper {
+            static const bool value = Bool::type::value;
+        };
+
+        template <typename... Bools>
+        using fast_and = and_c<fast_and_helper<Bools>::value...>;
+#else
         /// Logically and together all the integral constant-wrapped Boolean parameters, \e without
         /// doing short-circuiting.
         /// \ingroup logical
         template <typename... Bools>
         using fast_and = and_c<Bools::type::value...>;
+#endif
 
         /// Logically and together all the integral constant-wrapped Boolean parameters, \e with
         /// short-circuiting.
@@ -916,11 +1001,21 @@ namespace meta
         using or_c = not_<std::is_same<integer_sequence<bool, Bools...>,
                                        integer_sequence<bool, (Bools && false)...>>>;
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <typename Bool>
+        struct fast_or_helper {
+            static const bool value = Bool::type::value;
+        };
+
+        template <typename... Bools>
+        using fast_or = or_c<fast_or_helper<Bools>::value...>;
+#else
         /// Logically or together all the integral constant-wrapped Boolean parameters, \e without
         /// doing short-circuiting.
         /// \ingroup logical
         template <typename... Bools>
         using fast_or = or_c<Bools::type::value...>;
+#endif
 
         /// Logically or together all the integral constant-wrapped Boolean parameters, \e with
         /// short-circuiting.
@@ -1075,8 +1170,18 @@ namespace meta
         /// An integral constant wrapper that is the size of the \c meta::list
         /// \p List.
         /// \ingroup list
+#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+        template <typename List>
+        struct mysize_helper {
+            static const std::size_t value = List::size();
+        };
+
+        template <typename List>
+        using size = meta::size_t<mysize_helper<List>::value>;
+#else
         template <typename List>
         using size = meta::size_t<List::size()>;
+#endif
 
         namespace lazy
         {
@@ -1234,7 +1339,11 @@ namespace meta
 
             template <typename... Ts, typename N>
             struct at_<list<Ts...>, N>
+#ifdef WORKAROUND_218738
+                : decltype(at_impl_<repeat_n<N, void *>>::eval(detail::_nullptr_v_id<Ts>()...))
+#else
                 : decltype(at_impl_<repeat_n<N, void *>>::eval(detail::_nullptr_v<id<Ts>>()...))
+#endif
             {
             };
         } // namespace detail
@@ -1593,12 +1702,25 @@ namespace meta
                 using type = npos;
             };
 
+#ifdef WORKAROUND_210794
+            constexpr std::size_t find_index_i_2(bool const *const first, std::size_t i1, std::size_t i2, std::size_t N = 0)
+            {
+                return i1 == i2 ? npos::value : first[i1] ? N : find_index_i_2(first, i1 + 1, i2, N + 1);
+            }
+            template <typename... T, typename V>
+            struct find_index_<list<T...>, V>
+            {
+                static constexpr bool s_v[] = {std::is_same<T, V>::value...};
+                using type = size_t<find_index_i_2(s_v, 0, sizeof...(T))>;
+            };
+#else
             template <typename... T, typename V>
             struct find_index_<list<T...>, V>
             {
                 static constexpr bool s_v[] = {std::is_same<T, V>::value...};
                 using type = size_t<find_index_i_(s_v, s_v + sizeof...(T))>;
             };
+#endif
         } // namespace detail
         /// \endcond
 
@@ -1644,12 +1766,25 @@ namespace meta
                 using type = npos;
             };
 
+#ifdef WORKAROUND_210794
+            constexpr std::size_t reverse_find_index_i_2(bool const *const first, std::size_t i1, std::size_t i2, std::size_t N)
+            {
+                return i1 == i2 ? npos::value : first[i2 - 1] ? N - 1 : reverse_find_index_i_2(first, i1, i2 - 1, N - 1);
+            }
             template <typename... T, typename V>
             struct reverse_find_index_<list<T...>, V>
             {
-                static constexpr bool s_v[] = {std::is_same<T, V>::value...};
+                static constexpr bool s_v[] = { std::is_same<T, V>::value... };
+                using type = size_t<reverse_find_index_i_2(s_v, 0, sizeof...(T), sizeof...(T))>;
+            };
+#else
+            template <typename... T, typename V>
+            struct reverse_find_index_<list<T...>, V>
+            {
+                static constexpr bool s_v[] = { std::is_same<T, V>::value... };
                 using type = size_t<reverse_find_index_i_(s_v, s_v + sizeof...(T), sizeof...(T))>;
             };
+#endif
         } // namespace detail
         /// \endcond
 
@@ -2305,6 +2440,25 @@ namespace meta
         /// \cond
         namespace detail
         {
+#ifdef WORKAROUND_CANONICALMEMBER
+            template <typename, typename, typename, typename = void>
+            struct partition_impl
+            {
+            };
+            template <typename Pred, typename... Yes, typename... No, typename A>
+            struct partition_impl<Pred, pair<list<Yes...>, list<No...>>, A,
+                        void_<bool_<apply<Pred, A>::type::value>>>
+            {
+                using type = if_<apply<Pred, A>, pair<list<Yes..., A>, list<No...>>,
+                                    pair<list<Yes...>, list<No..., A>>>;
+            };
+            template <typename Pred>
+            struct partition_
+            {
+                template <typename State, typename A>
+                using apply = _t<partition_impl<Pred, State, A>>;
+            };
+#else
             template <typename Pred>
             struct partition_
             {
@@ -2322,6 +2476,7 @@ namespace meta
                 template <typename State, typename A>
                 using apply = _t<impl<State, A>>;
             };
+#endif
         } // namespace detail
         /// \endcond
 
@@ -2430,6 +2585,19 @@ namespace meta
                 using type = list<Ts>;
             };
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template <typename As, typename Ts>
+            using substitutions_ = push_back<
+                join<transform<
+                    concat<As, repeat_n_c<size<Ts>::value + 2 - size<As>::value, back<As>>>,
+                    concat<Ts, repeat_n_c<2, back<As>>>,
+                    bind_back<quote_trait<subst1_>, back<As>, drop_c<Ts, size<As>::value - 2>>>>,
+                list<back<As>>>;
+
+            template <typename As, typename Ts>
+            using substitutions =
+                apply<if_c<(size<Ts>::value + 2 >= size<As>::value), quote<substitutions_>>, As, Ts>;
+#else
             template <typename As, typename Ts>
             using substitutions_ = push_back<
                 join<transform<
@@ -2441,6 +2609,7 @@ namespace meta
             template <typename As, typename Ts>
             using substitutions =
                 apply<if_c<(size<Ts>{} + 2 >= size<As>{}), quote<substitutions_>>, As, Ts>;
+#endif
 
             template <typename T>
             struct is_vararg_ : std::false_type
@@ -2636,7 +2805,11 @@ namespace meta
                 struct thunk
                 {
                     template <typename S, typename R = _t<impl<back<Tags>, S>>>
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    using apply = if_c<size<R>::value == 1, front<R>>;
+#else
                     using apply = if_c<size<R>{} == 1, front<R>>;
+#endif
                 };
 
             public:

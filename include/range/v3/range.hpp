@@ -43,7 +43,11 @@ namespace ranges
         /// \addtogroup group-core
         /// @{
         template<typename I, typename S /*= I*/>
+#ifdef WORKAROUND_EBO
+        struct __declspec(empty_bases) range
+#else
         struct range
+#endif
           : private compressed_pair<I, S>
           , view_interface<range<I, S>>
         {
@@ -60,12 +64,20 @@ namespace ranges
               : compressed_pair<I, S>{detail::move(begin), detail::move(end)}
             {}
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>::value && ConvertibleTo<Y, sentinel>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>() && ConvertibleTo<Y, sentinel>())>
+#endif
             constexpr range(range<X, Y> rng)
               : compressed_pair<I, S>{detail::move(rng.first), detail::move(rng.second)}
             {}
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>::value && ConvertibleTo<Y, sentinel>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>() && ConvertibleTo<Y, sentinel>())>
+#endif
             constexpr range(std::pair<X, Y> rng)
               : compressed_pair<I, S>{detail::move(rng.first), detail::move(rng.second)}
             {}
@@ -78,7 +90,11 @@ namespace ranges
                 return second;
             }
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
+#endif
             constexpr operator std::pair<X, Y>() const
             {
                 return {first, second};
@@ -87,7 +103,11 @@ namespace ranges
             {
                 ++first;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BidirectionalIterator<sentinel>::value)
+#else
             CONCEPT_REQUIRES(BidirectionalIterator<sentinel>())
+#endif
             void pop_back()
             {
                 --second;
@@ -103,7 +123,11 @@ namespace ranges
         //   distance(first, second) == third
         //
         template<typename I, typename S /* = I */>
+#ifdef WORKAROUND_EBO
+        struct __declspec(empty_bases) sized_range
+#else
         struct sized_range
+#endif
           : private compressed_pair<I const, S const>
           , view_interface<sized_range<I, S>>
         {
@@ -119,13 +143,21 @@ namespace ranges
                 return detail::unsafe_move(this->second);
             }
             template<typename J = I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardIterator<J>::value && IteratorRange<J, S>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardIterator<J>() && IteratorRange<J, S>())>
+#endif
             void check() const
             {
                 RANGES_ASSERT(static_cast<iterator_size_t<I>>(iter_distance(first, second)) == third);
             }
             template<typename J = I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(!ForwardIterator<J>::value || !IteratorRange<J, S>::value)>
+#else
                 CONCEPT_REQUIRES_(!ForwardIterator<J>() || !IteratorRange<J, S>())>
+#endif
             void check() const
             {}
         public:
@@ -153,17 +185,29 @@ namespace ranges
               : compressed_pair<I const, S const>{rng.move_first(), rng.move_second()}, third(rng.third)
             {}
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
+#endif
             sized_range(std::pair<X, Y> rng, iterator_size_t<I> size)
               : sized_range{std::move(rng).first, std::move(rng).second, size}
             {}
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
+#endif
             sized_range(range<X, Y> rng, iterator_size_t<I> size)
               : sized_range{std::move(rng).first, std::move(rng).second, size}
             {}
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
+#endif
             sized_range(sized_range<X, Y> rng)
               : sized_range{rng.move_first(), rng.move_second(), rng.third}
             {}
@@ -182,7 +226,11 @@ namespace ranges
                 return *this;
             }
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Assignable<I&, X &&>::value && Assignable<S&, Y &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Assignable<I&, X &&>() && Assignable<S&, Y &&>())>
+#endif
             sized_range &operator=(sized_range<X, Y> rng)
             {
                 const_cast<I &>(first) = rng.move_first();
@@ -203,13 +251,21 @@ namespace ranges
                 return third;
             }
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
+#endif
             constexpr operator std::pair<X, Y>() const
             {
                 return {first, second};
             }
             template<typename X, typename Y,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
+#endif
             constexpr operator range<X, Y>() const
             {
                 return {first, second};
@@ -359,10 +415,12 @@ namespace ranges
 }
 
 // The standard is inconsistent about whether these are classes or structs
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wmismatched-tags"
+#endif
 
 /// \cond
 namespace std
@@ -403,6 +461,8 @@ namespace std
 }
 /// \endcond
 
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic pop
+#endif
 
 #endif

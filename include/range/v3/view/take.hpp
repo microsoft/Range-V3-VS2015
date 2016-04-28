@@ -63,7 +63,11 @@ namespace ranges
                 return {ranges::begin(rng_), n_};
             }
             template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
             detail::counted_cursor<range_iterator_t<BaseRng const>> begin_cursor() const
             {
                 return {ranges::begin(rng_), n_};
@@ -73,7 +77,11 @@ namespace ranges
                 return {ranges::end(rng_)};
             }
             template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
             sentinel<true> end_cursor() const
             {
                 return {ranges::end(rng_)};
@@ -103,14 +111,22 @@ namespace ranges
                 friend view_access;
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!SizedRange<Rng>::value && !is_infinite<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!SizedRange<Rng>() && !is_infinite<Rng>())>
+#endif
                 static take_view<all_t<Rng>> invoke_(Rng && rng, range_difference_t<Rng> n)
                 {
                     return {all(std::forward<Rng>(rng)), n};
                 }
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(SizedRange<Rng>::value || is_infinite<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(SizedRange<Rng>() || is_infinite<Rng>())>
+#endif
                 static auto invoke_(Rng && rng, range_difference_t<Rng> n)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -119,7 +135,11 @@ namespace ranges
                         is_infinite<Rng>() ? n : std::min(n, distance(rng)))
                 )
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(take_fn take, Int n)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -127,7 +147,11 @@ namespace ranges
                 )
 
             #ifndef RANGES_DOXYGEN_INVOKED
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(!Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(!Integral<Int>())>
+#endif
                 static detail::null_pipe bind(take_fn, Int)
                 {
                     CONCEPT_ASSERT_MSG(Integral<Int>(),
@@ -137,7 +161,11 @@ namespace ranges
             #endif
 
             public:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, range_difference_t<Rng> n) const
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -145,7 +173,11 @@ namespace ranges
                 )
 
             #ifndef RANGES_DOXYGEN_INVOKED
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, typename T, CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
+#else
                 template<typename Rng, typename T, CONCEPT_REQUIRES_(!InputRange<Rng>())>
+#endif
                 void operator()(Rng &&, T &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

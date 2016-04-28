@@ -92,8 +92,13 @@ namespace ranges
             };
         public:
             template<typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Function<Fun>::value &&
+                    ConvertibleTo<concepts::Function::result_t<Fun>, any_input_view<Ref>>::value)>
+#else
                 CONCEPT_REQUIRES_(Function<Fun>() &&
                     ConvertibleTo<concepts::Function::result_t<Fun>, any_input_view<Ref>>())>
+#endif
             explicit recursive_range_fn(Fun fun)
               : fun_{[=](){return view::concat(fun(), view::empty<value_type>());}}
             {}

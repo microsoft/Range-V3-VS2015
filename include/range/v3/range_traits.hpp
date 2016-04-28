@@ -60,11 +60,31 @@ namespace ranges
         template<typename Rng>
         using range_common_iterator_t = common_iterator<range_iterator_t<Rng>, range_sentinel_t<Rng>>;
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        template <typename T>
+        using range_safe_iterator_t_helper_void_t = void;
+        template <class T, class V = void> struct range_safe_iterator_t_helper {};
+        template <class T> struct range_safe_iterator_t_helper<T, range_safe_iterator_t_helper_void_t<decltype(ranges::safe_begin(std::declval<T>()))>> {
+            typedef decltype(ranges::safe_begin(std::declval<T>())) type;
+        };
+        template<typename T>
+        using range_safe_iterator_t = typename range_safe_iterator_t_helper<T>::type;
+
+        template <typename T>
+        using range_safe_sentinel_t_helper_void_t = void;
+        template <class T, class V = void> struct range_safe_sentinel_t_helper {};
+        template <class T> struct range_safe_sentinel_t_helper<T, range_safe_sentinel_t_helper_void_t<decltype(ranges::safe_end(std::declval<T>()))>> {
+            typedef decltype(ranges::safe_end(std::declval<T>())) type;
+        };
+        template<typename T>
+        using range_safe_sentinel_t = typename range_safe_sentinel_t_helper<T>::type;
+#else
         template<typename Rng>
         using range_safe_iterator_t = decltype(ranges::safe_begin(std::declval<Rng>()));
 
         template<typename Rng>
         using range_safe_sentinel_t = decltype(ranges::safe_end(std::declval<Rng>()));
+#endif
 
         // Metafunctions
         template<typename Rng>

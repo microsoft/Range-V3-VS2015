@@ -88,7 +88,11 @@ namespace ranges
 
                 // Pipeing requires range arguments or lvalue containers.
                 template<typename Rng, typename Vw,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ViewConcept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(ViewConcept<Rng>())>
+#endif
                 static auto pipe(Rng && rng, Vw && v)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -97,7 +101,11 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For better error messages:
                 template<typename Rng, typename Vw,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!ViewConcept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!ViewConcept<Rng>())>
+#endif
                 static void pipe(Rng &&, Vw &&)
                 {
                     CONCEPT_ASSERT_MSG(Range<Rng>(),
@@ -118,7 +126,11 @@ namespace ranges
                 {}
                 // Calling directly requires range arguments or lvalue containers.
                 template<typename Rng, typename...Rest,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ViewConcept<Rng, Rest...>::value)>
+#else
                     CONCEPT_REQUIRES_(ViewConcept<Rng, Rest...>())>
+#endif
                 auto operator()(Rng && rng, Rest &&... rest) const
                 RANGES_DECLTYPE_AUTO_RETURN
                 (

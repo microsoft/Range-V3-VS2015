@@ -20,11 +20,13 @@
 struct empty
 {};
 
+#ifndef WORKAROUND_209653
 static_assert(sizeof(ranges::range<int*, empty>) == sizeof(int*),
     "Expected range to be compressed");
 
 static_assert(sizeof(ranges::sized_range<int*, empty>) == sizeof(int*) + sizeof(std::size_t),
     "Expected sized_range to be compressed");
+#endif
 
 template<typename T, typename U = decltype(std::declval<T>().pop_front())>
 int test_pop_front(T & t)
@@ -54,7 +56,9 @@ int main()
     CHECK(p0.second == vi.end());
 
     ranges::range<std::vector<int>::iterator, ranges::unreachable> r1 { r0.begin(), {} };
+#ifndef WORKAROUND_209653
     static_assert(sizeof(r1) == sizeof(vi.begin()), "");
+#endif
     ::models<ranges::concepts::View>(r1);
     ::models_not<ranges::concepts::SizedView>(r1);
     CHECK(r1.first == vi.begin()+1);
@@ -73,7 +77,9 @@ int main()
     std::pair<std::vector<int>::iterator, ranges::unreachable> p1 = r1;
     CHECK(p1.first == vi.begin()+1);
     CHECK(p1.second == ranges::unreachable{});
+#ifndef WORKAROUND_209653
     static_assert(sizeof(p1) > sizeof(r1), "");
+#endif
 
     ranges::range<std::vector<int>::iterator, ranges::unreachable> r2 { p1 };
     CHECK(r1.first == vi.begin()+1);

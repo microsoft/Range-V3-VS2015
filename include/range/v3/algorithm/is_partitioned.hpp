@@ -46,7 +46,11 @@ namespace ranges
         struct is_partitioned_fn
         {
             template<typename I, typename S, typename C, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IsPartitionedable<I, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(IsPartitionedable<I, C, P>() && IteratorRange<I, S>())>
+#endif
             bool operator()(I begin, S end, C pred_, P proj_ = P{}) const
             {
                 auto && pred = as_function(pred_);
@@ -62,7 +66,11 @@ namespace ranges
 
             template<typename Rng, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IsPartitionedable<I, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(IsPartitionedable<I, C, P>() && Range<Rng>())>
+#endif
             bool operator()(Rng &&rng, C pred, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(pred), std::move(proj));

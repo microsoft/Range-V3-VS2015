@@ -68,7 +68,11 @@ namespace ranges
                 stride_view const *rng_;
                 offset_t & offset() { return *this; }
                 offset_t const & offset() const { return *this; }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
+#endif
                 void clean() const
                 {
                     std::atomic<difference_type_> &off = offset();
@@ -103,7 +107,11 @@ namespace ranges
                     offset() = ranges::advance(it, rng_->stride_ + offset(),
                         ranges::end(rng_->mutable_base()));
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
+#endif
                 void prev(iterator &it)
                 {
                     clean();
@@ -111,7 +119,11 @@ namespace ranges
                         ranges::begin(rng_->mutable_base()));
                     RANGES_ASSERT(0 == offset());
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 difference_type_ distance_to(iterator here, iterator there, adaptor const &that) const
                 {
                     clean();
@@ -120,7 +132,11 @@ namespace ranges
                     RANGES_ASSERT(0 == ((there - here) + that.offset() - offset()) % rng_->stride_);
                     return ((there - here) + that.offset() - offset()) / rng_->stride_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 void advance(iterator &it, difference_type_ n)
                 {
                     if(n != 0)
@@ -142,12 +158,20 @@ namespace ranges
             // speaking, we don't have to adapt the end iterator of Input and Forward
             // Ranges, but in the interests of making the resulting stride view model
             // BoundedView, adapt it anyway.
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(!BoundedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(!BoundedRange<Rng>())
+#endif
             adaptor_base end_adaptor() const
             {
                 return {};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BoundedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(BoundedRange<Rng>())
+#endif
             adaptor end_adaptor() const
             {
                 return {*this, end_tag{}};
@@ -160,7 +184,11 @@ namespace ranges
             {
                 RANGES_ASSERT(0 < stride_);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             size_type_ size() const
             {
                 return (ranges::size(this->base()) + static_cast<size_type_>(stride_) - 1) /
@@ -174,14 +202,22 @@ namespace ranges
             {
             private:
                 friend view_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Difference, CONCEPT_REQUIRES_(Integral<Difference>::value)>
+#else
                 template<typename Difference, CONCEPT_REQUIRES_(Integral<Difference>())>
+#endif
                 static auto bind(stride_fn stride, Difference step)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(stride, std::placeholders::_1, std::move(step)))
                 )
             public:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 stride_view<all_t<Rng>> operator()(Rng && rng, range_difference_t<Rng> step) const
                 {
                     return {all(std::forward<Rng>(rng)), step};
@@ -190,7 +226,11 @@ namespace ranges
                 // For the purpose of better error messages:
             #ifndef RANGES_DOXYGEN_INVOKED
             private:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Difference, CONCEPT_REQUIRES_(!Integral<Difference>::value)>
+#else
                 template<typename Difference, CONCEPT_REQUIRES_(!Integral<Difference>())>
+#endif
                 static detail::null_pipe bind(stride_fn, Difference &&)
                 {
                     CONCEPT_ASSERT_MSG(Integral<Difference>(),
@@ -201,7 +241,11 @@ namespace ranges
                 }
             public:
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!InputRange<Rng>())>
+#endif
                 void operator()(Rng &&, T &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

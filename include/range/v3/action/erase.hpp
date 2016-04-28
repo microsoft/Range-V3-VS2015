@@ -28,7 +28,11 @@ namespace ranges
         namespace adl_erase_detail
         {
             template<typename Cont, typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && ForwardIterator<I>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && ForwardIterator<I>())>
+#endif
             auto erase(Cont && cont, I it) ->
                 decltype(unwrap_reference(cont).erase(it))
             {
@@ -36,8 +40,13 @@ namespace ranges
             }
 
             template<typename Cont, typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && ForwardIterator<I>::value &&
+                    IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && ForwardIterator<I>() &&
                     IteratorRange<I, S>())>
+#endif
             auto erase(Cont && cont, I begin, S end) ->
                 decltype(unwrap_reference(cont).erase(begin, end))
             {
@@ -48,15 +57,24 @@ namespace ranges
             {
                 // TODO associative erase by key
                 template<typename Rng, typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && ForwardIterator<I>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && ForwardIterator<I>())>
+#endif
                 auto operator()(Rng && rng, I it) const ->
                     decltype(erase(std::forward<Rng>(rng), it))
                 {
                     return erase(std::forward<Rng>(rng), it);
                 }
                 template<typename Rng, typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && ForwardIterator<I>::value &&
+                        IteratorRange<I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && ForwardIterator<I>() &&
                         IteratorRange<I, S>())>
+#endif
                 auto operator()(Rng && rng, I begin, S end) const ->
                     decltype(erase(std::forward<Rng>(rng), begin, end))
                 {

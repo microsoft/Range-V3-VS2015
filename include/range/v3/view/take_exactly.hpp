@@ -35,7 +35,11 @@ namespace ranges
         namespace detail
         {
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                bool IsRandomAccessBounded = RandomAccessRange<Rng>::value && BoundedRange<Rng>::value>
+#else
                 bool IsRandomAccessBounded = RandomAccessRange<Rng>() && BoundedRange<Rng>()>
+#endif
             struct take_exactly_view_
               : view_facade<take_exactly_view<Rng>, finite>
             {
@@ -50,7 +54,11 @@ namespace ranges
                     return {ranges::begin(rng_), n_};
                 }
                 template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
                 counted_cursor<range_iterator_t<BaseRng const>> begin_cursor() const
                 {
                     return {ranges::begin(rng_), n_};
@@ -104,13 +112,21 @@ namespace ranges
                     return next(ranges::begin(rng_), n_);
                 }
                 template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
                 range_iterator_t<BaseRng const> begin() const
                 {
                     return ranges::begin(rng_);
                 }
                 template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
                 range_iterator_t<BaseRng const> end() const
                 {
                     return next(ranges::begin(rng_), n_);
@@ -154,7 +170,11 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), n};
                 }
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!View<Rng>::value && std::is_lvalue_reference<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!View<Rng>() && std::is_lvalue_reference<Rng>())>
+#endif
                 static range<range_iterator_t<Rng>>
                 invoke_(Rng && rng, range_difference_t<Rng> n, concepts::RandomAccessRange*)
                 {
@@ -162,7 +182,11 @@ namespace ranges
                 }
 
                 template<typename Int,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                     CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(take_exactly_fn take_exactly, Int n)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -170,7 +194,11 @@ namespace ranges
                 )
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Int,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Integral<Int>::value)>
+#else
                     CONCEPT_REQUIRES_(!Integral<Int>())>
+#endif
                 static detail::null_pipe bind(take_exactly_fn, Int)
                 {
                     CONCEPT_ASSERT_MSG(Integral<Int>(),
@@ -181,7 +209,11 @@ namespace ranges
 
             public:
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, range_difference_t<Rng> n) const
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -190,7 +222,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!InputRange<Rng>())>
+#endif
                 void operator()(Rng &&, T &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<T>(),

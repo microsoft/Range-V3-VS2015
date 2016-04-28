@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <range/v3/all.hpp>
 
-#ifdef RANGES_CXX_GREATER_THAN_11
+#if defined(RANGES_CXX_GREATER_THAN_11) || defined(_MSC_VER)
 
 /// Creates an geometric infinite sequence starting at 1 where the
 /// successor is multiplied by \p V

@@ -30,7 +30,11 @@ namespace ranges
         namespace adl_push_back_detail
         {
             template<typename Cont, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Constructible<range_value_t<Cont>, T &&>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Constructible<range_value_t<Cont>, T &&>())>
+#endif
             auto push_back(Cont && cont, T && t) ->
                 decltype((void)unwrap_reference(cont).push_back(std::forward<T>(t)))
             {
@@ -38,7 +42,11 @@ namespace ranges
             }
 
             template<typename Cont, typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Range<Rng>())>
+#endif
             auto push_back(Cont && cont, Rng && rng) ->
                 decltype((void)ranges::insert(unwrap_reference(cont), end(cont), std::forward<Rng>(rng)))
             {
@@ -73,7 +81,11 @@ namespace ranges
                 using Concept = concepts::models<ConceptImpl, Rng, Fun>;
 
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, T>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, T>())>
+#endif
                 Rng operator()(Rng && rng, T && t) const
                 {
                     push_back(rng, std::forward<T>(t));
@@ -82,7 +94,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, T>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, T>())>
+#endif
                 void operator()(Rng &&, T &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

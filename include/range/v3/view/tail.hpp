@@ -59,7 +59,11 @@ namespace ranges
             {
                 return next(ranges::begin(rng_));
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Range<Rng const>::value)
+#else
             CONCEPT_REQUIRES(Range<Rng const>())
+#endif
             iterator begin() const
             {
                 return next(ranges::begin(rng_));
@@ -68,12 +72,20 @@ namespace ranges
             {
                 return ranges::end(rng_);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Range<Rng const>::value)
+#else
             CONCEPT_REQUIRES(Range<Rng const>())
+#endif
             sentinel end() const
             {
                 return ranges::end(rng_);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedView<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedView<Rng>())
+#endif
             constexpr range_size_t<Rng> size() const
             {
                 return range_cardinality<Rng>::value > 0 ?
@@ -94,7 +106,11 @@ namespace ranges
         {
             struct tail_fn
             {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 tail_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     static_assert(range_cardinality<Rng>::value != 0,
@@ -103,7 +119,11 @@ namespace ranges
                 }
 
             #ifndef RANGES_DOXYGEN_INVOKED
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(!InputRange<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

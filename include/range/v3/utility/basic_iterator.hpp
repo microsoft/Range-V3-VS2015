@@ -107,7 +107,11 @@ namespace ranges
                     {
                         return *it_;
                     }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>::value)
+#else
                     CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>())
+#endif
                     RANGES_CXX14_CONSTEXPR operator value_t() const
                     {
                         return *it_;
@@ -146,7 +150,11 @@ namespace ranges
                     {
                         return *it_;
                     }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>::value)
+#else
                     CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>())
+#endif
                     RANGES_CXX14_CONSTEXPR operator value_t() const
                     {
                         return *it_;
@@ -256,7 +264,11 @@ namespace ranges
                 }
                 // Provides writability of *r++
                 template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Writable<I, T>::value)>
+#else
                     CONCEPT_REQUIRES_(Writable<I, T>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void operator=(T const &x) const
                 {
@@ -264,14 +276,22 @@ namespace ranges
                 }
                 // This overload just in case only non-const objects are writable
                 template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Writable<I, T>::value)>
+#else
                     CONCEPT_REQUIRES_(Writable<I, T>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void operator=(T &x) const
                 {
                     *it_ = x;
                 }
                 template<typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(MoveWritable<I, T>::value)>
+#else
                     CONCEPT_REQUIRES_(MoveWritable<I, T>())>
+#endif
                 RANGES_CXX14_CONSTEXPR
                 void operator=(T &&x) const
                 {
@@ -356,7 +376,11 @@ namespace ranges
         private:
             T t_;
         public:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(DefaultConstructible<T>::value)
+#else
             CONCEPT_REQUIRES(DefaultConstructible<T>())
+#endif
             constexpr basic_mixin()
               : t_{}
             {}
@@ -381,9 +405,12 @@ namespace ranges
         struct basic_sentinel : detail::mixin_base<S>
         {
             // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=60799
+#ifdef WORKAROUND_213536
+#else
             #ifndef __GNUC__
         private:
             #endif
+#endif
             friend range_access;
             template<typename Cur, typename OtherSentinel>
             friend struct basic_iterator;
@@ -392,19 +419,35 @@ namespace ranges
             {
                 return this->detail::mixin_base<S>::get();
             }
+#ifdef WORKAROUND_CONSTEXPR_CXX14
+            constexpr
+#else
             RANGES_CXX14_CONSTEXPR
+#endif
             S const &end() const noexcept
             {
                 return this->detail::mixin_base<S>::get();
             }
         private:
+#ifdef WORKAROUND_214062
+            template<typename T> struct helper {
+                typedef detail::mixin_base<T> type;
+            };
+            using helper<S>::type::get;
+#else
             using detail::mixin_base<S>::get;
+#endif
         public:
             RANGES_CXX14_CONSTEXPR basic_sentinel() = default;
             RANGES_CXX14_CONSTEXPR basic_sentinel(S end)
               : detail::mixin_base<S>(std::move(end))
             {}
+#ifdef WORKAROUND_214062
+            typedef detail::mixin_base<S> my_base;
+            using my_base::my_base;
+#else
             using detail::mixin_base<S>::mixin_base;
+#endif
             constexpr bool operator==(basic_sentinel<S> const &) const
             {
                 return true;
@@ -424,7 +467,11 @@ namespace ranges
             friend detail::mixin_base<Cur>;
             template<typename OtherCur, typename OtherS>
             friend struct basic_iterator;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_ASSERT(detail::InputCursor<Cur>::value);
+#else
             CONCEPT_ASSERT(detail::InputCursor<Cur>());
+#endif
             using single_pass = range_access::single_pass_t<Cur>;
             using cursor_concept_t =
                 meta::if_<
@@ -432,12 +479,23 @@ namespace ranges
                     range_access::InputCursorConcept,
                     detail::cursor_concept_t<Cur>>;
 
+#ifdef WORKAROUND_214062
+            template<typename T> struct helper {
+                typedef detail::mixin_base<T> type;
+            };
+            using helper<Cur>::type::get;
+#else
             using detail::mixin_base<Cur>::get;
+#endif
             RANGES_CXX14_CONSTEXPR Cur &pos() noexcept
             {
                 return this->detail::mixin_base<Cur>::get();
             }
+#ifdef WORKAROUND_CONSTEXPR_CXX14
+            constexpr Cur const &pos() const noexcept
+#else
             RANGES_CXX14_CONSTEXPR Cur const &pos() const noexcept
+#endif
             {
                 return this->detail::mixin_base<Cur>::get();
             }
@@ -487,12 +545,21 @@ namespace ranges
               : detail::mixin_base<Cur>{std::move(pos)}
             {}
             template<typename OtherCur, typename OtherS,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<OtherCur, Cur>::value)>
+#else
                 CONCEPT_REQUIRES_(ConvertibleTo<OtherCur, Cur>())>
+#endif
             basic_iterator(basic_iterator<OtherCur, OtherS> that)
               : detail::mixin_base<Cur>{std::move(that.pos())}
             {}
             // Mix in any additional constructors defined and exported by the cursor
+#ifdef WORKAROUND_214062
+            typedef detail::mixin_base<Cur> my_base;
+            using my_base::my_base;
+#else
             using detail::mixin_base<Cur>::mixin_base;
+#endif
             RANGES_CXX14_CONSTEXPR reference operator*() const
                 noexcept(noexcept(range_access::current(std::declval<basic_iterator const &>().pos())))
             {
@@ -541,14 +608,22 @@ namespace ranges
             {
                 return !(left == right);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             basic_iterator& operator--()
             {
                 range_access::prev(pos());
                 return *this;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             basic_iterator operator--(int)
             {
@@ -556,42 +631,66 @@ namespace ranges
                 --*this;
                 return tmp;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             basic_iterator& operator+=(difference_type n)
             {
                 range_access::advance(pos(), n);
                 return *this;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend basic_iterator operator+(basic_iterator left, difference_type n)
             {
                 left += n;
                 return left;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend basic_iterator operator+(difference_type n, basic_iterator right)
             {
                 right += n;
                 return right;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             basic_iterator& operator-=(difference_type n)
             {
                 range_access::advance(pos(), -n);
                 return *this;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend basic_iterator operator-(basic_iterator left, difference_type n)
             {
                 left -= n;
                 return left;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend difference_type operator-(basic_iterator const &left,
                 basic_iterator const &right)
@@ -599,80 +698,132 @@ namespace ranges
                 return range_access::distance_to(right.pos(), left.pos());
             }
             // symmetric comparisons
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator<(basic_iterator const &left, basic_iterator const &right)
             {
                 return 0 < (right - left);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator<=(basic_iterator const &left, basic_iterator const &right)
             {
                 return 0 <= (right - left);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator>(basic_iterator const &left, basic_iterator const &right)
             {
                 return (right - left) < 0;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator>=(basic_iterator const &left, basic_iterator const &right)
             {
                 return (right - left) <= 0;
             }
             // asymmetric comparisons
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator<(basic_iterator const &left,
                 basic_sentinel<S> const &right)
             {
                 return !range_access::empty(left.pos(), right.end());
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator<=(basic_iterator const &left,
                 basic_sentinel<S> const &right)
             {
                 return true;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator>(basic_iterator const &left,
                 basic_sentinel<S> const &right)
             {
                 return false;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator>=(basic_iterator const &left,
                 basic_sentinel<S> const &right)
             {
                 return range_access::empty(left.pos(), right.end());
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator<(basic_sentinel<S> const &left,
                 basic_iterator const &right)
             {
                 return false;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator<=(basic_sentinel<S> const &left,
                 basic_iterator const &right)
             {
                 return range_access::empty(right.pos(), left.end());
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator>(basic_sentinel<S> const &left,
                 basic_iterator const &right)
             {
                 return !range_access::empty(right.pos(), left.end());
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             friend constexpr bool operator>=(basic_sentinel<S> const &left,
                 basic_iterator const &right)
             {
                 return true;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>::value)
+#else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+#endif
             RANGES_CXX14_CONSTEXPR
             typename operator_brackets_dispatch_t::type
             operator[](difference_type n) const

@@ -39,7 +39,11 @@ namespace ranges
         struct accumulate_fn
         {
             template<typename I, typename S, typename T, typename Op = plus, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IteratorRange<I, S>::value && Accumulateable<I, T, Op, P>::value)>
+#else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>() && Accumulateable<I, T, Op, P>())>
+#endif
             T operator()(I begin, S end, T init, Op op_ = Op{}, P proj_ = P{}) const
             {
                 auto &&op = as_function(op_);
@@ -51,7 +55,11 @@ namespace ranges
 
             template<typename Rng, typename T, typename Op = plus, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value && Accumulateable<I, T, Op, P>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>() && Accumulateable<I, T, Op, P>())>
+#endif
             T operator()(Rng && rng, T init, Op op = Op{}, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(init), std::move(op),

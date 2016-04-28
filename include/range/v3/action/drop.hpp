@@ -36,7 +36,11 @@ namespace ranges
             {
             private:
                 friend action_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(drop_fn drop, Int n)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -60,7 +64,11 @@ namespace ranges
                 using Concept = concepts::models<ConceptImpl, Rng, T>;
 
                 template<typename Rng, typename D = range_difference_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, D>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, D>())>
+#endif
                 Rng operator()(Rng && rng, range_difference_t<Rng> n) const
                 {
                     RANGES_ASSERT(n >= 0);
@@ -70,7 +78,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, T>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, T>())>
+#endif
                 void operator()(Rng &&, T &&) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

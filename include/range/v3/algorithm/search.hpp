@@ -53,7 +53,11 @@ namespace ranges
         private:
             template<typename I1, typename D1, typename I2, typename S2, typename D2,
                 typename C, typename P1, typename P2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I1>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I1>())>
+#endif
             static I1 sized_impl(I1 const begin1_, I1 end1, D1 d1, I2 begin2, S2 end2, D2 d2,
                 C &pred, P1 &proj1, P2 &proj2)
             {
@@ -160,11 +164,19 @@ namespace ranges
         public:
             template<typename I1, typename S1, typename I2, typename S2,
                 typename C = equal_to, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    Searchable<I1, I2, C, P1, P2>::value &&
+                    IteratorRange<I1, S1>::value &&
+                    IteratorRange<I2, S2>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     Searchable<I1, I2, C, P1, P2>() &&
                     IteratorRange<I1, S1>() &&
                     IteratorRange<I2, S2>()
                 )>
+#endif
             I1 operator()(I1 begin1, S1 end1, I2 begin2, S2 end2,
                 C pred_ = C{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -186,11 +198,19 @@ namespace ranges
                 typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    Searchable<I1, I2, C, P1, P2>::value &&
+                    Range<Rng1>::value &&
+                    Range<Rng2>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     Searchable<I1, I2, C, P1, P2>() &&
                     Range<Rng1>() &&
                     Range<Rng2>()
                 )>
+#endif
             range_safe_iterator_t<Rng1>
             operator()(Rng1 &&rng1, Rng2 &&rng2, C pred_ = C{}, P1 proj1_ = P1{},
                 P2 proj2_ = P2{}) const

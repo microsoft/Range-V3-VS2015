@@ -90,14 +90,22 @@ namespace ranges
             struct repeat_fn
             {
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(SemiRegular<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(SemiRegular<Val>())>
+#endif
                 repeat_view<Val> operator()(Val value) const
                 {
                     return repeat_view<Val>{std::move(value)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!SemiRegular<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(!SemiRegular<Val>())>
+#endif
                 void operator()(Val) const
                 {
                     CONCEPT_ASSERT_MSG(SemiRegular<Val>(),

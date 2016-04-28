@@ -98,14 +98,22 @@ namespace ranges
                         range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename F,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, F>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, F>())>
+#endif
                 adjacent_remove_if_view<all_t<Rng>, F> operator()(Rng && rng, F pred) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(pred)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename F,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, F>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, F>())>
+#endif
                 void operator()(Rng &&, F) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

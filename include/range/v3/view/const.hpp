@@ -71,7 +71,11 @@ namespace ranges
             explicit const_view(Rng rng)
               : view_adaptor_t<const_view>{std::move(rng)}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(this->base());

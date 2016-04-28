@@ -48,11 +48,19 @@ namespace ranges
                 template<typename I, typename B, typename C = ordered_less, typename P = ident,
                     typename VI = iterator_common_reference_t<I>,
                     typename VB = iterator_common_reference_t<B>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(
+                        Same<VI, VB>::value &&
+                        IndirectlyCopyable<I, B>::value &&
+                        Mergeable<B, I, I, C, P, P>::value
+                    )>
+#else
                     CONCEPT_REQUIRES_(
                         Same<VI, VB>() &&
                         IndirectlyCopyable<I, B>() &&
                         Mergeable<B, I, I, C, P, P>()
                     )>
+#endif
                 I operator()(I begin, iterator_difference_t<I> n, B buff, C r = C{}, P p = P{}) const
                 {
                     auto half = n / 2;

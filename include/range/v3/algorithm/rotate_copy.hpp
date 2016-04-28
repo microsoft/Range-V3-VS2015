@@ -35,8 +35,13 @@ namespace ranges
         struct rotate_copy_fn
         {
             template<typename I, typename S, typename O, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value && WeaklyIncrementable<O>::value &&
+                    IndirectlyCopyable<I, O>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardIterator<I>() && IteratorRange<I, S>() && WeaklyIncrementable<O>() &&
                     IndirectlyCopyable<I, O>())>
+#endif
             tagged_pair<tag::in(I), tag::out(O)> operator()(I begin, I middle, S end, O out) const
             {
                 auto res = copy(middle, std::move(end), std::move(out));
@@ -48,8 +53,13 @@ namespace ranges
 
             template<typename Rng, typename O, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value && WeaklyIncrementable<O>::value &&
+                    IndirectlyCopyable<I, O>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>() && WeaklyIncrementable<O>() &&
                     IndirectlyCopyable<I, O>())>
+#endif
             tagged_pair<tag::in(range_safe_iterator_t<Rng>), tag::out(O)>
             operator()(Rng &&rng, I middle, O out) const
             {

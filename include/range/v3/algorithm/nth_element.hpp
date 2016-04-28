@@ -48,7 +48,11 @@ namespace ranges
             template<typename I, typename C, typename P,
                 typename V = iterator_common_reference_t<I>,
                 typename X = concepts::Function::result_t<P, V>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardIterator<I>::value && Function<P, V>::value && Relation<C, X>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardIterator<I>() && Function<P, V>() && Relation<C, X>())>
+#endif
             unsigned sort3(I x, I y, I z, C &pred, P &proj)
             {
                 unsigned r = 0;
@@ -86,7 +90,11 @@ namespace ranges
             template<typename I, typename C, typename P,
                 typename V = iterator_common_reference_t<I>,
                 typename X = concepts::Function::result_t<P, V>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && Function<P, V>::value && Relation<C, X>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && Function<P, V>() && Relation<C, X>())>
+#endif
             void selection_sort(I begin, I end, C &pred, P &proj)
             {
                 RANGES_ASSERT(begin != end);
@@ -105,7 +113,11 @@ namespace ranges
         struct nth_element_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && Sortable<I, C, P>())>
+#endif
             I operator()(I begin, I nth, S end_, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -297,10 +309,17 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    RandomAccessRange<Rng>::value &&
+                    Sortable<I, C, P>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     RandomAccessRange<Rng>() &&
                     Sortable<I, C, P>()
                 )>
+#endif
             range_safe_iterator_t<Rng>
             operator()(Rng &&rng, I nth, C pred = C{}, P proj = P{}) const
             {

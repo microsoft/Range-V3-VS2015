@@ -7,6 +7,11 @@
 #include "array.hpp"
 #include "test_iterators.hpp"
 
+#ifdef WORKAROUND_CONSTEXPR_CXX14
+// This test requires C++14 constexpr
+#undef RANGES_CXX_GREATER_THAN_11
+#endif
+
 #ifdef RANGES_CXX_GREATER_THAN_11
 
 

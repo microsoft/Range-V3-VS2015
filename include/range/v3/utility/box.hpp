@@ -33,7 +33,11 @@ namespace ranges
         struct mutable_
         {
             mutable T value;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(DefaultConstructible<T>::value)
+#else
             CONCEPT_REQUIRES(DefaultConstructible<T>())
+#endif
             constexpr mutable_()
               : value{}
             {}
@@ -133,13 +137,21 @@ namespace ranges
         {
             Element value;
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(DefaultConstructible<Element>::value)
+#else
             CONCEPT_REQUIRES(DefaultConstructible<Element>())
+#endif
             constexpr box()
               : value{}
             {}
 
             template<typename E,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<Element, E &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<Element, E &&>())>
+#endif
             constexpr explicit box(E && e)
               : value(detail::forward<E>(e))
             {}
@@ -149,13 +161,21 @@ namespace ranges
         struct box<Element, Tag, true>
           : Element
         {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(DefaultConstructible<Element>::value)
+#else
             CONCEPT_REQUIRES(DefaultConstructible<Element>())
+#endif
             constexpr box()
               : Element{}
             {}
 
             template<typename E,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<Element, E &&>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<Element, E &&>())>
+#endif
             constexpr explicit box(E && e)
               : Element(detail::forward<E>(e))
             {}

@@ -30,7 +30,11 @@ namespace ranges
         {
             /// \return `*begin(rng)`
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             range_reference_t<Rng> operator()(Rng &&rng) const
             {

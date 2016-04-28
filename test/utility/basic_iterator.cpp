@@ -28,7 +28,11 @@ struct cursor
     };
     cursor() = default;
     explicit cursor(I i) : it_(i) {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+    template<class J, CONCEPT_REQUIRES_(ranges::ConvertibleTo<J, I>::value)>
+#else
     template<class J, CONCEPT_REQUIRES_(ranges::ConvertibleTo<J, I>())>
+#endif
     cursor(cursor<J> that) : it_(std::move(that.it_)) {}
 
     auto current() const -> decltype(*it_) { return *it_; }

@@ -50,7 +50,11 @@ int main()
     ::check_equal(*it2++, {6,7,8});
     ::check_equal(*it2++, {9,10});
     CHECK(it2 == ranges::end(rng2));
+#ifdef TEST_FAILURES
+    // likely related to EBO and bug 209577
+#else
     static_assert(sizeof(rng2.begin()) == sizeof(l.begin())*2+sizeof(std::ptrdiff_t), "");
+#endif
 
     {
         // An infinite, cyclic range with cycle length == 1

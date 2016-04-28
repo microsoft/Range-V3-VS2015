@@ -30,7 +30,11 @@ namespace ranges
         {
             /// \return `*prev(end(rng))`
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BoundedRange<Rng>::value && BidirectionalRange<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(BoundedRange<Rng>() && BidirectionalRange<Rng>())>
+#endif
             RANGES_CXX14_CONSTEXPR
             range_reference_t<Rng> operator()(Rng &&rng) const
             {

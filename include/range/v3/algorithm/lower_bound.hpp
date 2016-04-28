@@ -32,7 +32,11 @@ namespace ranges
         struct lower_bound_fn
         {
             template<typename I, typename S, typename V, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IteratorRange<I, S>::value && BinarySearchable<I, V, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>() && BinarySearchable<I, V, C, P>())>
+#endif
             I operator()(I begin, S end, V const &val, C pred = C{}, P proj = P{}) const
             {
                 return aux::lower_bound_n(std::move(begin), distance(begin, end), val, std::move(pred),
@@ -41,7 +45,11 @@ namespace ranges
 
             template<typename Rng, typename V, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value && BinarySearchable<I, V, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>() && BinarySearchable<I, V, C, P>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, V const &val, C pred = C{}, P proj = P{}) const
             {
                 static_assert(!is_infinite<Rng>::value, "Trying to binary search an infinite range");

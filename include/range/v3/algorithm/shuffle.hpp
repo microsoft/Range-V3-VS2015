@@ -53,11 +53,19 @@ namespace ranges
         struct shuffle_fn
         {
             template<typename I, typename S, typename Gen,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value &&
+                    Permutable<I>::value && UniformRandomNumberGenerator<Gen>::value &&
+                    ConvertibleTo<
+                    concepts::UniformRandomNumberGenerator::result_t<Gen>,
+                    iterator_difference_t<I>>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() &&
                     Permutable<I>() && UniformRandomNumberGenerator<Gen>() &&
                     ConvertibleTo<
                         concepts::UniformRandomNumberGenerator::result_t<Gen>,
                         iterator_difference_t<I>>())>
+#endif
             I operator()(I begin, S end_, Gen && gen) const
             {
                 I end = ranges::next(begin, end_), orig = end;
@@ -78,10 +86,17 @@ namespace ranges
 
             template<typename Rng, typename Gen,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Permutable<I>::value &&
+                    UniformRandomNumberGenerator<Gen>::value && ConvertibleTo<
+                    concepts::UniformRandomNumberGenerator::result_t<Gen>,
+                    iterator_difference_t<I>>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Permutable<I>() &&
                     UniformRandomNumberGenerator<Gen>() && ConvertibleTo<
                         concepts::UniformRandomNumberGenerator::result_t<Gen>,
                         iterator_difference_t<I>>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, Gen && rand) const
             {
                 return (*this)(begin(rng), end(rng), std::forward<Gen>(rand));

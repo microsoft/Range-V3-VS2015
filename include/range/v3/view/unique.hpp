@@ -38,14 +38,22 @@ namespace ranges
                     ForwardRange<Rng>,
                     EqualityComparable<range_value_t<Rng>>>;
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 unique_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return {all(std::forward<Rng>(rng)), equal_to{}};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

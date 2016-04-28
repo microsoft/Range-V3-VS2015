@@ -73,7 +73,11 @@ namespace ranges
                     meta::not_<std::is_reference<Rng>>>;
                 // Pipeing requires things are passed by value.
                 template<typename Rng, typename Act,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ActionPipeConcept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(ActionPipeConcept<Rng>())>
+#endif
                 static auto pipe(Rng && rng, Act && act)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -82,7 +86,11 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For better error messages:
                 template<typename Rng, typename Act,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!ActionPipeConcept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!ActionPipeConcept<Rng>())>
+#endif
                 static void pipe(Rng &&, Act &&)
                 {
                     CONCEPT_ASSERT_MSG(Range<Rng>(),
@@ -104,7 +112,11 @@ namespace ranges
                 {}
                 // Calling directly requires things are passed by reference.
                 template<typename Rng, typename...Rest,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng &>::value && Function<Action, Rng &, Rest &&...>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng &>() && Function<Action, Rng &, Rest &&...>())>
+#endif
                 auto operator()(Rng & rng, Rest &&... rest) const
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -121,10 +133,17 @@ namespace ranges
             };
 
             template<typename Rng, typename Action,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(is_pipeable<Action>::value && Range<Rng &>::value &&
+                    Function<bitwise_or, ref_t<Rng &> &&, Action>::value &&
+                    Same<ref_t<Rng &>,
+                        concepts::Function::result_t<bitwise_or, ref_t<Rng &> &&, Action>>::value)>
+#else
                 CONCEPT_REQUIRES_(is_pipeable<Action>() && Range<Rng &>() &&
                     Function<bitwise_or, ref_t<Rng &> &&, Action>() &&
                     Same<ref_t<Rng &>,
                         concepts::Function::result_t<bitwise_or, ref_t<Rng &> &&, Action>>())>
+#endif
             Rng & operator|=(Rng & rng, Action && action)
             {
                 ref(rng) | action;

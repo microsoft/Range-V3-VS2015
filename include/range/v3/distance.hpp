@@ -50,7 +50,11 @@ namespace ranges
 
             template<typename Rng, typename D = range_difference_t<Rng>,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Integral<D>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Integral<D>() && Range<Rng>())>
+#endif
             std::pair<D, I> operator()(Rng &&rng, D d = 0) const
             {
                 // Better not be trying to compute the distance of an infinite range:
@@ -84,7 +88,11 @@ namespace ranges
             using iter_distance_fn::operator();
 
             template<typename Rng, typename D = range_difference_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Integral<D>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Integral<D>() && Range<Rng>())>
+#endif
             D operator()(Rng &&rng, D d = 0) const
             {
                 // Better not be trying to compute the distance of an infinite range:
@@ -105,13 +113,21 @@ namespace ranges
         {
         private:
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(!is_infinite<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(!is_infinite<Rng>())>
+#endif
             int impl_r(Rng &rng, range_difference_t<Rng> n, concepts::Range*) const
             {
                 return iter_distance_compare(begin(rng), end(rng), n);
             }
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(is_infinite<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(is_infinite<Rng>())>
+#endif
             int impl_r(Rng &rng, range_difference_t<Rng> n, concepts::Range*) const
             {
                 // Infinite ranges are always compared to be larger than a finite number.
@@ -132,7 +148,11 @@ namespace ranges
             using iter_distance_compare_fn::operator();
 
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>())>
+#endif
             int operator()(Rng &&rng, range_difference_t<Rng> n) const
             {
                 return this->impl_r(rng, n, sized_range_concept<Rng>());

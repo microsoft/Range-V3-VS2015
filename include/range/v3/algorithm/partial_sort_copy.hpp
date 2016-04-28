@@ -45,8 +45,13 @@ namespace ranges
         {
             template<typename I, typename SI, typename O, typename SO, typename C = ordered_less,
                 typename PI = ident, typename PO = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(PartialSortCopyConcept<I, O, C, PI, PO>::value &&
+                    IteratorRange<I, SI>::value && IteratorRange<O, SO>::value)>
+#else
                 CONCEPT_REQUIRES_(PartialSortCopyConcept<I, O, C, PI, PO>() &&
                     IteratorRange<I, SI>() && IteratorRange<O, SO>())>
+#endif
             O operator()(I begin, SI end, O out_begin, SO out_end, C pred_ = C{}, PI in_proj_ = PI{},
                 PO out_proj_ = PO{}) const
             {
@@ -78,8 +83,13 @@ namespace ranges
                 typename PI = ident, typename PO = ident,
                 typename I = range_iterator_t<InRng>,
                 typename O = range_iterator_t<OutRng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(PartialSortCopyConcept<I, O, C, PI, PO>::value &&
+                    Range<InRng>::value && Range<OutRng>::value)>
+#else
                 CONCEPT_REQUIRES_(PartialSortCopyConcept<I, O, C, PI, PO>() &&
                     Range<InRng>() && Range<OutRng>())>
+#endif
             range_safe_iterator_t<OutRng>
             operator()(InRng && in_rng, OutRng &&out_rng, C pred = C{}, PI in_proj = PI{},
                 PO out_proj = PO{}) const

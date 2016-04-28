@@ -37,11 +37,19 @@ namespace ranges
         struct copy_n_fn
         {
             template<typename I, typename O, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    WeakInputIterator<I>::value &&
+                    WeaklyIncrementable<O>::value &&
+                    IndirectlyCopyable<I, O>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     WeakInputIterator<I>() &&
                     WeaklyIncrementable<O>() &&
                     IndirectlyCopyable<I, O>()
                 )>
+#endif
             tagged_pair<tag::in(I), tag::out(O)>
             operator()(I begin, iterator_difference_t<I> n, O out) const
             {

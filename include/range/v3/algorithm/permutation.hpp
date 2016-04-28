@@ -104,7 +104,11 @@ namespace ranges
         public:
             template<typename I1, typename S1, typename I2, typename C = equal_to,
                 typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IteratorRange<I1, S1>::value && IsPermutationable<I1, I2, C, P1, P2>::value)>
+#else
                 CONCEPT_REQUIRES_(IteratorRange<I1, S1>() && IsPermutationable<I1, I2, C, P1, P2>())>
+#endif
             bool operator()(I1 begin1, S1 end1, I2 begin2, C pred_ = C{}, P1 proj1_ = P1{},
                 P2 proj2_ = P2{}) const
             {
@@ -153,8 +157,13 @@ namespace ranges
 
             template<typename I1, typename S1, typename I2, typename S2,
                 typename C = equal_to, typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value &&
+                    IsPermutationable<I1, I2, C, P1, P2>::value)>
+#else
                 CONCEPT_REQUIRES_(IteratorRange<I1, S1>() && IteratorRange<I2, S2>() &&
                     IsPermutationable<I1, I2, C, P1, P2>())>
+#endif
             bool operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, C pred = C{},
                 P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -170,8 +179,13 @@ namespace ranges
             template<typename Rng1, typename I2Ref, typename C = equal_to, typename P1 = ident,
                 typename P2 = ident, typename I1 = range_iterator_t<Rng1>,
                 typename I2 = uncvref_t<I2Ref>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardRange<Rng1>::value && Iterator<I2>::value &&
+                    IsPermutationable<I1, I2, C, P1, P2>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>() && Iterator<I2>() &&
                     IsPermutationable<I1, I2, C, P1, P2>())>
+#endif
             bool operator()(Rng1 &&rng1, I2Ref &&begin2,
                 C pred = C{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -182,8 +196,13 @@ namespace ranges
             template<typename Rng1, typename Rng2, typename C = equal_to, typename P1 = ident,
                 typename P2 = ident, typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ForwardRange<Rng1>::value && ForwardRange<Rng2>::value &&
+                    IsPermutationable<I1, I2, C, P1, P2>::value)>
+#else
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>() && ForwardRange<Rng2>() &&
                     IsPermutationable<I1, I2, C, P1, P2>())>
+#endif
             bool operator()(Rng1 &&rng1, Rng2 &&rng2,
                 C pred = C{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -206,7 +225,11 @@ namespace ranges
         struct next_permutation_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
+#endif
             bool operator()(I begin, S end_, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -238,7 +261,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Sortable<I, C, P>())>
+#endif
             bool operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(pred), std::move(proj));
@@ -255,7 +282,11 @@ namespace ranges
         struct prev_permutation_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
+#endif
             bool operator()(I begin, S end_, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -287,7 +318,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Sortable<I, C, P>())>
+#endif
             bool operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(pred), std::move(proj));

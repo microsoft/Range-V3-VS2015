@@ -36,7 +36,11 @@ namespace ranges
             {
             private:
                 friend action_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename D, CONCEPT_REQUIRES_(Integral<D>::value)>
+#else
                 template<typename D, CONCEPT_REQUIRES_(Integral<D>())>
+#endif
                 static auto bind(slice_fn slice, D from, D to)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -64,7 +68,11 @@ namespace ranges
                 template<typename Rng,
                     typename I = range_iterator_t<Rng>,
                     typename D = range_difference_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, D, D>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, D, D>())>
+#endif
                 Rng operator()(Rng && rng, range_difference_t<Rng> from,
                     range_difference_t<Rng> to) const
                 {
@@ -76,7 +84,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T, typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, T, U>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, T, U>())>
+#endif
                 void operator()(Rng &&, T &&, U &&) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

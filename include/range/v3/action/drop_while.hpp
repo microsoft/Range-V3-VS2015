@@ -37,7 +37,11 @@ namespace ranges
             {
             private:
                 friend action_access;
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Fun, CONCEPT_REQUIRES_(!Range<Fun>::value)>
+#else
                 template<typename Fun, CONCEPT_REQUIRES_(!Range<Fun>())>
+#endif
                 static auto bind(drop_while_fn drop_while, Fun fun)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -61,7 +65,11 @@ namespace ranges
 
                 template<typename Rng, typename Fun,
                     typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
+#endif
                 Rng operator()(Rng && rng, Fun fun) const
                 {
                     ranges::action::erase(rng, begin(rng), find_if_not(begin(rng), end(rng),
@@ -71,7 +79,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>
+#endif
                 void operator()(Rng &&, Fun &&) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

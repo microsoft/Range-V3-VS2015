@@ -50,7 +50,11 @@ namespace ranges
             struct is_heap_until_n_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value)>
+#else
                     CONCEPT_REQUIRES_(IsHeapable<I, C, P>())>
+#endif
                 I operator()(I const begin_, iterator_difference_t<I> const n_, C pred_ = C{}, P proj_ = P{}) const
                 {
                     RANGES_ASSERT(0 <= n_);
@@ -83,7 +87,11 @@ namespace ranges
             struct is_heap_n_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value)>
+#else
                     CONCEPT_REQUIRES_(IsHeapable<I, C, P>())>
+#endif
                 bool operator()(I begin, iterator_difference_t<I> n, C pred = C{}, P proj = P{}) const
                 {
                     return is_heap_until_n(begin, n, std::move(pred), std::move(proj)) == begin + n;
@@ -102,7 +110,11 @@ namespace ranges
         struct is_heap_until_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end, C pred = C{}, P proj = P{}) const
             {
                 return detail::is_heap_until_n(std::move(begin), distance(begin, end), std::move(pred),
@@ -111,7 +123,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && Range<Rng>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 return detail::is_heap_until_n(begin(rng), distance(rng), std::move(pred),
@@ -129,7 +145,11 @@ namespace ranges
         struct is_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && IteratorRange<I, S>())>
+#endif
             bool operator()(I begin, S end, C pred = C{}, P proj = P{}) const
             {
                 return detail::is_heap_n(std::move(begin), distance(begin, end), std::move(pred),
@@ -138,7 +158,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && Range<Rng>())>
+#endif
             bool operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 return detail::is_heap_n(begin(rng), distance(rng), std::move(pred), std::move(proj));
@@ -260,7 +284,11 @@ namespace ranges
         struct push_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
+#endif
             I operator()(I begin, S end, C pred = C{}, P proj = P{}) const
             {
                 auto n = distance(begin, end);
@@ -270,7 +298,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Sortable<I, C, P>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 I begin = ranges::begin(rng);
@@ -294,7 +326,11 @@ namespace ranges
             struct pop_heap_n_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && Sortable<I, C, P>::value)>
+#else
                     CONCEPT_REQUIRES_(RandomAccessIterator<I>() && Sortable<I, C, P>())>
+#endif
                 void operator()(I begin, iterator_difference_t<I> len, C pred = C{},
                     P proj = P{}) const
                 {
@@ -318,7 +354,11 @@ namespace ranges
         struct pop_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
+#endif
             I operator()(I begin, S end, C pred = C{}, P proj = P{}) const
             {
                 auto n = distance(begin, end);
@@ -328,7 +368,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Sortable<I, C, P>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred = C{}, P proj = P{}) const
             {
                 I begin = ranges::begin(rng);
@@ -348,7 +392,11 @@ namespace ranges
         struct make_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
+#endif
             I operator()(I begin, S end, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -363,7 +411,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Sortable<I, C, P>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -388,7 +440,11 @@ namespace ranges
         struct sort_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
+#endif
             I operator()(I begin, S end, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -401,7 +457,11 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<Rng &>::value && Sortable<I, C, P>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng &>() && Sortable<I, C, P>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred_ = C{}, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);

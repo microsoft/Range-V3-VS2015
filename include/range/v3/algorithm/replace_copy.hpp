@@ -42,7 +42,11 @@ namespace ranges
         struct replace_copy_fn
         {
             template<typename I, typename S, typename O, typename T0, typename T1, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ReplaceCopyable<I, O, T0, T1, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(ReplaceCopyable<I, O, T0, T1, P>() && IteratorRange<I, S>())>
+#endif
             tagged_pair<tag::in(I), tag::out(O)> operator()(I begin, S end, O out, T0 const & old_value, T1 const & new_value, P proj_ = {}) const
             {
                 auto &&proj = as_function(proj_);
@@ -59,7 +63,11 @@ namespace ranges
 
             template<typename Rng, typename O, typename T0, typename T1, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ReplaceCopyable<I, O, T0, T1, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(ReplaceCopyable<I, O, T0, T1, P>() && Range<Rng>())>
+#endif
             tagged_pair<tag::in(range_safe_iterator_t<Rng>), tag::out(O)>
             operator()(Rng &&rng, O out, T0 const & old_value, T1 const & new_value,
                 P proj = {}) const

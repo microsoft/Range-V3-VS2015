@@ -60,7 +60,11 @@ namespace ranges
         public:
             delimit_view() = default;
             delimit_view(Rng rng, Val value)
+#ifdef WORKAROUND_207134
+              : delimit_view::view_adaptor_t(std::move(rng))
+#else
               : view_adaptor_t<delimit_view>{std::move(rng)}
+#endif
               , value_(std::move(value))
             {}
         };
@@ -84,7 +88,11 @@ namespace ranges
                     EqualityComparable<Val, range_common_reference_t<Rng>>>;
 
                 template<typename Rng, typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Val>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Val>())>
+#endif
                 delimit_view<all_t<Rng>, Val>
                 operator()(Rng && rng, Val value) const
                 {
@@ -92,7 +100,11 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Val>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Val>())>
+#endif
                 void
                 operator()(Rng &&, Val) const
                 {
@@ -110,7 +122,11 @@ namespace ranges
                 using view<delimit_impl_fn>::operator();
 
                 template<typename I, typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputIterator<I>::value)>
+#else
                     CONCEPT_REQUIRES_(InputIterator<I>())>
+#endif
                 delimit_view<range<I, unreachable>, Val>
                 operator()(I begin, Val value) const
                 {

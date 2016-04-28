@@ -93,14 +93,22 @@ namespace ranges
                     meta::not_<Same<void, concepts::Function::result_t<G>>>>;
 
                 template<typename G,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<G>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<G>())>
+#endif
                 generate_view<G> operator()(G g) const
                 {
                     return generate_view<G>{std::move(g)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename G,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<G>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<G>())>
+#endif
                 void operator()(G) const
                 {
                     CONCEPT_ASSERT_MSG(Function<G>(),

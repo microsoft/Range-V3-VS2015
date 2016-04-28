@@ -50,10 +50,17 @@ namespace ranges
             template<typename I1, typename S1, typename I2, typename T,
                 typename BOp1 = plus, typename BOp2 = multiplies,
                 typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    IteratorRange<I1, S1>::value &&
+                    InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     IteratorRange<I1, S1>() &&
                     InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>()
                 )>
+#endif
             T operator()(I1 begin1, S1 end1, I2 begin2, T init, BOp1 bop1_ = BOp1{},
                 BOp2 bop2_ = BOp2{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -70,11 +77,19 @@ namespace ranges
             template<typename I1, typename S1, typename I2, typename S2, typename T,
                 typename BOp1 = plus, typename BOp2 = multiplies,
                 typename P1 = ident, typename P2 = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    IteratorRange<I1, S1>::value &&
+                    IteratorRange<I2, S2>::value &&
+                    InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     IteratorRange<I1, S1>() &&
                     IteratorRange<I2, S2>() &&
                     InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>()
                 )>
+#endif
             T operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, T init, BOp1 bop1_ = BOp1{},
                 BOp2 bop2_ = BOp2{}, P1 proj1_ = P1{}, P2 proj2_ = P2{}) const
             {
@@ -92,10 +107,17 @@ namespace ranges
                 typename BOp2 = multiplies, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = uncvref_t<I2Ref>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    Range<Rng1>::value && Iterator<I2>::value &&
+                    InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     Range<Rng1>() && Iterator<I2>() &&
                     InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>()
                 )>
+#endif
             T operator()(Rng1 && rng1, I2Ref && begin2, T init, BOp1 bop1 = BOp1{},
                 BOp2 bop2 = BOp2{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {
@@ -107,11 +129,19 @@ namespace ranges
                 typename BOp2 = multiplies, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(
+                    Range<Rng1>::value &&
+                    Range<Rng2>::value &&
+                    InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>::value
+                )>
+#else
                 CONCEPT_REQUIRES_(
                     Range<Rng1>() &&
                     Range<Rng2>() &&
                     InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>()
                 )>
+#endif
             T operator()(Rng1 && rng1, Rng2 && rng2, T init, BOp1 bop1 = BOp1{},
                 BOp2 bop2 = BOp2{}, P1 proj1 = P1{}, P2 proj2 = P2{}) const
             {

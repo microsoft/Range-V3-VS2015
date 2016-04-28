@@ -35,8 +35,13 @@ namespace ranges
         struct move_backward_fn
         {
             template<typename I, typename S, typename O,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value &&
+                    BidirectionalIterator<O>::value && IndirectlyMovable<I, O>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() &&
                     BidirectionalIterator<O>() && IndirectlyMovable<I, O>())>
+#endif
             tagged_pair<tag::in(I), tag::out(O)> operator()(I begin, S end_, O out) const
             {
                 I i = ranges::next(begin, end_), end = i;
@@ -47,8 +52,13 @@ namespace ranges
 
             template<typename Rng, typename O,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && BidirectionalIterator<O>::value &&
+                    IndirectlyMovable<I, O>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && BidirectionalIterator<O>() &&
                     IndirectlyMovable<I, O>())>
+#endif
             tagged_pair<tag::in(range_safe_iterator_t<Rng>), tag::out(O)> operator()(Rng &&rng, O out) const
             {
                 return (*this)(begin(rng), end(rng), std::move(out));

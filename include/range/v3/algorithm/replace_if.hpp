@@ -39,7 +39,11 @@ namespace ranges
         struct replace_if_fn
         {
             template<typename I, typename S, typename C, typename T, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ReplaceIfable<I, C, T, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(ReplaceIfable<I, C, T, P>() && IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end, C pred_, T const & new_value, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -52,7 +56,11 @@ namespace ranges
 
             template<typename Rng, typename C, typename T, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ReplaceIfable<I, C, T, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(ReplaceIfable<I, C, T, P>() && Range<Rng>())>
+#endif
             range_safe_iterator_t<Rng>
             operator()(Rng &&rng, C pred, T const & new_value, P proj = P{}) const
             {

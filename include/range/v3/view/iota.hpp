@@ -130,20 +130,32 @@ namespace ranges
             template<typename Val>
             using iota_difference_t = meta::_t<iota_difference<Val>>;
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename Val, CONCEPT_REQUIRES_(!Integral<Val>::value)>
+#else
             template<typename Val, CONCEPT_REQUIRES_(!Integral<Val>())>
+#endif
             iota_difference_t<Val> iota_minus(Val const &v0, Val const &v1)
             {
                 return v0 - v1;
             }
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename Val, CONCEPT_REQUIRES_(SignedIntegral<Val>::value)>
+#else
             template<typename Val, CONCEPT_REQUIRES_(SignedIntegral<Val>())>
+#endif
             iota_difference_t<Val> iota_minus(Val const &v0, Val const &v1)
             {
                 using D = iota_difference_t<Val>;
                 return (D) v0 - (D) v1;
             }
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename Val, CONCEPT_REQUIRES_(UnsignedIntegral<Val>::value)>
+#else
             template<typename Val, CONCEPT_REQUIRES_(UnsignedIntegral<Val>())>
+#endif
             iota_difference_t<Val> iota_minus(Val const &v0, Val const &v1)
             {
                 using D = iota_difference_t<Val>;
@@ -183,23 +195,39 @@ namespace ranges
             {
                 return done_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Incrementable<From>::value)
+#else
             CONCEPT_REQUIRES(Incrementable<From>())
+#endif
             bool equal(closed_iota_view const &that) const
             {
                 return that.from_ == from_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BidirectionalIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>())
+#endif
             void prev()
             {
                 --from_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
+#endif
             void advance(difference_type_ n)
             {
                 RANGES_ASSERT(detail::iota_minus(to_, from_) >= n);
                 from_ += n;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
+#endif
             difference_type_ distance_to(closed_iota_view const &that) const
             {
                 return detail::iota_minus(that.from_, from_);
@@ -234,23 +262,39 @@ namespace ranges
             {
                 return from_ == to_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Incrementable<From>::value)
+#else
             CONCEPT_REQUIRES(Incrementable<From>())
+#endif
             bool equal(iota_view const &that) const
             {
                 return that.from_ == from_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BidirectionalIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>())
+#endif
             void prev()
             {
                 --from_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
+#endif
             void advance(difference_type_ n)
             {
                 RANGES_ASSERT(detail::iota_minus(to_, from_) >= n);
                 from_ += n;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
+#endif
             difference_type_ distance_to(iota_view const &that) const
             {
                 return detail::iota_minus(that.from_, from_);
@@ -285,22 +329,38 @@ namespace ranges
             {
                 return false;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Incrementable<From>::value)
+#else
             CONCEPT_REQUIRES(Incrementable<From>())
+#endif
             bool equal(iota_view const &that) const
             {
                 return that.value_ == value_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BidirectionalIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>())
+#endif
             void prev()
             {
                 --value_;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
+#endif
             void advance(difference_type_ n)
             {
                 value_ += n;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
+#else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
+#endif
             difference_type_ distance_to(iota_view const &that) const
             {
                 return detail::iota_minus(that.value_, value_);
@@ -331,14 +391,22 @@ namespace ranges
                 }
             public:
                 template<typename From,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(WeaklyIncrementable<From>::value)>
+#else
                     CONCEPT_REQUIRES_(WeaklyIncrementable<From>())>
+#endif
                 iota_view<From> operator()(From value) const
                 {
                     return iota_view<From>{std::move(value)};
                 }
                 template<typename From, typename To>
                 meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value,
+#else
                     WeaklyIncrementable<From>() && EqualityComparable<From, To>(),
+#endif
                     meta::if_<
                         meta::and_<RandomAccessIncrementable<From>, Same<From, To>>,
                         detail::take_exactly_view_<iota_view<From>, true>,
@@ -352,7 +420,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename From,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!WeaklyIncrementable<From>::value)>
+#else
                     CONCEPT_REQUIRES_(!WeaklyIncrementable<From>())>
+#endif
                 void operator()(From) const
                 {
                     CONCEPT_ASSERT_MSG(WeaklyIncrementable<From>(),
@@ -361,7 +433,11 @@ namespace ranges
                         " difference_type");
                 }
                 template<typename From, typename To,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value))>
+#else
                     CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>() && EqualityComparable<From, To>()))>
+#endif
                 void operator()(From, To) const
                 {
                     CONCEPT_ASSERT_MSG(WeaklyIncrementable<From>(),
@@ -376,7 +452,11 @@ namespace ranges
 
             template<typename From, typename To>
             meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value,
+#else
                 WeaklyIncrementable<From>() && EqualityComparable<From, To>(),
+#endif
                 meta::if_<
                     meta::and_<RandomAccessIncrementable<From>, Same<From, To>>,
                     detail::take_exactly_view_<iota_view<From>, true>,
@@ -403,7 +483,11 @@ namespace ranges
                 }
             public:
                 template<typename From, typename To,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value)>
+#else
                     CONCEPT_REQUIRES_(WeaklyIncrementable<From>() && EqualityComparable<From, To>())>
+#endif
                 meta::if_<
                     meta::and_<RandomAccessIncrementable<From>, Same<From, To>>,
                     detail::take_exactly_view_<iota_view<From>, true>,
@@ -414,7 +498,11 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename From, typename To,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value))>
+#else
                     CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>() && EqualityComparable<From, To>()))>
+#endif
                 void operator()(From, To) const
                 {
                     CONCEPT_ASSERT_MSG(WeaklyIncrementable<From>(),
@@ -447,14 +535,22 @@ namespace ranges
                 ints_fn() = default;
 
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Integral<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(Integral<Val>())>
+#endif
                 iota_view<Val> operator()(Val value) const
                 {
                     return iota_view<Val>{value};
                 }
                 template<typename Val>
                 meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    (bool)Integral<Val>::value,
+#else
                     (bool)Integral<Val>(),
+#endif
                     detail::take_exactly_view_<iota_view<Val>, true>>
                 operator()(Val from, Val to) const
                     RANGES_IOTA_WARNING_MESSAGE("The meaning of view::ints(x,y) has changed! It is no "
@@ -465,14 +561,22 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Integral<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(!Integral<Val>())>
+#endif
                 void operator()(Val) const
                 {
                     CONCEPT_ASSERT_MSG(Integral<Val>(),
                         "The object passed to view::ints must be Integral");
                 }
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Integral<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(!Integral<Val>())>
+#endif
                 void operator()(Val, Val) const
                 {
                     CONCEPT_ASSERT_MSG(Integral<Val>(),
@@ -483,7 +587,11 @@ namespace ranges
 
             template<typename Val>
             meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                (bool)Integral<Val>::value,
+#else
                 (bool)Integral<Val>(),
+#endif
                 detail::take_exactly_view_<iota_view<Val>, true>>
             ints_fn::operator()(Val from, Val to) const
             {
@@ -493,14 +601,22 @@ namespace ranges
             struct closed_ints_fn
             {
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Integral<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(Integral<Val>())>
+#endif
                 detail::take_exactly_view_<iota_view<Val>, true> operator()(Val from, Val to) const
                 {
                     return {iota_view<Val>{from}, detail::iota_minus(to, from) + 1};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Val,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Integral<Val>::value)>
+#else
                     CONCEPT_REQUIRES_(!Integral<Val>())>
+#endif
                 void operator()(Val, Val) const
                 {
                     CONCEPT_ASSERT_MSG(Integral<Val>(),

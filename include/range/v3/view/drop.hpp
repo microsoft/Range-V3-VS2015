@@ -107,18 +107,30 @@ namespace ranges
                 return ranges::end(rng_);
             }
             template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<BaseRng const>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<BaseRng const>())>
+#endif
             range_iterator_t<BaseRng const> begin() const
             {
                 return this->get_begin_(std::true_type{});
             }
             template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(RandomAccessRange<BaseRng const>::value)>
+#else
                 CONCEPT_REQUIRES_(RandomAccessRange<BaseRng const>())>
+#endif
             range_sentinel_t<BaseRng const> end() const
             {
                 return ranges::end(rng_);
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(rng_) - static_cast<range_size_t<Rng>>(n_);
@@ -140,7 +152,11 @@ namespace ranges
             private:
                 friend view_access;
                 template<typename Int,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                     CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(drop_fn drop, Int n)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -148,7 +164,11 @@ namespace ranges
                 )
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Int,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Integral<Int>::value)>
+#else
                     CONCEPT_REQUIRES_(!Integral<Int>())>
+#endif
                 static detail::null_pipe bind(drop_fn drop, Int)
                 {
                     CONCEPT_ASSERT_MSG(Integral<Int>(),
@@ -162,7 +182,11 @@ namespace ranges
                 {
                     return {all(std::forward<Rng>(rng)), n};
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(!View<Rng>::value && std::is_lvalue_reference<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(!View<Rng>() && std::is_lvalue_reference<Rng>())>
+#endif
                 static range<range_iterator_t<Rng>, range_sentinel_t<Rng>>
                 invoke_(Rng && rng, range_difference_t<Rng> n, concepts::RandomAccessRange*)
                 {
@@ -170,7 +194,11 @@ namespace ranges
                 }
             public:
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, range_difference_t<Rng> n) const
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -178,7 +206,11 @@ namespace ranges
                 )
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!(InputRange<Rng>::value && Integral<T>::value))>
+#else
                     CONCEPT_REQUIRES_(!(InputRange<Rng>() && Integral<T>()))>
+#endif
                 void operator()(Rng &&, T) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

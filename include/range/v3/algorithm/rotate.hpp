@@ -191,7 +191,11 @@ namespace ranges
 
         public:
             template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Permutable<I>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(Permutable<I>() && IteratorRange<I, S>())>
+#endif
             range<I> operator()(I begin, I middle, S end) const
             {
                 if(begin == middle)
@@ -207,7 +211,11 @@ namespace ranges
             }
 
             template<typename Rng, typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Range<Rng>::value && Permutable<I>::value)>
+#else
                 CONCEPT_REQUIRES_(Range<Rng>() && Permutable<I>())>
+#endif
             meta::if_<std::is_lvalue_reference<Rng>, range<I>, dangling<range<I>>>
             operator()(Rng &&rng, I middle) const
             {

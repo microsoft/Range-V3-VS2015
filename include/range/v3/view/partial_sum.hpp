@@ -57,7 +57,11 @@ namespace ranges
                 optional<range_value_t<Rng>> sum_;
                 partial_sum_view_t *rng_;
             public:
+#ifdef WORKAROUND_207089
+                using single_pass = SinglePass<range_iterator_t<Rng>>;
+#else
                 using single_pass = partial_sum_view::single_pass;
+#endif
                 adaptor() = default;
                 adaptor(partial_sum_view_t &rng)
                   : sum_{}, rng_(&rng)
@@ -91,15 +95,25 @@ namespace ranges
                     return {*this};
                 return {*this, front(this->base())};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
+                range_common_reference_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
                 range_common_reference_t<Rng>>())
+#endif
             adaptor<true> begin_adaptor() const
             {
                 return empty(this->base()) ? adaptor<true>{*this} :
                     adaptor<true>{*this, front(this->base())};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
+                range_common_reference_t<Rng>>::value)
+#else
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
                 range_common_reference_t<Rng>>())
+#endif
             meta::if_<use_sentinel_t, adaptor_base, adaptor<true>> end_adaptor() const
             {
                 if(use_sentinel_t() || empty(this->base()))
@@ -112,7 +126,11 @@ namespace ranges
               : view_adaptor_t<partial_sum_view>{std::move(rng)}
               , fun_(as_function(std::move(fun)))
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(this->base());
@@ -143,14 +161,22 @@ namespace ranges
                         range_value_t<Rng>>>;
 
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
+#endif
                 partial_sum_view<all_t<Rng>, Fun> operator()(Rng && rng, Fun fun) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(fun)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>
+#endif
                 void operator()(Rng && rng, Fun fun) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

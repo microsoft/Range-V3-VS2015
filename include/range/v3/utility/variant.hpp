@@ -69,7 +69,11 @@ namespace ranges
             union variant_data<>
             {
                 template <typename That,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Same<variant_data, uncvref_t<That>>::value)>
+#else
                     CONCEPT_REQUIRES_(Same<variant_data,uncvref_t<That>>())>
+#endif
                 [[noreturn]] void move_copy_construct(std::size_t, That &&) const
                 {
                     RANGES_ENSURE(false);
@@ -79,7 +83,8 @@ namespace ranges
                     RANGES_ENSURE(false);
                 }
                 template<typename Fun, std::size_t N = 0>
-                [[noreturn]] void apply(std::size_t, Fun &&, meta::size_t<N> = meta::size_t<N>{}) const
+                [[noreturn]]
+                void apply(std::size_t, Fun &&, meta::size_t<N> = meta::size_t<N>{}) const
                 {
                     RANGES_ENSURE(false);
                 }
@@ -109,19 +114,31 @@ namespace ranges
                 variant_data()
                 {}
                 template<typename ...Args,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Constructible<head_t, Args...>::value)>
+#else
                     CONCEPT_REQUIRES_(Constructible<head_t, Args...>())>
+#endif
                 variant_data(meta::size_t<0>, Args && ...args)
                   : head(std::forward<Args>(args)...)
                 {}
                 template<std::size_t N, typename ...Args,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(0 != N && Constructible<tail_t, meta::size_t<N - 1>, Args...>::value)>
+#else
                     CONCEPT_REQUIRES_(0 != N && Constructible<tail_t, meta::size_t<N - 1>, Args...>())>
+#endif
                 variant_data(meta::size_t<N>, Args && ...args)
                   : tail{meta::size_t<N - 1>{}, std::forward<Args>(args)...}
                 {}
                 ~variant_data()
                 {}
                 template <typename That,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Same<variant_data, decay_t<That>>::value)>
+#else
                     CONCEPT_REQUIRES_(Same<variant_data, decay_t<That>>())>
+#endif
                 void move_copy_construct(std::size_t n, That &&that)
                 {
                     if(n == 0)
@@ -197,7 +214,11 @@ namespace ranges
                 std::tuple<Ts...> t_;
 
                 template<typename U, std::size_t ...Is,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Constructible<U, Ts...>::value)>
+#else
                     CONCEPT_REQUIRES_(Constructible<U, Ts...>())>
+#endif
                 void construct(U &u, meta::index_sequence<Is...>)
                 {
                     ::new((void*)std::addressof(u)) U(std::get<Is>(std::move(t_))...);
@@ -207,7 +228,11 @@ namespace ranges
                   : t_{std::forward<Ts>(ts)...}
                 {}
                 template<typename U,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Constructible<U, Ts...>::value)>
+#else
                     CONCEPT_REQUIRES_(Constructible<U, Ts...>())>
+#endif
                 void operator()(U &u) const
                 {
                     // HACKHACKHACK: "workaround" the fact that the visitation
@@ -357,7 +382,11 @@ namespace ranges
                     meta::replace<
                         meta::transform<
                             Types,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                            meta::as_list<meta::make_index_sequence<meta::size<Types>::value>>,
+#else
                             meta::as_list<meta::make_index_sequence<Types::size()>>,
+#endif
                             meta::bind_front<meta::quote<concepts::Function::result_t>, Fun>>,
                         void, std::nullptr_t>>;
 
@@ -408,7 +437,11 @@ namespace ranges
             }
 
             template <typename That,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Same<tagged_variant, detail::decay_t<That>>::value)>
+#else
                 CONCEPT_REQUIRES_(Same<tagged_variant, detail::decay_t<That>>())>
+#endif
             void assign_(That &&that)
             {
                 if(that.is_valid())
@@ -424,16 +457,28 @@ namespace ranges
             {}
 
         public:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(!Constructible<data_t, meta::size_t<0>>::value)
+#else
             CONCEPT_REQUIRES(!Constructible<data_t, meta::size_t<0>>())
+#endif
             tagged_variant()
               : tagged_variant{empty_tag{}}
             {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Constructible<data_t, meta::size_t<0>>::value)
+#else
             CONCEPT_REQUIRES(Constructible<data_t, meta::size_t<0>>())
+#endif
             tagged_variant()
               : tagged_variant{meta::size_t<0>{}}
             {}
             template<std::size_t N, typename...Args,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>())>
+#endif
             tagged_variant(meta::size_t<N> n, Args &&...args)
               : which_(N), data_{n, detail::forward<Args>(args)...}
             {
@@ -470,7 +515,11 @@ namespace ranges
                 return sizeof...(Ts);
             }
             template<std::size_t N, typename ...Args,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>::value)>
+#else
                 CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>())>
+#endif
             void set(Args &&...args)
             {
                 clear_();
@@ -485,47 +534,96 @@ namespace ranges
             {
                 return which_;
             }
+
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+            using Args_default = meta::transform<types_t, detail::add_ref_t>;
+            template<typename Fun>
+            using Result_default = detail::variant_result_t<Fun, Args_default>;
+            template<typename Fun>
+            using Result_i_default = detail::variant_result_i_t<Fun, Args_default>;
+#endif
+
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+            template<typename Fun>
+            Result_default<Fun> apply(Fun &&fun)
+#else
             template<typename Fun,
                 typename Args = meta::transform<types_t, detail::add_ref_t>,
                 typename Result = detail::variant_result_t<Fun, Args>>
             Result apply(Fun &&fun)
+#endif
             {
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+                Result_default<Fun> res;
+#else
                 Result res;
+#endif
                 data_.apply(which_, detail::make_unary_visitor(detail::unwrap_ref_fun<Fun>{std::forward<Fun>(fun)}, res));
                 return res;
             }
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+            template<typename Fun>
+            Result_default<Fun> apply(Fun &&fun) const
+#else
             template<typename Fun,
                 typename Args = meta::transform<types_t, detail::add_cref_t>,
                 typename Result = detail::variant_result_t<Fun, Args >>
             Result apply(Fun &&fun) const
+#endif
             {
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+                Result_default<Fun> res;
+#else
                 Result res;
+#endif
                 data_.apply(which_, detail::make_unary_visitor(detail::unwrap_ref_fun<Fun>{std::forward<Fun>(fun)}, res));
                 return res;
             }
 
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+            template<typename Fun>
+            Result_i_default<Fun> apply_i(Fun &&fun)
+#else
             template<typename Fun,
                 typename Args = meta::transform<types_t, detail::add_ref_t>,
                 typename Result = detail::variant_result_i_t<Fun, Args>>
             Result apply_i(Fun &&fun)
+#endif
             {
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+                Result_i_default<Fun> res;
+#else
                 Result res;
+#endif
                 data_.apply(which_, detail::make_binary_visitor(detail::unwrap_ref_fun<Fun>{std::forward<Fun>(fun)}, res));
                 return res;
             }
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+            template<typename Fun>
+            Result_i_default<Fun> apply_i(Fun &&fun) const
+#else
             template<typename Fun,
                 typename Args = meta::transform<types_t, detail::add_cref_t>,
                 typename Result = detail::variant_result_i_t<Fun, Args >>
             Result apply_i(Fun &&fun) const
+#endif
             {
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+                Result_i_default<Fun> res;
+#else
                 Result res;
+#endif
                 data_.apply(which_, detail::make_binary_visitor(detail::unwrap_ref_fun<Fun>{std::forward<Fun>(fun)}, res));
                 return res;
             }
         };
 
         template<typename...Ts, typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>::value...>::value)>
+#else
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>()...>::value)>
+#endif
         bool operator==(tagged_variant<Ts...> const &lhs, tagged_variant<Us...> const &rhs)
         {
             RANGES_ASSERT(lhs.is_valid());
@@ -535,7 +633,11 @@ namespace ranges
         }
 
         template<typename...Ts, typename...Us,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>::value...>::value)>
+#else
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>()...>::value)>
+#endif
         bool operator!=(tagged_variant<Ts...> const &lhs, tagged_variant<Us...> const &rhs)
         {
             return !(lhs == rhs);

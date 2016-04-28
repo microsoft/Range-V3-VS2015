@@ -32,8 +32,13 @@ namespace ranges
         struct count_if_fn
         {
             template<typename I, typename S, typename R, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
+                    IndirectCallablePredicate<R, Project<I, P> >::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
                     IndirectCallablePredicate<R, Project<I, P> >())>
+#endif
             iterator_difference_t<I>
             operator()(I begin, S end, R pred_, P proj_ = P{}) const
             {
@@ -48,7 +53,11 @@ namespace ranges
 
             template<typename Rng, typename R, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<R, Project<I, P> >::value)>
+#else
                 CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<R, Project<I, P> >())>
+#endif
             iterator_difference_t<I>
             operator()(Rng &&rng, R pred, P proj = P{}) const
             {

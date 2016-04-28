@@ -151,11 +151,31 @@ namespace ranges
                 template<typename I>
                 using value_t = meta::_t<value_type<I>>;
 
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+                template <typename T>
+                using reference_t_void_t = void;
+                template <class T, class V = void> struct reference_t_helper {};
+                template <class T> struct reference_t_helper<T, reference_t_void_t<decltype(*std::declval<T>())>> {
+                    typedef decltype(*std::declval<T>()) type;
+                };
+                template<typename T>
+                using reference_t = typename reference_t_helper<T>::type;
+
+                template <typename T>
+                using rvalue_reference_t_void_t = void;
+                template <class T, class V = void> struct rvalue_reference_t_helper {};
+                template <class T> struct rvalue_reference_t_helper<T, rvalue_reference_t_void_t<decltype(indirect_move(std::declval<T>()))>> {
+                    typedef decltype(indirect_move(std::declval<T>())) type;
+                };
+                template<typename T>
+                using rvalue_reference_t = typename rvalue_reference_t_helper<T>::type;
+#else
                 template<typename I>
                 using reference_t = decltype(*std::declval<I>());
 
                 template<typename I>
                 using rvalue_reference_t = decltype(indirect_move(std::declval<I>()));
+#endif
 
                 template<typename I>
                 using common_reference_t =

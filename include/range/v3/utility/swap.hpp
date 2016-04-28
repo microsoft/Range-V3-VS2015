@@ -86,10 +86,22 @@ namespace ranges
               : std::true_type
             {};
 
+#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+            template<typename T, typename U>
+            struct my_is_nothrow_swappable_
+            {
+                static const bool value = noexcept(swap(std::declval<T>(), std::declval<U>()));
+            };
+            template<typename T, typename U>
+            struct is_nothrow_swappable_
+                : meta::bool_<my_is_nothrow_swappable_<T, U>::value>
+            {};
+#else
             template<typename T, typename U>
             struct is_nothrow_swappable_
               : meta::bool_<noexcept(swap(std::declval<T>(), std::declval<U>()))>
             {};
+#endif
 
             template<typename First0, typename Second0, typename First1, typename Second1>
             RANGES_CXX14_CONSTEXPR
@@ -156,9 +168,14 @@ namespace ranges
                 is_indirectly_movable<Readable0, Readable1>::value &&
                 is_indirectly_movable<Readable1, Readable0>::value>
             indirect_swap(Readable0 a, Readable1 b)
+                // TODO
+#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+                ;
+#else
                 noexcept(
                     is_nothrow_indirectly_movable<Readable0, Readable1>::value &&
                     is_nothrow_indirectly_movable<Readable0, Readable1>::value);
+#endif
 
             struct indirect_swap_fn
             {
@@ -217,9 +234,13 @@ namespace ranges
                 is_indirectly_movable<Readable0, Readable1>::value &&
                 is_indirectly_movable<Readable1, Readable0>::value>
             indirect_swap(Readable0 a, Readable1 b)
+                // TODO
+#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+#else
                 noexcept(
                     is_nothrow_indirectly_movable<Readable0, Readable1>::value &&
                     is_nothrow_indirectly_movable<Readable0, Readable1>::value)
+#endif
             {
                 meta::_t<value_type<Readable0>> v0 = indirect_move(a);
                 *a = indirect_move(b);

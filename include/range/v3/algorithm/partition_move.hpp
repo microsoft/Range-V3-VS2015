@@ -47,7 +47,11 @@ namespace ranges
         struct partition_move_fn
         {
             template<typename I, typename S, typename O0, typename O1, typename C, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>() && IteratorRange<I, S>())>
+#endif
             tagged_tuple<tag::in(I), tag::out1(O0), tag::out2(O1)> operator()(I begin, S end, O0 o0, O1 o1, C pred_, P proj_ = P{}) const
             {
                 auto && pred = as_function(pred_);
@@ -70,7 +74,11 @@ namespace ranges
 
             template<typename Rng, typename O0, typename O1, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>() && Range<Rng>())>
+#endif
             tagged_tuple<tag::in(range_safe_iterator_t<Rng>), tag::out1(O0), tag::out2(O1)>
             operator()(Rng &&rng, O0 o0, O1 o1, C pred, P proj = P{}) const
             {

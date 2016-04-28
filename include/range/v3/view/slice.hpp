@@ -70,8 +70,11 @@ namespace ranges
                     return next(ranges::begin(rng), distance(rng) + i);
                 return next(ranges::begin(rng), i);
             }
-
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename Rng, bool IsRandomAccess = RandomAccessRange<Rng>::value>
+#else
             template<typename Rng, bool IsRandomAccess = RandomAccessRange<Rng>()>
+#endif
             struct slice_view_
               : view_facade<slice_view<Rng>, finite>
             {
@@ -164,14 +167,22 @@ namespace ranges
                         is_infinite<Rng>{}) + count_;
                 }
                 template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
                 range_iterator_t<BaseRng const> begin() const
                 {
                     return detail::pos_at_(rng_, from_, range_concept<Rng>{},
                         is_infinite<Rng>{});
                 }
                 template<typename BaseRng = Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
+#endif
                 range_iterator_t<BaseRng const> end() const
                 {
                     return detail::pos_at_(rng_, from_, range_concept<Rng>{},
@@ -196,7 +207,11 @@ namespace ranges
         /// \cond
         namespace adl_begin_end_detail
         {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
             template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
             detail::from_end_<meta::_t<std::make_signed<Int>>> operator-(end_fn, Int dist)
             {
                 RANGES_ASSERT(0 <= static_cast<meta::_t<std::make_signed<Int>>>(dist));
@@ -229,7 +244,11 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), from, count};
                 }
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!View<Rng>::value && std::is_lvalue_reference<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!View<Rng>() && std::is_lvalue_reference<Rng>())>
+#endif
                 static range<range_iterator_t<Rng>>
                 invoke_(Rng && rng, range_difference_t<Rng> from, range_difference_t<Rng> count,
                     concepts::RandomAccessRange *, concepts::BoundedRange * = nullptr)
@@ -239,31 +258,51 @@ namespace ranges
                 }
 
                 // Overloads for the pipe syntax: rng | view::slice(from,to)
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(slice_fn slice, Int from, Int to)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
                 )
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(slice_fn slice, Int from, detail::from_end_<Int> to)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
                 )
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(slice_fn slice, detail::from_end_<Int> from, detail::from_end_<Int> to)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
                 )
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(slice_fn slice, Int from, end_fn)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(ranges::view::drop, std::placeholders::_1, from))
                 )
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
+#else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
+#endif
                 static auto bind(slice_fn slice, detail::from_end_<Int> from, end_fn to)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
@@ -273,7 +312,11 @@ namespace ranges
             public:
                 // slice(rng, 2, 4)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, range_difference_t<Rng> from,
                     range_difference_t<Rng> to) const ->
                     decltype(slice_fn::invoke_(std::forward<Rng>(rng), from, to - from,
@@ -287,7 +330,11 @@ namespace ranges
                 //  TODO Support Forward, non-Sized ranges by returning a range that
                 //       doesn't know it's size?
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value && SizedRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(InputRange<Rng>() && SizedRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, range_difference_t<Rng> from,
                     detail::from_end_<range_difference_t<Rng>> to) const ->
                     decltype(slice_fn::invoke_(std::forward<Rng>(rng), from,
@@ -302,8 +349,13 @@ namespace ranges
                 }
                 // slice(rng, end-4, end-2)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_((InputRange<Rng>::value && SizedRange<Rng>::value) ||
+                        ForwardRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_((InputRange<Rng>() && SizedRange<Rng>()) ||
                         ForwardRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, detail::from_end_<range_difference_t<Rng>> from,
                     detail::from_end_<range_difference_t<Rng>> to) const ->
                     decltype(slice_fn::invoke_(std::forward<Rng>(rng), from.dist_,
@@ -319,7 +371,11 @@ namespace ranges
                 }
                 // slice(rng, 4, end)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, range_difference_t<Rng> from, end_fn) const ->
                     decltype(ranges::view::drop(std::forward<Rng>(rng), from))
                 {
@@ -328,8 +384,13 @@ namespace ranges
                 }
                 // slice(rng, end-4, end)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_((InputRange<Rng>::value && SizedRange<Rng>::value) ||
+                        ForwardRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_((InputRange<Rng>() && SizedRange<Rng>()) ||
                         ForwardRange<Rng>())>
+#endif
                 auto operator()(Rng && rng, detail::from_end_<range_difference_t<Rng>> from,
                     end_fn) const ->
                     decltype(slice_fn::invoke_(std::forward<Rng>(rng), from.dist_,
@@ -351,7 +412,11 @@ namespace ranges
 
                 // slice(rng, 2, 4)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!InputRange<Rng>())>
+#endif
                 void operator()(Rng &&, range_difference_t<Rng>, range_difference_t<Rng>) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
@@ -359,7 +424,11 @@ namespace ranges
                 }
                 // slice(rng, 4, end-2)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!(InputRange<Rng>::value && SizedRange<Rng>::value))>
+#else
                     CONCEPT_REQUIRES_(!(InputRange<Rng>() && SizedRange<Rng>()))>
+#endif
                 void operator()(Rng &&, range_difference_t<Rng>,
                     detail::from_end_<range_difference_t<Rng>>) const
                 {
@@ -372,8 +441,13 @@ namespace ranges
                 }
                 // slice(rng, end-4, end-2)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!((InputRange<Rng>::value && SizedRange<Rng>::value) ||
+                        ForwardRange<Rng>::value))>
+#else
                     CONCEPT_REQUIRES_(!((InputRange<Rng>() && SizedRange<Rng>()) ||
                         ForwardRange<Rng>()))>
+#endif
                 void operator()(Rng &&, detail::from_end_<range_difference_t<Rng>>,
                     detail::from_end_<range_difference_t<Rng>>) const
                 {
@@ -386,7 +460,11 @@ namespace ranges
                 }
                 // slice(rng, 4, end)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!(InputRange<Rng>::value))>
+#else
                     CONCEPT_REQUIRES_(!(InputRange<Rng>()))>
+#endif
                 void operator()(Rng &&, range_difference_t<Rng>, end_fn) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
@@ -394,8 +472,13 @@ namespace ranges
                 }
                 // slice(rng, end-4, end)
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!((InputRange<Rng>::value && SizedRange<Rng>::value) ||
+                        ForwardRange<Rng>::value))>
+#else
                     CONCEPT_REQUIRES_(!((InputRange<Rng>() && SizedRange<Rng>()) ||
                         ForwardRange<Rng>()))>
+#endif
                 void operator()(Rng &&, detail::from_end_<range_difference_t<Rng>>, end_fn) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

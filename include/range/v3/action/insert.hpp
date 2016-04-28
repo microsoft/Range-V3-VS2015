@@ -33,7 +33,11 @@ namespace ranges
         namespace adl_insert_detail
         {
             template<typename Cont, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Constructible<range_value_t<Cont>, T &&>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Constructible<range_value_t<Cont>, T &&>())>
+#endif
             auto insert(Cont && cont, T && t) ->
                 decltype(unwrap_reference(cont).insert(std::forward<T>(t)))
             {
@@ -42,7 +46,11 @@ namespace ranges
 
             template<typename Cont, typename I, typename S,
                 typename C = common_iterator<I, S>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && IteratorRange<I, S>())>
+#endif
             auto insert(Cont && cont, I i, S j) ->
                 decltype(unwrap_reference(cont).insert(C{i}, C{j}))
             {
@@ -51,7 +59,11 @@ namespace ranges
 
             template<typename Cont, typename Rng,
                 typename C = range_common_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Range<Rng>())>
+#endif
             auto insert(Cont && cont, Rng && rng) ->
                 decltype(unwrap_reference(cont).insert(C{begin(rng)}, C{end(rng)}))
             {
@@ -59,8 +71,13 @@ namespace ranges
             }
 
             template<typename Cont, typename I, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value &&
+                    Constructible<range_value_t<Cont>, T &&>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() &&
                     Constructible<range_value_t<Cont>, T &&>())>
+#endif
             auto insert(Cont && cont, I p, T && t) ->
                 decltype(unwrap_reference(cont).insert(p, std::forward<T>(t)))
             {
@@ -68,8 +85,13 @@ namespace ranges
             }
 
             template<typename Cont, typename I, typename N, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Integral<N>::value &&
+                    Constructible<range_value_t<Cont>, T &&>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Integral<N>() &&
                     Constructible<range_value_t<Cont>, T &&>())>
+#endif
             auto insert(Cont && cont, I p, N n, T && t) ->
                 decltype(unwrap_reference(cont).insert(p, n, std::forward<T>(t)))
             {
@@ -87,7 +109,11 @@ namespace ranges
 
                 template<typename Cont, typename P, typename I, typename S,
                     typename C = common_iterator<I, S>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && IteratorRange<I, S>())>
+#endif
                 auto insert_impl(Cont && cont, P p, I i, S j, std::false_type) ->
                     decltype(unwrap_reference(cont).insert(p, C{i}, C{j}))
                 {
@@ -96,8 +122,13 @@ namespace ranges
 
                 template<typename Cont, typename P, typename I, typename S,
                     typename C = common_iterator<I, S>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value &&
+                                      ReserveConcept<Cont, I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && IteratorRange<I, S>() &&
                                       ReserveConcept<Cont, I, S>())>
+#endif
                 auto insert_impl(Cont && cont, P p, I i, S j, std::true_type) ->
                     decltype(unwrap_reference(cont).insert(begin(unwrap_reference(cont)), C{i}, C{j}))
                 {
@@ -109,7 +140,11 @@ namespace ranges
 
                 template<typename Cont, typename I, typename Rng,
                     typename C = range_common_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Range<Rng>())>
+#endif
                 auto insert_impl(Cont && cont, I p, Rng && rng, std::false_type) ->
                     decltype(unwrap_reference(cont).insert(p, C{begin(rng)}, C{end(rng)}))
                 {
@@ -118,8 +153,13 @@ namespace ranges
 
                 template<typename Cont, typename I, typename Rng,
                     typename C = range_common_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value &&
+                                      ReserveConcept<Cont, range_iterator_t<Rng>, range_sentinel_t<Rng>>::value)>
+#else
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Range<Rng>() &&
                                       ReserveConcept<Cont, range_iterator_t<Rng>, range_sentinel_t<Rng>>())>
+#endif
                 auto insert_impl(Cont && cont, I p, Rng && rng, std::true_type) ->
                     decltype(unwrap_reference(cont).insert(begin(unwrap_reference(cont)), C{begin(rng)}, C{end(rng)}))
                 {
@@ -132,7 +172,11 @@ namespace ranges
 
             template<typename Cont, typename P, typename I, typename S,
                 typename C = common_iterator<I, S>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && IteratorRange<I, S>())>
+#endif
             auto insert(Cont && cont, P p, I i, S j)
             RANGES_DECLTYPE_AUTO_RETURN
             (
@@ -142,7 +186,11 @@ namespace ranges
 
             template<typename Cont, typename I, typename Rng,
                 typename C = range_common_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Range<Rng>())>
+#endif
             auto insert(Cont && cont, I p, Rng && rng)
             RANGES_DECLTYPE_AUTO_RETURN
             (
@@ -153,7 +201,11 @@ namespace ranges
             struct insert_fn
             {
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Constructible<range_value_t<Rng>, T &&>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Constructible<range_value_t<Rng>, T &&>())>
+#endif
                 auto operator()(Rng && rng, T && t) const ->
                     decltype(insert(std::forward<Rng>(rng), std::forward<T>(t)))
                 {
@@ -161,7 +213,11 @@ namespace ranges
                 }
 
                 template<typename Rng, typename Rng2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Range<Rng2>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Range<Rng2>())>
+#endif
                 auto operator()(Rng && rng, Rng2 && rng2) const ->
                     decltype(insert(std::forward<Rng>(rng), std::forward<Rng2>(rng2)))
                 {
@@ -171,7 +227,11 @@ namespace ranges
                 }
 
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>())>
+#endif
                 auto operator()(Rng && rng, std::initializer_list<T> rng2) const ->
                     decltype(insert(std::forward<Rng>(rng), rng2))
                 {
@@ -179,7 +239,11 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && IteratorRange<I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && IteratorRange<I, S>())>
+#endif
                 auto operator()(Rng && rng, I i, S j) const ->
                     decltype(insert(std::forward<Rng>(rng), i, j))
                 {
@@ -187,8 +251,13 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value &&
+                        Constructible<range_value_t<Rng>, T &&>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<I>() &&
                         Constructible<range_value_t<Rng>, T &&>())>
+#endif
                 auto operator()(Rng && rng, I p, T && t) const ->
                     decltype(insert(std::forward<Rng>(rng), p, std::forward<T>(t)))
                 {
@@ -196,7 +265,11 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename Rng2,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value && Range<Rng2>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<I>() && Range<Rng2>())>
+#endif
                 auto operator()(Rng && rng, I p, Rng2 && rng2) const ->
                     decltype(insert(std::forward<Rng>(rng), p, std::forward<Rng2>(rng2)))
                 {
@@ -206,7 +279,11 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<I>())>
+#endif
                 auto operator()(Rng && rng, I p, std::initializer_list<T> rng2) const ->
                     decltype(insert(std::forward<Rng>(rng), p, rng2))
                 {
@@ -214,8 +291,13 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename N, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value && Integral<N>::value
+                        && Constructible<range_value_t<Rng>, T &&>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<I>() && Integral<N>()
                         && Constructible<range_value_t<Rng>, T &&>())>
+#endif
                 auto operator()(Rng && rng, I p, N n, T && t) const ->
                     decltype(insert(std::forward<Rng>(rng), p, n, std::forward<T>(t)))
                 {
@@ -223,7 +305,11 @@ namespace ranges
                 }
 
                 template<typename Rng, typename P, typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<P>::value && IteratorRange<I, S>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<P>() && IteratorRange<I, S>())>
+#endif
                 auto operator()(Rng && rng, P p, I i, S j) const ->
                     decltype(insert(std::forward<Rng>(rng), p, i, j))
                 {

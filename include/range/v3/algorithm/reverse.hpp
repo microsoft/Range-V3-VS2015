@@ -54,7 +54,11 @@ namespace ranges
 
         public:
             template<typename I, typename S,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value && Permutable<I>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() && Permutable<I>())>
+#endif
             I operator()(I begin, S end_) const
             {
                 I end = ranges::next(begin, end_);
@@ -63,7 +67,11 @@ namespace ranges
             }
 
             template<typename Rng, typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Permutable<I>::value)>
+#else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Permutable<I>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng) const
             {
                 return (*this)(begin(rng), end(rng));

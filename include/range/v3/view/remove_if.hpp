@@ -76,7 +76,11 @@ namespace ranges
                 {
                     this->satisfy(++it);
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
+#endif
                 void prev(range_iterator_t<Rng> &it) const
                 {
                     auto &&pred = rng_->pred_;
@@ -146,7 +150,11 @@ namespace ranges
                     IndirectCallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
+#endif
                 remove_if_view<all_t<Rng>, Pred>
                 operator()(Rng && rng, Pred pred) const
                 {
@@ -154,7 +162,11 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>
+#endif
                 void operator()(Rng &&, Pred) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

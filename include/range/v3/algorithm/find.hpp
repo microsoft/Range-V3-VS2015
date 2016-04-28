@@ -41,8 +41,13 @@ namespace ranges
             /// \pre `P` is a model of the `Callable<iterator_common_reference_t<I>>` concept
             /// \pre The ResultType of `P` is EqualityComparable with V
             template<typename I, typename S, typename V, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
+                    IndirectCallableRelation<equal_to, Project<I, P>, V const *>::value)>
+#else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
                     IndirectCallableRelation<equal_to, Project<I, P>, V const *>())>
+#endif
             I operator()(I begin, S end, V const &val, P proj_ = P{}) const
             {
                 auto &&proj = as_function(proj_);
@@ -55,8 +60,13 @@ namespace ranges
             /// \overload
             template<typename Rng, typename V, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(InputRange<Rng>::value &&
+                    IndirectCallableRelation<equal_to, Project<I, P>, V const *>::value)>
+#else
                 CONCEPT_REQUIRES_(InputRange<Rng>() &&
                     IndirectCallableRelation<equal_to, Project<I, P>, V const *>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, V const &val, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), val, std::move(proj));

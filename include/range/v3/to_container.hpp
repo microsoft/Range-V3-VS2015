@@ -59,7 +59,11 @@ namespace ranges
 
                 template<typename Rng,
                     typename Cont = meta::apply<ContainerMetafunctionClass, range_value_t<Rng>>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && detail::ConvertibleToContainer<Rng, Cont>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && detail::ConvertibleToContainer<Rng, Cont>())>
+#endif
                 Cont impl(Rng && rng, std::false_type) const
                 {
                     using I = range_common_iterator_t<Rng>;
@@ -68,8 +72,13 @@ namespace ranges
 
                 template<typename Rng,
                     typename Cont = meta::apply<ContainerMetafunctionClass, range_value_t<Rng>>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && detail::ConvertibleToContainer<Rng, Cont>::value &&
+                                      ReserveConcept<Cont, Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && detail::ConvertibleToContainer<Rng, Cont>() &&
                                       ReserveConcept<Cont, Rng>())>
+#endif
                 Cont impl(Rng && rng, std::true_type) const
                 {
                     Cont c;
@@ -82,7 +91,11 @@ namespace ranges
             public:
                 template<typename Rng,
                     typename Cont = meta::apply<ContainerMetafunctionClass, range_value_t<Rng>>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Range<Rng>::value && detail::ConvertibleToContainer<Rng, Cont>::value)>
+#else
                     CONCEPT_REQUIRES_(Range<Rng>() && detail::ConvertibleToContainer<Rng, Cont>())>
+#endif
                 Cont operator()(Rng && rng) const
                 {
                     static_assert(!is_infinite<Rng>::value,
@@ -112,7 +125,11 @@ namespace ranges
         /// \overload
         template<template<typename...> class ContT, typename Rng,
             typename Cont = meta::apply<meta::quote<ContT>, range_value_t<Rng>>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(Range<Rng>::value && detail::ConvertibleToContainer<Rng, Cont>::value)>
+#else
             CONCEPT_REQUIRES_(Range<Rng>() && detail::ConvertibleToContainer<Rng, Cont>())>
+#endif
         Cont to_(Rng && rng)
         {
             return std::forward<Rng>(rng) | ranges::to_<ContT>();
@@ -121,7 +138,11 @@ namespace ranges
         /// \overload
         template<template<typename...> class ContT, typename T,
             typename Cont = meta::apply<meta::quote<ContT>, T>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(detail::ConvertibleToContainer<std::initializer_list<T>, Cont>::value)>
+#else
             CONCEPT_REQUIRES_(detail::ConvertibleToContainer<std::initializer_list<T>, Cont>())>
+#endif
         Cont to_(std::initializer_list<T> list)
         {
             return list | ranges::to_<ContT>();
@@ -136,7 +157,11 @@ namespace ranges
 
         /// \overload
         template<typename Cont, typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(Range<Rng>::value && detail::ConvertibleToContainer<Rng, Cont>::value)>
+#else
             CONCEPT_REQUIRES_(Range<Rng>() && detail::ConvertibleToContainer<Rng, Cont>())>
+#endif
         Cont to_(Rng && rng)
         {
             return std::forward<Rng>(rng) | ranges::to_<Cont>();
@@ -144,7 +169,11 @@ namespace ranges
 
         /// \overload
         template<typename Cont, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(detail::ConvertibleToContainer<std::initializer_list<T>, Cont>::value)>
+#else
             CONCEPT_REQUIRES_(detail::ConvertibleToContainer<std::initializer_list<T>, Cont>())>
+#endif
         Cont to_(std::initializer_list<T> list)
         {
             return list | ranges::to_<Cont>();

@@ -44,7 +44,11 @@ namespace ranges
             template<typename T>
             struct first_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>
             {
+#ifdef WORKAROUND_209653
+                T first;
+#else
                 static T first;
+#endif
                 first_base() = default;
                 template<typename U,
                     meta::if_<std::is_constructible<T, U &&>, int> = 0>
@@ -52,8 +56,15 @@ namespace ranges
                 {}
             };
 
+#ifdef WORKAROUND_209653
+#else
             template<typename T>
+#ifdef WORKAROUND_TEMPLATE_STATIC_INITIALIZER
+            T first_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::first = {};
+#else
             T first_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::first{};
+#endif
+#endif
 
             template<typename T, typename Enable = void>
             struct second_base
@@ -70,7 +81,11 @@ namespace ranges
             template<typename T>
             struct second_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>
             {
+#ifdef WORKAROUND_209653
+                T second;
+#else
                 static T second;
+#endif
                 second_base() = default;
                 template<typename U,
                     meta::if_<std::is_constructible<T, U &&>, int> = 0>
@@ -78,13 +93,24 @@ namespace ranges
                 {}
             };
 
+#ifdef WORKAROUND_209653
+#else
             template<typename T>
+#ifdef WORKAROUND_TEMPLATE_STATIC_INITIALIZER
+            T second_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::second = {};
+#else
             T second_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::second{};
+#endif
+#endif
         }
         /// \endcond
 
         template<typename First, typename Second>
+#ifdef WORKAROUND_EBO
+        struct __declspec(empty_bases) compressed_pair
+#else
         struct compressed_pair
+#endif
           : private detail::first_base<First>
           , private detail::second_base<Second>
         {
@@ -192,10 +218,12 @@ namespace ranges
     }
 }
 
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wmismatched-tags"
+#endif
 
 namespace std
 {
@@ -217,6 +245,8 @@ namespace std
     };
 }
 
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic pop
+#endif
 
 #endif

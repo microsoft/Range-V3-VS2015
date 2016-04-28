@@ -118,8 +118,13 @@ namespace ranges
             {
                 return {fun_, ranges::begin(rng_), ranges::end(rng_)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>,
+                range_sentinel_t<Rng>>::value && Range<Rng const>::value)
+#else
             CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>,
                 range_sentinel_t<Rng>>() && Range<Rng const>())
+#endif
             cursor<true> begin_cursor() const
             {
                 return {fun_, ranges::begin(rng_), ranges::end(rng_)};
@@ -184,12 +189,40 @@ namespace ranges
                     }
                 };
             public:
+#ifdef WORKAROUND_209577
+                template<typename T>
+                using void_t_helper1 = void;
+                template<typename Rng, typename Fun, typename = void>
+                struct helper1 {
+                    typedef void type;
+                };
+                template<typename Rng, typename Fun>
+                struct helper1<Rng, Fun, void_t_helper1<concepts::Function::result_t<Fun, range_iterator_t<Rng>, range_sentinel_t<Rng>>>> {
+                    typedef concepts::Function::result_t<Fun, range_iterator_t<Rng>, range_sentinel_t<Rng>> type;
+                };
+
+                template<typename T>
+                using void_t_helper2 = void;
+                template<typename Sub, typename = void>
+                struct helper2 {
+                    typedef void type;
+                };
+                template<typename Sub>
+                struct helper2<Sub, void_t_helper2<range_value_t<Sub>>> {
+                    typedef range_value_t<Sub> type;
+                };
+#endif
+
                 template<typename Rng, typename Fun>
                 using FunctionConcept = meta::and_<
                     ForwardRange<Rng>,
                     Function<Fun, range_iterator_t<Rng>, range_sentinel_t<Rng>>,
                     ConvertibleTo<
+#ifdef WORKAROUND_209577
+                        typename helper1<Rng, Fun>::type,
+#else
                         concepts::Function::result_t<Fun, range_iterator_t<Rng>, range_sentinel_t<Rng>>,
+#endif
                         std::pair<bool, range_difference_t<Rng>>>>;
 
                 template<typename Rng>
@@ -201,22 +234,38 @@ namespace ranges
                 using SubRangeConcept = meta::and_<
                     ForwardRange<Rng>,
                     ForwardRange<Sub>,
+#ifdef WORKAROUND_209577
+                    EqualityComparable<range_value_t<Rng>, typename helper2<Sub>::type>>;
+#else
                     EqualityComparable<range_value_t<Rng>, range_value_t<Sub>>>;
+#endif
 
                 template<typename Rng, typename Fun,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(FunctionConcept<Rng, Fun>::value)>
+#else
                     CONCEPT_REQUIRES_(FunctionConcept<Rng, Fun>())>
+#endif
                 split_view<all_t<Rng>, Fun> operator()(Rng && rng, Fun fun) const
                 {
                     return {all(std::forward<Rng>(rng)), std::move(fun)};
                 }
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ElementConcept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(ElementConcept<Rng>())>
+#endif
                 split_view<all_t<Rng>, element_pred<Rng>> operator()(Rng && rng, range_value_t<Rng> val) const
                 {
                     return {all(std::forward<Rng>(rng)), {std::move(val)}};
                 }
                 template<typename Rng, typename Sub,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(SubRangeConcept<Rng, Sub>::value)>
+#else
                     CONCEPT_REQUIRES_(SubRangeConcept<Rng, Sub>())>
+#endif
                 split_view<all_t<Rng>, subrange_pred<Rng, Sub>> operator()(Rng && rng, Sub && sub) const
                 {
                     return {all(std::forward<Rng>(rng)), {std::forward<Sub>(sub)}};
@@ -224,7 +273,11 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!ConvertibleTo<T, range_value_t<Rng>>::value)>
+#else
                     CONCEPT_REQUIRES_(!ConvertibleTo<T, range_value_t<Rng>>())>
+#endif
                 void operator()(Rng &&, T &&) const volatile
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

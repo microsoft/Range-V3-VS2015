@@ -31,13 +31,27 @@ namespace ranges
             template<typename A, typename B>
             using UnambiguouslyConvertible =
                 meta::or_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    (bool)Same<A, B>::value,
+                    ConvertibleTo<A, B>::value == !ConvertibleTo<B, A>::value>;
+#else
                     (bool)Same<A, B>(),
                     ConvertibleTo<A, B>() == !ConvertibleTo<B, A>()>;
+#endif
 
             template<typename A, typename B>
             using UnambiguouslyConvertibleType =
                 meta::_t<
                     meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                        (bool)Same<A, B>::value,
+                        meta::id<A>,
+                        meta::if_c<
+                            ConvertibleTo<A, B>::value && !ConvertibleTo<B, A>::value,
+                            meta::id<A>,
+                            meta::if_c<
+                                ConvertibleTo<B, A>::value && !ConvertibleTo<A, B>::value,
+#else
                         (bool)Same<A, B>(),
                         meta::id<A>,
                         meta::if_c<
@@ -45,6 +59,7 @@ namespace ranges
                             meta::id<A>,
                             meta::if_c<
                                 ConvertibleTo<B, A>() && !ConvertibleTo<A, B>(),
+#endif
                                 meta::id<B>,
                                 meta::nil_>>>>;
 
@@ -109,7 +124,11 @@ namespace ranges
                   : it_(std::move(it)), n_(n)
                 {}
                 template<typename OtherI, typename OtherD,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ConvertibleTo<OtherI, I>::value && ConvertibleTo<OtherD, D>::value)>
+#else
                     CONCEPT_REQUIRES_(ConvertibleTo<OtherI, I>() && ConvertibleTo<OtherD, D>())>
+#endif
                 counted_cursor(counted_cursor<OtherI, OtherD> that)
                   : it_(std::move(that.it_)), n_(std::move(that.n_))
                 {}
@@ -122,24 +141,40 @@ namespace ranges
                     ++it_;
                     --n_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(EqualityComparable<D>::value)
+#else
                 CONCEPT_REQUIRES(EqualityComparable<D>())
+#endif
                 bool equal(counted_cursor const &that) const
                 {
                     return n_ == that.n_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalIterator<I>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalIterator<I>())
+#endif
                 void prev()
                 {
                     --it_;
                     ++n_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
+#endif
                 void advance(iterator_difference_t<I> n)
                 {
                     it_ += n;
                     n_ -= n;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
+#endif
                 iterator_difference_t<I>
                 distance_to(counted_cursor<I> const &that) const
                 {
@@ -172,8 +207,13 @@ namespace ranges
         // For RandomAccessIterator, operator- will be defined by basic_iterator
         template<typename I0, typename D0, typename I1, typename D1,
             typename CI = detail::UnambiguouslyConvertibleType<I0, I1>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES_(detail::UnambiguouslyConvertible<I0, I1>::value &&
+                !RandomAccessIterator<CI>::value)>
+#else
             CONCEPT_REQUIRES_(detail::UnambiguouslyConvertible<I0, I1>() &&
                 !RandomAccessIterator<CI>())>
+#endif
         iterator_difference_t<CI>
         operator-(counted_iterator<I0, D0> const &end, counted_iterator<I1, D1> const &begin)
         {

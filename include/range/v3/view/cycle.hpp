@@ -58,7 +58,11 @@ namespace ranges
           , private detail::cycle_end_<Rng>
         {
         private:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_ASSERT(ForwardRange<Rng>::value);
+#else
             CONCEPT_ASSERT(ForwardRange<Rng>());
+#endif
             friend range_access;
             Rng rng_;
 
@@ -133,14 +137,22 @@ namespace ranges
                         it_ = ranges::begin(rng_->rng_);
                     }
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
+#endif
                 void prev()
                 {
                     if(it_ == ranges::begin(rng_->rng_))
                         it_ = this->get_end_(BoundedRange<Rng>());
                     --it_;
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 void advance(difference_type_ n)
                 {
                     auto const begin = ranges::begin(rng_->rng_);
@@ -149,7 +161,11 @@ namespace ranges
                     auto const off = ((it_ - begin) + n) % d;
                     it_ = begin + (off < 0 ? off + d : off);
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 difference_type_ distance_to(cursor const &that) const
                 {
                     RANGES_ASSERT(that.rng_ == rng_);
@@ -161,7 +177,11 @@ namespace ranges
             {
                 return cursor<false>{*this};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BoundedRange<Rng const>::value)
+#else
             CONCEPT_REQUIRES(BoundedRange<Rng const>())
+#endif
             cursor<true> begin_cursor() const
             {
                 return cursor<true>{*this};
@@ -209,14 +229,22 @@ namespace ranges
 
             public:
                 /// \pre <tt>distance(rng) != 0</tt>
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 cycled_view<all_t<Rng>> operator()(Rng &&rng) const
                 {
                     return cycled_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
 
 #ifndef RANGES_DOXYGEN_INVOKED
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(ForwardRange<Rng>(),

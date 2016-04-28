@@ -204,9 +204,15 @@ namespace ranges
                 using single_pass = meta::bool_<Cat == category::input>;
                 any_cursor() = default;
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_cursor>::value),
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value &&
+                                      ConvertibleTo<range_reference_t<Rng>, Ref>::value)>
+#else
                     CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_cursor>()),
                     CONCEPT_REQUIRES_(InputRange<Rng>() &&
                                       ConvertibleTo<range_reference_t<Rng>, Ref>())>
+#endif
                 any_cursor(Rng &&rng, begin_tag)
                   : ptr_{new any_cursor_impl<range_iterator_t<Rng>, Cat>{begin(rng)}}
                 {}
@@ -262,8 +268,13 @@ namespace ranges
             public:
                 any_sentinel() = default;
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_sentinel>::value),
+                    CONCEPT_REQUIRES_(InputRange<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_sentinel>()),
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
+#endif
                 any_sentinel(Rng &&rng, end_tag)
                   : ptr_{new any_sentinel_impl<range_sentinel_t<Rng>, range_iterator_t<Rng>>{
                         end(rng)}}
@@ -360,9 +371,15 @@ namespace ranges
         public:
             any_view() = default;
             template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_view>::value),
+                CONCEPT_REQUIRES_(InputRange<Rng>::value &&
+                                  ConvertibleTo<range_reference_t<Rng>, Ref>::value)>
+#else
                 CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_view>()),
                 CONCEPT_REQUIRES_(InputRange<Rng>() &&
                                   ConvertibleTo<range_reference_t<Rng>, Ref>())>
+#endif
             any_view(Rng && rng)
               : any_view(std::forward<Rng>(rng),
                   meta::bool_<detail::to_cat_(range_concept<Rng>{}) >= Cat>{})

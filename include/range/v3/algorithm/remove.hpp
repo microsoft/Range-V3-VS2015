@@ -41,7 +41,11 @@ namespace ranges
         struct remove_fn
         {
             template<typename I, typename S, typename T, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Removable<I, T, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(Removable<I, T, P>() && IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end, T const &val, P proj_ = P{}) const
             {
                 auto &&proj = as_function(proj_);
@@ -62,7 +66,11 @@ namespace ranges
 
             template<typename Rng, typename T, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Removable<I, T, P>::value && ForwardRange<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(Removable<I, T, P>() && ForwardRange<Rng>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, T const &val, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), val, std::move(proj));

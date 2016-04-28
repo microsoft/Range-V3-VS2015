@@ -98,14 +98,22 @@ namespace ranges
         {
             struct single_fn
             {
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Val, CONCEPT_REQUIRES_(SemiRegular<Val>::value)>
+#else
                 template<typename Val, CONCEPT_REQUIRES_(SemiRegular<Val>())>
+#endif
                 single_view<Val> operator()(Val value) const
                 {
                     return single_view<Val>{std::move(value)};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Val, CONCEPT_REQUIRES_(!SemiRegular<uncvref_t<Val>>::value)>
+#else
                 template<typename Val, CONCEPT_REQUIRES_(!SemiRegular<uncvref_t<Val>>())>
+#endif
                 void operator()(Val &&) const
                 {
                     CONCEPT_ASSERT_MSG(SemiRegular<Val>(),

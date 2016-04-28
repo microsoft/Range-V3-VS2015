@@ -35,7 +35,11 @@ namespace ranges
             struct equal_range_n_fn
             {
                 template<typename I, typename V, typename R = ordered_less, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(BinarySearchable<I, V, R, P>::value)>
+#else
                     CONCEPT_REQUIRES_(BinarySearchable<I, V, R, P>())>
+#endif
                 range<I>
                 operator()(I begin, iterator_difference_t<I> dist, V const & val, R pred_ = R{},
                     P proj_ = P{}) const

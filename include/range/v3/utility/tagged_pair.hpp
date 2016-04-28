@@ -32,13 +32,25 @@ namespace ranges
         {
             struct getters
             {
+#ifdef WORKAROUND_214039
+				template<typename Type, typename Tags, std::size_t Is>
+				struct helper_getter
+				{
+					typedef typename Tags::template getter<Type, meta::_t<std::tuple_element<Is, Type>>, Is> type;
+				};
+#endif
+
             private:
                 template<typename, typename...> friend struct ranges::tagged;
                 template<typename Type, typename Indices, typename...Tags>
                 struct collect_;
                 template<typename Type, std::size_t...Is, typename...Tags>
                 struct collect_<Type, meta::index_sequence<Is...>, Tags...>
+#ifdef WORKAROUND_214039
+                  : helper_getter<Type, Tags, Is>::type...
+#else
                   : Tags::template getter<Type, meta::_t<std::tuple_element<Is, Type>>, Is>...
+#endif
                 {
                     collect_() = default;
                     collect_(const collect_&) = default;
@@ -164,10 +176,12 @@ namespace ranges
     }                                                                           \
     /**/
 
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wmismatched-tags"
+#endif
 
 namespace std
 {
@@ -182,6 +196,8 @@ namespace std
     {};
 }
 
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic pop
+#endif
 
 #endif

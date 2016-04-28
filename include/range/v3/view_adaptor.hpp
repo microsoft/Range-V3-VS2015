@@ -31,6 +31,43 @@ namespace ranges
         /// \cond
         namespace detail
         {
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+            template <typename T>
+            using begin_adaptor_t_void_t = void;
+            template <class T, class V = void> struct begin_adaptor_t_helper {};
+            template <class T> struct begin_adaptor_t_helper<T, begin_adaptor_t_void_t<decltype(range_access::begin_adaptor(std::declval<T &>(), 42))>> {
+                typedef decltype(range_access::begin_adaptor(std::declval<T &>(), 42)) type;
+            };
+            template<typename T>
+            using begin_adaptor_t = typename begin_adaptor_t_helper<T>::type;
+
+            template <typename T>
+            using end_adaptor_t_void_t = void;
+            template <class T, class V = void> struct end_adaptor_t_helper {};
+            template <class T> struct end_adaptor_t_helper<T, end_adaptor_t_void_t<decltype(range_access::end_adaptor(std::declval<T &>(), 42))>> {
+                typedef decltype(range_access::end_adaptor(std::declval<T &>(), 42)) type;
+            };
+            template<typename T>
+            using end_adaptor_t = typename end_adaptor_t_helper<T>::type;
+
+            template <typename T>
+            using adapted_iterator_t_void_t = void;
+            template <class T, class V = void> struct adapted_iterator_t_helper {};
+            template <class T> struct adapted_iterator_t_helper<T, adapted_iterator_t_void_t<decltype(std::declval<begin_adaptor_t<T>>().begin(std::declval<T &>()))>> {
+                typedef decltype(std::declval<begin_adaptor_t<T>>().begin(std::declval<T &>())) type;
+            };
+            template<typename T>
+            using adapted_iterator_t = typename adapted_iterator_t_helper<T>::type;
+
+            template <typename T>
+            using adapted_sentinel_t_void_t = void;
+            template <class T, class V = void> struct adapted_sentinel_t_helper {};
+            template <class T> struct adapted_sentinel_t_helper<T, adapted_sentinel_t_void_t<decltype(std::declval<end_adaptor_t<T>>().end(std::declval<T &>()))>> {
+                typedef decltype(std::declval<end_adaptor_t<T>>().end(std::declval<T &>())) type;
+            };
+            template<typename T>
+            using adapted_sentinel_t = typename adapted_sentinel_t_helper<T>::type;
+#else
             template<typename Derived>
             using begin_adaptor_t =
                 decltype(range_access::begin_adaptor(std::declval<Derived &>(), 42));
@@ -46,6 +83,7 @@ namespace ranges
             template<typename Derived>
             using adapted_sentinel_t =
                 decltype(std::declval<end_adaptor_t<Derived>>().end(std::declval<Derived &>()));
+#endif
 
             struct adaptor_base_current_mem_fn
             {};
@@ -110,38 +148,66 @@ namespace ranges
             {
                 return ranges::end(rng.base());
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, CONCEPT_REQUIRES_(Iterator<I>::value)>
+#else
             template<typename I, CONCEPT_REQUIRES_(Iterator<I>())>
+#endif
             static bool equal(I const &it0, I const &it1)
             {
                 return it0 == it1;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
             template<typename I, CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
             static iterator_reference_t<I> current(I const &it, detail::adaptor_base_current_mem_fn = {})
                 noexcept(noexcept(iterator_reference_t<I>(*it)))
             {
                 return *it;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
             template<typename I, CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
             static void next(I &it)
             {
                 ++it;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, CONCEPT_REQUIRES_(BidirectionalIterator<I>::value)>
+#else
             template<typename I, CONCEPT_REQUIRES_(BidirectionalIterator<I>())>
+#endif
             static void prev(I &it)
             {
                 --it;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, CONCEPT_REQUIRES_(RandomAccessIterator<I>::value)>
+#else
             template<typename I, CONCEPT_REQUIRES_(RandomAccessIterator<I>())>
+#endif
             static void advance(I &it, iterator_difference_t<I> n)
             {
                 it += n;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, CONCEPT_REQUIRES_(RandomAccessIterator<I>::value)>
+#else
             template<typename I, CONCEPT_REQUIRES_(RandomAccessIterator<I>())>
+#endif
             static iterator_difference_t<I> distance_to(I const &it0, I const &it1)
             {
                 return it1 - it0;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename I, typename S, CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
+#else
             template<typename I, typename S, CONCEPT_REQUIRES_(IteratorRange<I, S>())>
+#endif
             static constexpr bool empty(I const &it, S const &end)
             {
                 return it == end;
@@ -151,7 +217,11 @@ namespace ranges
         // Build a cursor out of an iterator into the adapted range, and an
         // adaptor that customizes behavior.
         template<typename BaseIter, typename Adapt>
+#ifdef WORKAROUND_EBO
+        struct __declspec(empty_bases) adaptor_cursor
+#else
         struct adaptor_cursor
+#endif
           : private compressed_pair<BaseIter, Adapt>
           , detail::adaptor_value_type<BaseIter, Adapt>
         {
@@ -223,9 +293,16 @@ namespace ranges
                 typename R = decltype(std::declval<A>().current(first, detail::adaptor_base_current_mem_fn{})),
                 typename X = iterator_rvalue_reference_t<BaseIter>>
             X indirect_move_(long) const
+#ifdef WORKAROUND_211850
+#else
                 noexcept(noexcept(X(ranges::indirect_move(first))))
+#endif
             {
+#ifdef WORKAROUND_INDIRECT_MOVE
+                return ranges::detail_msvc::indirect_move(first);
+#else
                 return ranges::indirect_move(first);
+#endif
             }
             // If the adaptor does not have an indirect_move function but overrides the current
             // member function, apply std::move to the result of calling current.
@@ -246,10 +323,19 @@ namespace ranges
                 return static_cast<X &&>(second.current(first));
             }
             // Gives users a way to override the default indirect_move function in their adaptors.
+#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+            // mixin is captured as tokens. So the name won't be found because friend function
+            // isn't in the class scope.
+            template<typename Sent>
+            friend auto indirect_move(basic_iterator<adaptor_cursor, Sent> const &it)
+                noexcept(noexcept(get_cursor(it).indirect_move_(42))) ->
+                decltype(get_cursor(it).indirect_move_(42))
+#else
             template<typename Sent, typename M = mixin>
             friend auto indirect_move(basic_iterator<adaptor_cursor, Sent> const &it)
                 noexcept(noexcept(std::declval<M const &>().get().indirect_move_(42))) ->
                 decltype(std::declval<M const &>().get().indirect_move_(42))
+#endif
             {
                 return get_cursor(it).indirect_move_(42);
             }
@@ -383,14 +469,22 @@ namespace ranges
                 return {};
             }
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
+#else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
+#endif
             adaptor_cursor_t<D> begin_cursor()
             {
                 auto adapt = range_access::begin_adaptor(derived(), 42);
                 auto pos = adapt.begin(derived());
                 return {std::move(pos), std::move(adapt)};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
+#else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
+#endif
             adaptor_sentinel_t<D> end_cursor()
             {
                 auto adapt = range_access::end_adaptor(derived(), 42);
@@ -401,7 +495,11 @@ namespace ranges
             // has const begin/end accessors. That disables the const begin()/end() accessors
             // in view_facade, meaning the derived range type only has mutable iterators.
             template<typename D = Derived,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Same<D, Derived>::value && View<base_range_t const>::value)>
+#else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && View<base_range_t const>())>
+#endif
             adaptor_cursor_t<D const> begin_cursor() const
             {
                 auto adapt = range_access::begin_adaptor(derived(), 42);
@@ -409,7 +507,11 @@ namespace ranges
                 return {std::move(pos), std::move(adapt)};
             }
             template<typename D = Derived,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Same<D, Derived>::value && View<base_range_t const>::value)>
+#else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && View<base_range_t const>())>
+#endif
             adaptor_sentinel_t<D const> end_cursor() const
             {
                 auto adapt = range_access::end_adaptor(derived(), 42);

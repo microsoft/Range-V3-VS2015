@@ -345,7 +345,11 @@ namespace ranges
             meta::if_<std::is_same<I, S>, I, basic_iterator<detail::common_cursor<I, S>>>;
 
         template<typename First, typename Second>
+#ifdef WORKAROUND_EBO
+        struct __declspec(empty_bases) compressed_pair;
+#else
         struct compressed_pair;
+#endif
 
         template<typename...Ts>
         struct compressed_tuple;

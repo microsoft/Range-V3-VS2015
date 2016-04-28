@@ -26,7 +26,11 @@ namespace ranges
         struct iota_fn
         {
             template<typename O, typename S, class T,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(OutputIterator<O, T>::value && IteratorRange<O, S>::value && WeaklyIncrementable<T>::value)>
+#else
                 CONCEPT_REQUIRES_(OutputIterator<O, T>() && IteratorRange<O, S>() && WeaklyIncrementable<T>())>
+#endif
             O operator()(O begin, S end, T val) const
             {
                 for(; begin != end; ++begin, ++val)
@@ -35,7 +39,11 @@ namespace ranges
             }
 
             template<typename Rng, class T, typename O = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(OutputRange<Rng &, T>::value && WeaklyIncrementable<T>::value)>
+#else
                 CONCEPT_REQUIRES_(OutputRange<Rng &, T>() && WeaklyIncrementable<T>())>
+#endif
             O operator()(Rng &rng, T val) const
             {
                 return (*this)(begin(rng), end(rng), std::move(val));

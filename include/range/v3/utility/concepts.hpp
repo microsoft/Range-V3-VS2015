@@ -209,10 +209,22 @@ namespace ranges
 
             ////////////////////////////////////////////////////////////////////////////////////////////
             // models
+#ifdef WORKAROUND_214014
+            template<typename Concept, typename...Ts>
+            struct models_helper {
+                typedef decltype(detail::models_<Ts...>(_nullptr_v<Concept>())) type;
+            };
+
+            template<typename Concept, typename...Ts>
+            struct models
+              : meta::bool_<models_helper<Concept, Ts...>::type::type::value>
+            {};
+#else
             template<typename Concept, typename...Ts>
             struct models
               : meta::bool_<decltype(detail::models_<Ts...>(_nullptr_v<Concept>()))::type::value>
             {};
+#endif
 
             template<typename Concept, typename...Args, typename...Ts>
             struct models<Concept(Args...), Ts...>
@@ -501,7 +513,12 @@ namespace ranges
                 auto requires_(T && t, T* const p = nullptr) -> decltype(
                     concepts::valid_expr(
                         (t.~T(), 42),
+#ifdef WORKAROUND_140392
+						// When /EHsc is not used, we don't mark dtor as noexcept implicitly
+						concepts::is_true(std::is_destructible<T>()),
+#else
                         concepts::is_true(std::is_nothrow_destructible<T>()),
+#endif
                         concepts::has_type<T*>(&t),
                         concepts::has_type<const T*>(&std::declval<const T&>()),
                         (delete p, 42),
@@ -678,10 +695,35 @@ namespace ranges
             // Function concepts
             ////////////////////////////////////////////////////////////////////////////////////////////
 
-            struct Function
-            {
+			struct Function
+			{
+#if defined(WORKAROUND_SFINAE_ALIAS_DECLTYPE) || defined(WORKAROUND_SFINAE_PARAMETERPACK)
+				template<typename T>
+				struct helper1 {};
+				template<typename Fun2, typename ...Args2>
+				struct helper2 {
+					template<typename Fun, typename ...Args>
+					static short f(helper1<decltype(val<Fun>()(val<Args>()...))> * = 0);
+					template<typename Fun, typename ...Args>
+					static char f(...);
+
+					static const bool value = sizeof(helper2::f<Fun2, Args2...>(0)) == 2;
+				};
+
+				template<bool, typename Fun, typename ...Args>
+				struct helper {
+				};
+				template<typename Fun, typename ...Args>
+				struct helper<true, Fun, Args...> {
+					typedef decltype(val<Fun>()(val<Args>()...)) type;
+				};
+
+				template<typename Fun, typename ...Args>
+				using result_t = typename helper<helper2<Fun, Args...>::value, Fun, Args...>::type;
+#else
                 template<typename Fun, typename ...Args>
                 using result_t = decltype(val<Fun>()(val<Args>()...));
+#endif
 
                 template<typename Fun, typename ...Args>
                 auto requires_(Fun&& fun, Args&&... args) -> decltype(
@@ -869,7 +911,29 @@ namespace ranges
         >::type = 0>                                                                \
     /**/
 
-#define CONCEPT_ASSERT(...) static_assert((__VA_ARGS__), "Concept check failed")
+#ifdef WORKAROUND_159890
+#define CONCEPT_REQUIRES_FRIEND_(...)                                               \
+    int CONCEPT_PP_CAT(_concept_requires_, __LINE__) = 44,                          \
+    typename std::enable_if<                                                        \
+        (CONCEPT_PP_CAT(_concept_requires_, __LINE__) == 45) || (__VA_ARGS__),      \
+        int                                                                         \
+    >::type = 0                                                                     \
+    /**/
+
+#define CONCEPT_REQUIRES_FRIEND(...)                                                \
+    template<                                                                       \
+        int CONCEPT_PP_CAT(_concept_requires_, __LINE__) = 44,                      \
+        typename std::enable_if<                                                    \
+            (CONCEPT_PP_CAT(_concept_requires_, __LINE__) == 45) || (__VA_ARGS__),  \
+            int                                                                     \
+        >::type = 0>                                                                \
+    /**/
+#else
+#define CONCEPT_REQUIRES_FRIEND_(...) CONCEPT_REQUIRES_(__VA_ARGS__)
+#define CONCEPT_REQUIRES_FRIEND(...) CONCEPT_REQUIRES(__VA_ARGS__)
+#endif
+
+#define CONCEPT_ASSERT(...) static_assert((__VA_ARGS__), "Concept check failed: " #__VA_ARGS__)
 /// @}
 
 #define CONCEPT_ASSERT_MSG static_assert

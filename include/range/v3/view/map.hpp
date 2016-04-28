@@ -66,14 +66,22 @@ namespace ranges
                     detail::PairLike<range_value_t<Rng>>>;
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 keys_range_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return {all(std::forward<Rng>(rng)), detail::get_first{}};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
@@ -93,14 +101,22 @@ namespace ranges
                     detail::PairLike<range_value_t<Rng>>>;
 
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 values_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return {all(std::forward<Rng>(rng)), detail::get_second{}};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(!Concept<Rng>::value)>
+#else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),

@@ -51,7 +51,11 @@ namespace ranges
           , private detail::reverse_end_<Rng>
         {
         private:
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_ASSERT(BidirectionalRange<Rng>::value);
+#else
             CONCEPT_ASSERT(BidirectionalRange<Rng>());
+#endif
             friend range_access;
 
             // BoundedRange == true
@@ -110,7 +114,11 @@ namespace ranges
                     if(0 != ranges::advance(it, 1, ranges::end(rng_->mutable_base())))
                         it = ranges::begin(rng_->mutable_base());
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 void advance(range_iterator_t<Rng> &it, range_difference_t<Rng> n) const
                 {
                     if(n > 0)
@@ -118,7 +126,11 @@ namespace ranges
                     else if(n < 0)
                         this->prev(it), ranges::advance(it, -n - 1);
                 }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+#else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+#endif
                 range_difference_t<Rng>
                 distance_to(range_iterator_t<Rng> const &here, range_iterator_t<Rng> const &there,
                     adaptor const &other_adapt) const
@@ -140,12 +152,20 @@ namespace ranges
             {
                 return {*this};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BoundedRange<Rng const>::value)
+#else
             CONCEPT_REQUIRES(BoundedRange<Rng const>())
+#endif
             adaptor<true> begin_adaptor() const
             {
                 return {*this};
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(BoundedRange<Rng const>::value)
+#else
             CONCEPT_REQUIRES(BoundedRange<Rng const>())
+#endif
             adaptor<true> end_adaptor() const
             {
                 return {*this};
@@ -186,12 +206,20 @@ namespace ranges
                 this->dirty_(BoundedRange<Rng>{});
                 return *this;
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng>::value || RandomAccessRange<Rng>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng>() || RandomAccessRange<Rng>())
+#endif
             range_size_t<Rng> size()
             {
                 return this->size_(SizedRange<Rng>());
             }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+            CONCEPT_REQUIRES(SizedRange<Rng const>::value)
+#else
             CONCEPT_REQUIRES(SizedRange<Rng const>())
+#endif
             range_size_t<Rng> size() const
             {
                 return ranges::size(this->base());
@@ -205,14 +233,22 @@ namespace ranges
                 template<typename Rng>
                 using Concept = BidirectionalRange<Rng>;
 
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>())>
+#endif
                 reverse_view<all_t<Rng>> operator()(Rng && rng) const
                 {
                     return reverse_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>::value)>
+#else
                 template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>())>
+#endif
                 void operator()(Rng &&) const
                 {
                     CONCEPT_ASSERT_MSG(BidirectionalRange<Rng>(),

@@ -263,7 +263,11 @@ namespace ranges
 
         public:
             template<typename I, typename S, typename C, typename P = ident,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(StablePartitionable<I, C, P>::value && IteratorRange<I, S>::value)>
+#else
                 CONCEPT_REQUIRES_(StablePartitionable<I, C, P>() && IteratorRange<I, S>())>
+#endif
             I operator()(I begin, S end, C pred_, P proj_ = P{}) const
             {
                 auto &&pred = as_function(pred_);
@@ -275,7 +279,11 @@ namespace ranges
             // BUGBUG Can this be optimized if Rng has O1 size?
             template<typename Rng, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(StablePartitionable<I, C, P>::value && Range<Rng>::value)>
+#else
                 CONCEPT_REQUIRES_(StablePartitionable<I, C, P>() && Range<Rng>())>
+#endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, C pred, P proj = P{}) const
             {
                 return (*this)(begin(rng), end(rng), std::move(pred), std::move(proj));

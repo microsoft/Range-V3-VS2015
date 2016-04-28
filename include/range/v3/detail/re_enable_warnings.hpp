@@ -11,4 +11,6 @@
 ///
 
 /// \note Works with GCC and Clang
+#ifndef NO_GCC_WARNING_PRAGMA
 #pragma GCC diagnostic pop
+#endif

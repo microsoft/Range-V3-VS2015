@@ -65,7 +65,11 @@ namespace ranges
             struct counted_fn
             {
                 template<typename I,
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(WeakIterator<I>::value)>
+#else
                     CONCEPT_REQUIRES_(WeakIterator<I>())>
+#endif
                 counted_view<I> operator()(I it, iterator_difference_t<I> n) const
                 {
                     return {std::move(it), n};
