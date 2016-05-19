@@ -61,7 +61,7 @@ namespace ranges
             delimit_view() = default;
             delimit_view(Rng rng, Val value)
 #ifdef WORKAROUND_207134
-              : delimit_view::view_adaptor_t(std::move(rng))
+              : delimit_view::view_adaptor(std::move(rng))
 #else
               : view_adaptor_t<delimit_view>{std::move(rng)}
 #endif

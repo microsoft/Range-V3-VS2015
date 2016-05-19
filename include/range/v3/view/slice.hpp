@@ -205,14 +205,14 @@ namespace ranges
         /// \endcond
 
         /// \cond
-        namespace adl_begin_end_detail
+        namespace end_detail
         {
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
             template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
 #endif
-            detail::from_end_<meta::_t<std::make_signed<Int>>> operator-(end_fn, Int dist)
+            detail::from_end_<meta::_t<std::make_signed<Int>>> operator-(fn, Int dist)
             {
                 RANGES_ASSERT(0 <= static_cast<meta::_t<std::make_signed<Int>>>(dist));
                 return {-static_cast<meta::_t<std::make_signed<Int>>>(dist)};
@@ -293,7 +293,7 @@ namespace ranges
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
 #endif
-                static auto bind(slice_fn slice, Int from, end_fn)
+                static auto bind(slice_fn slice, Int from, end_detail::fn)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(ranges::view::drop, std::placeholders::_1, from))
@@ -303,7 +303,7 @@ namespace ranges
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
 #endif
-                static auto bind(slice_fn slice, detail::from_end_<Int> from, end_fn to)
+                static auto bind(slice_fn slice, detail::from_end_<Int> from, end_detail::fn to)
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
@@ -376,7 +376,7 @@ namespace ranges
 #else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
 #endif
-                auto operator()(Rng && rng, range_difference_t<Rng> from, end_fn) const ->
+                auto operator()(Rng && rng, range_difference_t<Rng> from, end_detail::fn) const ->
                     decltype(ranges::view::drop(std::forward<Rng>(rng), from))
                 {
                     RANGES_ASSERT(0 <= from);
@@ -392,7 +392,7 @@ namespace ranges
                         ForwardRange<Rng>())>
 #endif
                 auto operator()(Rng && rng, detail::from_end_<range_difference_t<Rng>> from,
-                    end_fn) const ->
+                    end_detail::fn) const ->
                     decltype(slice_fn::invoke_(std::forward<Rng>(rng), from.dist_,
                         -from.dist_, range_concept<Rng>{},
                         bounded_range_concept<Rng>{}()))
@@ -465,7 +465,7 @@ namespace ranges
 #else
                     CONCEPT_REQUIRES_(!(InputRange<Rng>()))>
 #endif
-                void operator()(Rng &&, range_difference_t<Rng>, end_fn) const
+                void operator()(Rng &&, range_difference_t<Rng>, end_detail::fn) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
                         "The object to be sliced must be a model of the InputRange concept.");
@@ -479,7 +479,7 @@ namespace ranges
                     CONCEPT_REQUIRES_(!((InputRange<Rng>() && SizedRange<Rng>()) ||
                         ForwardRange<Rng>()))>
 #endif
-                void operator()(Rng &&, detail::from_end_<range_difference_t<Rng>>, end_fn) const
+                void operator()(Rng &&, detail::from_end_<range_difference_t<Rng>>, end_detail::fn) const
                 {
                     CONCEPT_ASSERT_MSG(InputRange<Rng>(),
                         "The object to be sliced must be a model of the InputRange concept.");

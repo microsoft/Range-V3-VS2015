@@ -101,12 +101,8 @@ public:
       : algo_(algo)
     {}
     template<typename I, typename...Rest>
-#ifdef WORKAROUND_SFINAE_UNIQUE
-    auto operator()(I begin, I end, Rest &&... rest) const
-#else
     auto operator()(I begin, I end, Rest &&... rest) const ->
         checker<decltype(algo_(begin, end, rest...))>
-#endif
     {
         using R = decltype(algo_(begin, end, rest...));
         return checker<R>{[=](std::function<void(R)> const & check)
@@ -136,12 +132,8 @@ public:
       : algo_(algo)
     {}
     template<typename I1, typename I2, typename...Rest>
-#ifdef WORKAROUND_SFINAE_UNIQUE
-    auto operator()(I1 begin1, I1 end1, I2 begin2, I2 end2, Rest &&... rest) const
-#else
     auto operator()(I1 begin1, I1 end1, I2 begin2, I2 end2, Rest &&... rest) const ->
         checker<decltype(algo_(begin1, end1, begin2, end2, rest...))>
-#endif
     {
         using R = decltype(algo_(begin1, end1, begin2, end2, rest...));
         return checker<R>{[=](std::function<void(R)> const & check)

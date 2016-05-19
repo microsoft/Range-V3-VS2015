@@ -95,7 +95,7 @@ namespace ranges
             }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
-                range_common_reference_t<Rng >>::value && Range<Rng const>::value)
+                range_common_reference_t<Rng>>::value && Range<Rng const>::value)
 #else
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
                 range_common_reference_t<Rng>>() && Range<Rng const>())

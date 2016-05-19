@@ -47,17 +47,9 @@ namespace ranges
                     return **it;
                 }
                 auto indirect_move(range_iterator_t<Rng> it) const ->
-#ifdef WORKAROUND_INDIRECT_MOVE
-                    decltype(ranges::detail_msvc::indirect_move(*it))
-#else
                     decltype(ranges::indirect_move(*it))
-#endif
                 {
-#ifdef WORKAROUND_INDIRECT_MOVE
-                    return ranges::detail_msvc::indirect_move(*it);
-#else
                     return ranges::indirect_move(*it);
-#endif
                 }
             };
             adaptor begin_adaptor() const
@@ -71,7 +63,11 @@ namespace ranges
         public:
             indirect_view() = default;
             explicit indirect_view(Rng rng)
+#ifdef WORKAROUND_207134
+              : indirect_view::view_adaptor{std::move(rng)}
+#else
               : view_adaptor_t<indirect_view>{std::move(rng)}
+#endif
             {}
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)

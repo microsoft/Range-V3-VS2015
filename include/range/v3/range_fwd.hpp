@@ -45,31 +45,12 @@ namespace ranges
         /// \cond
         namespace adl_begin_end_detail
         {
-            struct begin_fn;
-            struct end_fn;
-            struct cbegin_fn;
-            struct cend_fn;
             struct rbegin_fn;
             struct rend_fn;
-            struct crbegin_fn;
-            struct crend_fn;
         }
 
-        using adl_begin_end_detail::begin_fn;
-        using adl_begin_end_detail::end_fn;
-        using adl_begin_end_detail::cbegin_fn;
-        using adl_begin_end_detail::cend_fn;
         using adl_begin_end_detail::rbegin_fn;
         using adl_begin_end_detail::rend_fn;
-        using adl_begin_end_detail::crbegin_fn;
-        using adl_begin_end_detail::crend_fn;
-
-        namespace adl_size_detail
-        {
-            struct size_fn;
-        }
-
-        using adl_size_detail::size_fn;
         /// \endcond
 
         template<typename I = void>
@@ -133,6 +114,22 @@ namespace ranges
         struct distance_fn;
 
         struct iter_size_fn;
+
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        template<typename>
+        using reference_t_void_t = void;
+        template<typename, typename = void>
+        struct reference_t_helper {};
+        template<typename I>
+        struct reference_t_helper<I, reference_t_void_t<decltype(*std::declval<I>())>> {
+            using type = decltype(*std::declval<I>());
+        };
+        template<typename I>
+        using reference_t = meta::_t<reference_t_helper<I>>;
+#else
+        template<typename I>
+        using reference_t = decltype(*std::declval<I>());
+#endif
 
         template<typename T, typename = void>
         struct difference_type;
@@ -204,7 +201,22 @@ namespace ranges
             }
 
             template<typename T>
+            constexpr T const & as_const(T & t) noexcept
+            {
+                return t;
+            }
+            template<typename T>
+            void as_const(T const &&) = delete;
+
+            template<typename T>
             using decay_t = meta::_t<std::decay<T>>;
+
+            template<typename T>
+            constexpr auto decay_copy(T && t)
+            RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+            (
+                static_cast<decay_t<T>>(static_cast<T &&>(t))
+            )
 
             template<typename T, typename R = meta::_t<std::remove_reference<T>>>
             using as_ref_t =
@@ -286,6 +298,12 @@ namespace ranges
         struct end_tag {};
         struct copy_tag {};
         struct move_tag {};
+
+        template<unsigned N> struct priority_tag : priority_tag<N - 1> {};
+        template<> struct priority_tag<0> {};
+
+        template<template <class...> class Trait, typename T, typename D = detail::decay_t<T>>
+        using if_decayed = meta::if_<Trait<D>, D>;
 
         template<typename T>
         using uncvref_t =
@@ -655,8 +673,12 @@ namespace ranges
             struct values_fn;
         }
 
-        template<typename Fun, typename...Rngs>
-        struct iter_zip_with_view;
+        namespace iter_zip_with_view_detail
+        {
+            template<typename Fun, typename...Rngs>
+            struct iter_zip_with_view;
+        }
+        using iter_zip_with_view_detail::iter_zip_with_view;
 
         template<typename Fun, typename ...Rngs>
         struct zip_with_view;

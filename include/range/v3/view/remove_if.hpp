@@ -101,17 +101,29 @@ namespace ranges
         public:
             remove_if_view() = default;
             remove_if_view(remove_if_view &&that)
+#ifdef WORKAROUND_207134
+              : remove_if_view::view_adaptor(std::move(that))
+#else
               : view_adaptor_t<remove_if_view>(std::move(that))
+#endif
               , pred_(std::move(that).pred_)
               , begin_{}
             {}
             remove_if_view(remove_if_view const &that)
+#ifdef WORKAROUND_207134
+              : remove_if_view::view_adaptor(that)
+#else
               : view_adaptor_t<remove_if_view>(that)
+#endif
               , pred_(that.pred_)
               , begin_{}
             {}
             remove_if_view(Rng rng, Pred pred)
+#ifdef WORKAROUND_207134
+              : remove_if_view::view_adaptor(std::move(rng))
+#else
               : view_adaptor_t<remove_if_view>{std::move(rng)}
+#endif
               , pred_(as_function(std::move(pred)))
               , begin_{}
             {}

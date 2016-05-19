@@ -119,7 +119,11 @@ namespace ranges
         public:
             iter_transform_view() = default;
             iter_transform_view(Rng rng, Fun fun)
+#ifdef WORKAROUND_207134
+              : iter_transform_view::view_adaptor{std::move(rng)}
+#else
               : view_adaptor_t<iter_transform_view>{std::move(rng)}
+#endif
               , fun_(as_function(std::move(fun)))
             {}
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
@@ -144,185 +148,189 @@ namespace ranges
             {}
         };
 
-        template<typename Rng1, typename Rng2, typename Fun>
-        struct iter_transform2_view
-          : view_facade<
-                iter_transform2_view<Rng1, Rng2, Fun>,
-                detail::transform2_cardinality(
-                    range_cardinality<Rng1>::value,
-                    range_cardinality<Rng2>::value)>
+        namespace iter_transform2_view_detail
         {
-        private:
-            friend range_access;
-            semiregular_t<function_type<Fun>> fun_;
-            Rng1 rng1_;
-            Rng2 rng2_;
-            using difference_type_ = common_type_t<range_difference_t<Rng1>, range_difference_t<Rng2>>;
-            using size_type_ = meta::_t<std::make_unsigned<difference_type_>>;
-
-            struct sentinel;
-            struct cursor
+            template<typename Rng1, typename Rng2, typename Fun>
+            struct iter_transform2_view
+            : view_facade<
+                    iter_transform2_view<Rng1, Rng2, Fun>,
+                    detail::transform2_cardinality(
+                        range_cardinality<Rng1>::value,
+                        range_cardinality<Rng2>::value)>
             {
             private:
-                friend sentinel;
-                using fun_ref_ = semiregular_ref_or_val_t<function_type<Fun>, true>;
-                fun_ref_ fun_;
-                range_iterator_t<Rng1> it1_;
-                range_iterator_t<Rng2> it2_;
+                friend range_access;
+                semiregular_t<function_type<Fun>> fun_;
+                Rng1 rng1_;
+                Rng2 rng2_;
+                using difference_type_ = common_type_t<range_difference_t<Rng1>, range_difference_t<Rng2>>;
+                using size_type_ = meta::_t<std::make_unsigned<difference_type_>>;
 
-                template<typename Sent>
-                friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    get_cursor(it).fun_(move_tag{}, get_cursor(it).it1_, get_cursor(it).it2_)
-                )
+                struct sentinel;
+                struct cursor
+                {
+                private:
+                    friend sentinel;
+                    using fun_ref_ = semiregular_ref_or_val_t<function_type<Fun>, true>;
+                    fun_ref_ fun_;
+                    range_iterator_t<Rng1> it1_;
+                    range_iterator_t<Rng2> it2_;
+
+                    template<typename Sent>
+                    friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
+                    RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                    (
+                        get_cursor(it).fun_(move_tag{}, get_cursor(it).it1_, get_cursor(it).it2_)
+                    )
+                public:
+                    using difference_type = difference_type_;
+                    using single_pass = meta::or_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                        (bool)SinglePass<range_iterator_t<Rng1>>::value,
+                        (bool)SinglePass<range_iterator_t<Rng2>>::value>;
+#else
+                        (bool) SinglePass<range_iterator_t<Rng1>>(),
+                        (bool) SinglePass<range_iterator_t<Rng2>>()>;
+#endif
+                    using value_type =
+                        detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rng1>{},
+                            range_iterator_t<Rng2>{}))>;
+
+                    cursor() = default;
+                    cursor(fun_ref_ fun, range_iterator_t<Rng2> it1, range_iterator_t<Rng2> it2)
+                    : fun_(std::move(fun)), it1_(std::move(it1)), it2_(std::move(it2))
+                    {}
+                    auto current() const
+                    RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                    (
+                        fun_(it1_, it2_)
+                    )
+                    void next()
+                    {
+                        ++it1_;
+                        ++it2_;
+                    }
+                    bool equal(cursor const &that) const
+                    {
+                        // By returning true if *any* of the iterators are equal, we allow
+                        // transformed ranges to be of different lengths, stopping when the first
+                        // one reaches the end.
+                        return it1_ == that.it1_ || it2_ == that.it2_;
+                    }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(BidirectionalRange<Rng1>::value && BidirectionalRange<Rng2>::value)
+#else
+                    CONCEPT_REQUIRES(BidirectionalRange<Rng1>() && BidirectionalRange<Rng2>())
+#endif
+                    void prev()
+                    {
+                        --it1_;
+                        --it2_;
+                    }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
+#else
+                    CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
+#endif
+                    void advance(difference_type n)
+                    {
+                        ranges::advance(it1_, n);
+                        ranges::advance(it2_, n);
+                    }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
+#else
+                    CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
+#endif
+                    difference_type distance_to(cursor const &that) const
+                    {
+                        // Return the smallest distance (in magnitude) of any of the iterator
+                        // pairs. This is to accommodate zippers of sequences of different length.
+                        difference_type d1 = that.it1_ - it1_, d2 = that.it2_ - it2_;
+                        return 0 < d1 ? std::min(d1, d2) : std::max(d1, d2);
+                    }
+                };
+
+                struct sentinel
+                {
+                private:
+                    range_sentinel_t<Rng1> end1_;
+                    range_sentinel_t<Rng2> end2_;
+                public:
+                    sentinel() = default;
+                    sentinel(detail::any, range_sentinel_t<Rng1> end1, range_sentinel_t<Rng1> end2)
+                    : end1_(std::move(end1)), end2_(std::move(end2))
+                    {}
+                    bool equal(cursor const &pos) const
+                    {
+                        // By returning true if *any* of the iterators are equal, we allow
+                        // transformed ranges to be of different lengths, stopping when the first
+                        // one reaches the end.
+                        return pos.it1_ == end1_ || pos.it2_ == end2_;
+                    }
+                };
+
+                using end_cursor_t =
+                    meta::if_c<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                        BoundedRange<Rng1>::value && BoundedRange<Rng2>::value &&
+                            !SinglePass<range_iterator_t<Rng1>>::value &&
+                            !SinglePass<range_iterator_t<Rng2>>::value,
+#else
+                        BoundedRange<Rng1>() && BoundedRange<Rng2>() &&
+                            !SinglePass<range_iterator_t<Rng1>>() &&
+                            !SinglePass<range_iterator_t<Rng2>>(),
+#endif
+                        cursor,
+                        sentinel>;
+
+                cursor begin_cursor()
+                {
+                    return {fun_, ranges::begin(rng1_), ranges::begin(rng2_)};
+                }
+                end_cursor_t end_cursor()
+                {
+                    return {fun_, ranges::end(rng1_), ranges::end(rng2_)};
+                }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(Range<Rng1 const>::value && Range<Rng2 const>::value)
+#else
+                CONCEPT_REQUIRES(Range<Rng1 const>() && Range<Rng2 const>())
+#endif
+                cursor begin_cursor() const
+                {
+                    return {fun_, ranges::begin(rng1_), ranges::begin(rng2_)};
+                }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(Range<Rng1 const>::value && Range<Rng2 const>::value)
+#else
+                CONCEPT_REQUIRES(Range<Rng1 const>() && Range<Rng2 const>())
+#endif
+                end_cursor_t end_cursor() const
+                {
+                    return {fun_, ranges::end(rng1_), ranges::end(rng2_)};
+                }
             public:
-                using difference_type = difference_type_;
-                using single_pass = meta::or_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    (bool)SinglePass<range_iterator_t<Rng1>>::value,
-                    (bool)SinglePass<range_iterator_t<Rng2>>::value>;
-#else
-                    (bool) SinglePass<range_iterator_t<Rng1>>(),
-                    (bool) SinglePass<range_iterator_t<Rng2>>()>;
-#endif
-                using value_type =
-                    detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rng1>{},
-                        range_iterator_t<Rng2>{}))>;
-
-                cursor() = default;
-                cursor(fun_ref_ fun, range_iterator_t<Rng2> it1, range_iterator_t<Rng2> it2)
-                  : fun_(std::move(fun)), it1_(std::move(it1)), it2_(std::move(it2))
+                iter_transform2_view() = default;
+                iter_transform2_view(Rng1 rng1, Rng2 rng2, Fun fun)
+                : fun_(as_function(std::move(fun)))
+                , rng1_(std::move(rng1))
+                , rng2_(std::move(rng2))
                 {}
-                auto current() const
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    fun_(it1_, it2_)
-                )
-                void next()
-                {
-                    ++it1_;
-                    ++it2_;
-                }
-                bool equal(cursor const &that) const
-                {
-                    // By returning true if *any* of the iterators are equal, we allow
-                    // transformed ranges to be of different lengths, stopping when the first
-                    // one reaches the end.
-                    return it1_ == that.it1_ || it2_ == that.it2_;
-                }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(BidirectionalRange<Rng1>::value && BidirectionalRange<Rng2>::value)
+                CONCEPT_REQUIRES(SizedRange<Rng1>::value && SizedRange<Rng2>::value)
 #else
-                CONCEPT_REQUIRES(BidirectionalRange<Rng1>() && BidirectionalRange<Rng2>())
+                CONCEPT_REQUIRES(SizedRange<Rng1>() && SizedRange<Rng2>())
 #endif
-                void prev()
+                constexpr size_type_ size() const
                 {
-                    --it1_;
-                    --it2_;
-                }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
-#else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
-#endif
-                void advance(difference_type n)
-                {
-                    ranges::advance(it1_, n);
-                    ranges::advance(it2_, n);
-                }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
-#else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
-#endif
-                difference_type distance_to(cursor const &that) const
-                {
-                    // Return the smallest distance (in magnitude) of any of the iterator
-                    // pairs. This is to accommodate zippers of sequences of different length.
-                    difference_type d1 = that.it1_ - it1_, d2 = that.it2_ - it2_;
-                    return 0 < d1 ? std::min(d1, d2) : std::max(d1, d2);
+                    return range_cardinality<iter_transform2_view>::value >= 0 ?
+                        (size_type_)range_cardinality<iter_transform2_view>::value :
+                        std::min<size_type_>(ranges::size(rng1_), ranges::size(rng2_));
                 }
             };
-
-            struct sentinel
-            {
-            private:
-                range_sentinel_t<Rng1> end1_;
-                range_sentinel_t<Rng2> end2_;
-            public:
-                sentinel() = default;
-                sentinel(detail::any, range_sentinel_t<Rng1> end1, range_sentinel_t<Rng1> end2)
-                  : end1_(std::move(end1)), end2_(std::move(end2))
-                {}
-                bool equal(cursor const &pos) const
-                {
-                    // By returning true if *any* of the iterators are equal, we allow
-                    // transformed ranges to be of different lengths, stopping when the first
-                    // one reaches the end.
-                    return pos.it1_ == end1_ || pos.it2_ == end2_;
-                }
-            };
-
-            using end_cursor_t =
-                meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    BoundedRange<Rng1>::value && BoundedRange<Rng2>::value &&
-                        !SinglePass<range_iterator_t<Rng1>>::value &&
-                        !SinglePass<range_iterator_t<Rng2>>::value,
-#else
-                    BoundedRange<Rng1>() && BoundedRange<Rng2>() &&
-                        !SinglePass<range_iterator_t<Rng1>>() &&
-                        !SinglePass<range_iterator_t<Rng2>>(),
-#endif
-                    cursor,
-                    sentinel>;
-
-            cursor begin_cursor()
-            {
-                return {fun_, ranges::begin(rng1_), ranges::begin(rng2_)};
-            }
-            end_cursor_t end_cursor()
-            {
-                return {fun_, ranges::end(rng1_), ranges::end(rng2_)};
-            }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(Range<Rng1 const>::value && Range<Rng2 const>::value)
-#else
-            CONCEPT_REQUIRES(Range<Rng1 const>() && Range<Rng2 const>())
-#endif
-            cursor begin_cursor() const
-            {
-                return {fun_, ranges::begin(rng1_), ranges::begin(rng2_)};
-            }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(Range<Rng1 const>::value && Range<Rng2 const>::value)
-#else
-            CONCEPT_REQUIRES(Range<Rng1 const>() && Range<Rng2 const>())
-#endif
-            end_cursor_t end_cursor() const
-            {
-                return {fun_, ranges::end(rng1_), ranges::end(rng2_)};
-            }
-        public:
-            iter_transform2_view() = default;
-            iter_transform2_view(Rng1 rng1, Rng2 rng2, Fun fun)
-              : fun_(as_function(std::move(fun)))
-              , rng1_(std::move(rng1))
-              , rng2_(std::move(rng2))
-            {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(SizedRange<Rng1>::value && SizedRange<Rng2>::value)
-#else
-            CONCEPT_REQUIRES(SizedRange<Rng1>() && SizedRange<Rng2>())
-#endif
-            constexpr size_type_ size() const
-            {
-                return range_cardinality<iter_transform2_view>::value >= 0 ?
-                    (size_type_)range_cardinality<iter_transform2_view>::value :
-                    std::min<size_type_>(ranges::size(rng1_), ranges::size(rng2_));
-            }
-        };
+        }
+        using iter_transform2_view_detail::iter_transform2_view;
 
         template<typename Rng1, typename Rng2, typename Fun>
         struct transform2_view

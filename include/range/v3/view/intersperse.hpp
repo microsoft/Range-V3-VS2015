@@ -150,7 +150,12 @@ namespace ranges
         public:
             intersperse_view() = default;
             intersperse_view(Rng rng, range_value_t<Rng> val)
-              : view_adaptor_t<intersperse_view>{std::move(rng)}, val_(std::move(val))
+#ifdef WORKAROUND_207134
+              : intersperse_view::view_adaptor{std::move(rng)}
+#else
+              : view_adaptor_t<intersperse_view>{std::move(rng)}
+#endif
+              , val_(std::move(val))
             {}
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)

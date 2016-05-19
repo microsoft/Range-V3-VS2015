@@ -83,7 +83,7 @@
 // This requires __declspec(empty_bases)
 #define WORKAROUND_EBO
 
-//#define WORKAROUND_PERMISSIVE
+#define WORKAROUND_PERMISSIVE
 
 #ifdef WORKAROUND_PERMISSIVE
 // fail only under /d1permissive
@@ -124,10 +124,6 @@
 // friend + default template argument
 #define WORKAROUND_216572
 
-// qualified name lookup issue related to hidden friend
-// action\sort.cpp, action\split.cpp
-#define WORKAROUND_INDIRECT_MOVE
-
 // replace.cpp (prevent indirect_move in adaptor_cursor from being specialized)
 // variant.hpp (pack expansion doesn't happen for default argument)
 #define WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
@@ -149,14 +145,6 @@
 
 #define BUGFIX
 
-#ifdef WORKAROUND_SFINAE_UNIQUE
-namespace workaround {
-    template<typename T, typename...>
-    struct unique_helper {
-        using type = T;
-    };
-}
-#endif
 #endif
 
 #if _MSC_VER >= 1900
@@ -198,6 +186,15 @@ namespace workaround {
 #endif
 #else
 #define RANGES_CXX14_CONSTEXPR inline
+#endif
+
+// Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70552
+#if defined(__GNUC__) && !defined(__clang__) && \
+    ((__GNUC__ == 4 && __GNUC_MINOR__ == 9 && __GNUC_PATCHLEVEL__ >= 4) || \
+     (__GNUC__ == 5 && __GNUC_MINOR__ >= 3))
+#define RANGES_GCC_BROKEN_CUSTPOINT inline
+#else
+#define RANGES_GCC_BROKEN_CUSTPOINT
 #endif
 
 #endif

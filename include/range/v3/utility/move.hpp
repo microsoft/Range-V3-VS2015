@@ -66,55 +66,47 @@ namespace ranges
         /// \cond
         namespace adl_move_detail
         {
+            void indirect_move();
+
             // Default indirect_move overload.
             template<typename I,
-                typename R = decltype(*std::declval<I>()),
-                typename U = meta::_t<std::remove_reference<R>>>
-            aux::move_t<R> indirect_move(I const &i)
-                noexcept(std::is_reference<R>::value ||
-                    std::is_nothrow_constructible<detail::decay_t<U>, U &&>::value)
-            {
-                return aux::move(*i);
-            }
+                typename R = decltype(*std::declval<I const &>())>
+            auto indirect_move(I const &i)
+            RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+            (
+                static_cast<aux::move_t<R>>(aux::move(*i))
+            )
 
             struct indirect_move_fn
             {
                 template<typename I>
                 auto operator()(I const &i) const
-                    noexcept(noexcept(indirect_move(i))) ->
-                    decltype(indirect_move(i))
-                {
-                    return indirect_move(i);
-                }
+                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                (
+                    indirect_move(i)
+                )
             };
         }
         /// \endcond
 
-#ifdef WORKAROUND_INDIRECT_MOVE
-        namespace detail_msvc
-#else
         namespace
-#endif
         {
             constexpr auto&& indirect_move =
                 static_const<adl_move_detail::indirect_move_fn>::value;
         }
-#ifdef WORKAROUND_INDIRECT_MOVE
-        using namespace detail_msvc;
-#endif
 
-#ifdef WORKAROUND_SFINAE_FUNCTION_DECLTYPE
-        namespace detail_msvc
-        {
-            template <typename T>
-            using reference_t_void_t = void;
-            template <class T, class V = void> struct reference_t_helper {};
-            template <class T> struct reference_t_helper<T, reference_t_void_t<decltype(*std::declval<T>())>> {
-                typedef decltype(*std::declval<T>()) type;
-            };
-            template<typename T>
-            using reference_t = typename reference_t_helper<T>::type;
-        }
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+        template<typename>
+        using rvalue_reference_t_void_t = void;
+        template<typename, typename = void> struct rvalue_reference_t_helper {};
+        template<typename I> struct rvalue_reference_t_helper<I, rvalue_reference_t_void_t<decltype(indirect_move(std::declval<I>()))>> {
+            using type = decltype(indirect_move(std::declval<I>()));
+        };
+        template<typename I>
+        using rvalue_reference_t = meta::_t<rvalue_reference_t_helper<I>>;
+#else
+        template<typename I>
+        using rvalue_reference_t = decltype(indirect_move(std::declval<I>()));
 #endif
 
         namespace detail
@@ -122,21 +114,21 @@ namespace ranges
             // impact algorithm\swap_ranges.cpp
             template<typename I, typename O>
 #ifdef WORKAROUND_SFINAE_FUNCTION_DECLTYPE
-            typename meta::detail::_and_<
+            meta::_t<meta::detail::_and_<
                 std::is_constructible<
                     meta::_t<value_type<I>>,
-                    decltype(indirect_move(std::declval<I>()))>,
+                    rvalue_reference_t<I>>,
                 std::is_assignable<
-                    detail_msvc::reference_t<O>,
-                    decltype(indirect_move(std::declval<I>()))>>::type
+                    reference_t<O>,
+                    rvalue_reference_t<I>>>>
 #else
             meta::and_<
                 std::is_constructible<
                     meta::_t<value_type<I>>,
-                    decltype(indirect_move(std::declval<I>()))>,
+                    rvalue_reference_t<I>>,
                 std::is_assignable<
                     decltype(*std::declval<O>()),
-                    decltype(indirect_move(std::declval<I>()))>>
+                    rvalue_reference_t<I>>>
 #endif
             is_indirectly_movable_(int);
 
@@ -148,10 +140,10 @@ namespace ranges
             meta::and_<
                 std::is_nothrow_constructible<
                     meta::_t<value_type<I>>,
-                    decltype(indirect_move(std::declval<I>()))>,
+                    rvalue_reference_t<I>>,
                 std::is_nothrow_assignable<
                     decltype(*std::declval<O>()),
-                    decltype(indirect_move(std::declval<I>()))>>
+                    rvalue_reference_t<I>>>
             is_nothrow_indirectly_movable_(int);
 
             template<typename I, typename O>

@@ -138,20 +138,11 @@ namespace ranges
                 {
                     return *it_;
                 }
-                auto indirect_move(range_iterator_t<Rng> const &) const ->
-#ifdef WORKAROUND_INDIRECT_MOVE
-                    // adaptor_cursor::indirect_move is incorrectly found during qualified name lookup
-                    decltype(ranges::detail_msvc::indirect_move(it_))
-#else
-                    decltype(ranges::indirect_move(it_))
-#endif
-                {
-#ifdef WORKAROUND_INDIRECT_MOVE
-                    return ranges::detail_msvc::indirect_move(it_);
-#else
-                    return ranges::indirect_move(it_);
-#endif
-                }
+                auto indirect_move(range_iterator_t<Rng> const &) const
+                RANGES_DECLTYPE_AUTO_RETURN
+                (
+                    ranges::indirect_move(it_)
+                )
                 void distance_to() = delete;
             };
             adaptor begin_adaptor()
@@ -170,7 +161,12 @@ namespace ranges
         public:
             join_view() = default;
             explicit join_view(Rng rng)
-              : view_adaptor_t<join_view>{std::move(rng)}, cur_{}
+#ifdef WORKAROUND_207134
+              : join_view::view_adaptor{std::move(rng)}
+#else
+              : view_adaptor_t<join_view>{std::move(rng)}
+#endif
+              , cur_{}
             {}
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 && SizedRange<range_value_t<Rng>>::value)
@@ -325,7 +321,11 @@ namespace ranges
         public:
             join_view() = default;
             join_view(Rng rng, ValRng val)
+#ifdef WORKAROUND_207134
+              : join_view::view_adaptor{std::move(rng)}
+#else
               : view_adaptor_t<join_view>{std::move(rng)}
+#endif
               , cur_{}, val_(std::move(val))
             {}
 #ifdef WORKAROUND_SFINAE_CONSTEXPR

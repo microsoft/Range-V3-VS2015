@@ -65,12 +65,11 @@ namespace ranges
             struct swap_fn
             {
                 template<typename T, typename U>
-                RANGES_CXX14_CONSTEXPR
-                meta::if_c<is_swappable<T, U>::value>
-                operator()(T && t, U && u) const noexcept(is_nothrow_swappable<T, U>::value)
-                {
-                    swap(std::forward<T>(t), std::forward<U>(u));
-                }
+                RANGES_CXX14_CONSTEXPR auto operator()(T && t, U && u) const
+                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                (
+                    static_cast<void>(swap((T &&) t, (U &&) u))
+                )
             };
 
             // Now implementations
@@ -168,13 +167,12 @@ namespace ranges
                 is_indirectly_movable<Readable0, Readable1>::value &&
                 is_indirectly_movable<Readable1, Readable0>::value>
             indirect_swap(Readable0 a, Readable1 b)
-                // TODO
 #ifdef WORKAROUND_NOEXCEPT_DEPENDENT
-                ;
+                ; // TODO
 #else
                 noexcept(
                     is_nothrow_indirectly_movable<Readable0, Readable1>::value &&
-                    is_nothrow_indirectly_movable<Readable0, Readable1>::value);
+                    is_nothrow_indirectly_movable<Readable1, Readable0>::value);
 #endif
 
             struct indirect_swap_fn
@@ -234,12 +232,12 @@ namespace ranges
                 is_indirectly_movable<Readable0, Readable1>::value &&
                 is_indirectly_movable<Readable1, Readable0>::value>
             indirect_swap(Readable0 a, Readable1 b)
-                // TODO
 #ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+                // TODO
 #else
                 noexcept(
                     is_nothrow_indirectly_movable<Readable0, Readable1>::value &&
-                    is_nothrow_indirectly_movable<Readable0, Readable1>::value)
+                    is_nothrow_indirectly_movable<Readable1, Readable0>::value)
 #endif
             {
                 meta::_t<value_type<Readable0>> v0 = indirect_move(a);
@@ -279,14 +277,14 @@ namespace ranges
 
         /// \ingroup group-utility
         /// \relates adl_swap_detail::swap_fn
-        namespace
+        RANGES_GCC_BROKEN_CUSTPOINT namespace
         {
             constexpr auto&& swap = static_const<adl_swap_detail::swap_fn>::value;
         }
 
         /// \ingroup group-utility
         /// \relates adl_swap_detail::indirect_swap_fn
-        namespace
+        RANGES_GCC_BROKEN_CUSTPOINT namespace
         {
             constexpr auto&& indirect_swap = static_const<adl_swap_detail::indirect_swap_fn>::value;
         }

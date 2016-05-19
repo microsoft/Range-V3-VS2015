@@ -72,7 +72,11 @@ namespace ranges
         public:
             adjacent_remove_if_view() = default;
             adjacent_remove_if_view(Rng rng, F pred)
+#ifdef WORKAROUND_207134
+              : adjacent_remove_if_view::view_adaptor{std::move(rng)}
+#else
               : view_adaptor_t<adjacent_remove_if_view>{std::move(rng)}
+#endif
               , pred_(as_function(std::move(pred)))
             {}
         };

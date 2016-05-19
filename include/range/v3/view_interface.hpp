@@ -266,7 +266,7 @@ namespace ranges
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
 #endif
-            auto operator[](detail::slice_bounds<range_difference_t<D>, end_fn> offs) ->
+            auto operator[](detail::slice_bounds<range_difference_t<D>, end_detail::fn> offs) ->
                 decltype(std::declval<Slice>()(std::declval<D &>(), offs.from, offs.to))
             {
                 return Slice{}(derived(), offs.from, offs.to);
@@ -278,7 +278,7 @@ namespace ranges
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
 #endif
-            auto operator[](detail::slice_bounds<range_difference_t<D>, end_fn> offs) const ->
+            auto operator[](detail::slice_bounds<range_difference_t<D>, end_detail::fn> offs) const ->
                 decltype(std::declval<Slice>()(std::declval<D const &>(), offs.from, offs.to))
             {
                 return Slice{}(derived(), offs.from, offs.to);
@@ -291,7 +291,7 @@ namespace ranges
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
 #endif
-            auto operator[](detail::slice_bounds<detail::from_end_<range_difference_t<D>>, end_fn> offs) ->
+            auto operator[](detail::slice_bounds<detail::from_end_<range_difference_t<D>>, end_detail::fn> offs) ->
                 decltype(std::declval<Slice>()(std::declval<D &>(), offs.from, offs.to))
             {
                 return Slice{}(derived(), offs.from, offs.to);
@@ -303,7 +303,7 @@ namespace ranges
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
 #endif
-            auto operator[](detail::slice_bounds<detail::from_end_<range_difference_t<D>>, end_fn> offs) const ->
+            auto operator[](detail::slice_bounds<detail::from_end_<range_difference_t<D>>, end_detail::fn> offs) const ->
                 decltype(std::declval<Slice>()(std::declval<D const &>(), offs.from, offs.to))
             {
                 return Slice{}(derived(), offs.from, offs.to);

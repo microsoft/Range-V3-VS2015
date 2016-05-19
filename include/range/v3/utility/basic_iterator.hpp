@@ -222,88 +222,91 @@ namespace ranges
                 }
             };
 
-            //
-            // In general, we can't determine that such an iterator isn't
-            // writable -- we also need to store a copy of the old iterator so
-            // that it can be written into.
-            template<typename I>
-            struct writable_postfix_increment_proxy
+            namespace writable_postfix_increment_proxy_detail
             {
-                using value_type = iterator_value_t<I>;
-            private:
-                mutable value_type value_;
-                I it_;
-            public:
-                RANGES_CXX14_CONSTEXPR
-                writable_postfix_increment_proxy() = default;
-                RANGES_CXX14_CONSTEXPR
-                explicit writable_postfix_increment_proxy(I x)
-                  : value_(*x)
-                  , it_(std::move(x))
-                {}
-                // Dereferencing must return a proxy so that both *r++ = o and
-                // value_type(*r++) can work.  In this case, *r is the same as
-                // *r++, and the conversion operator below is used to ensure
-                // readability.
-                RANGES_CXX14_CONSTEXPR
-                writable_postfix_increment_proxy const & operator*() const
+                // In general, we can't determine that such an iterator isn't
+                // writable -- we also need to store a copy of the old iterator so
+                // that it can be written into.
+                template<typename I>
+                struct writable_postfix_increment_proxy
                 {
-                    return *this;
-                }
-                // So that iter_move(r++) moves the cached value out
-                RANGES_CXX14_CONSTEXPR
-                friend value_type && indirect_move(writable_postfix_increment_proxy const &ref)
-                {
-                    return std::move(ref.value_);
-                }
-                // Provides readability of *r++
-                RANGES_CXX14_CONSTEXPR
-                operator value_type &() const
-                {
-                    return value_;
-                }
-                // Provides writability of *r++
-                template<typename T,
+                    using value_type = iterator_value_t<I>;
+                private:
+                    mutable value_type value_;
+                    I it_;
+                public:
+                    RANGES_CXX14_CONSTEXPR
+                    writable_postfix_increment_proxy() = default;
+                    RANGES_CXX14_CONSTEXPR
+                    explicit writable_postfix_increment_proxy(I x)
+                    : value_(*x)
+                    , it_(std::move(x))
+                    {}
+                    // Dereferencing must return a proxy so that both *r++ = o and
+                    // value_type(*r++) can work.  In this case, *r is the same as
+                    // *r++, and the conversion operator below is used to ensure
+                    // readability.
+                    RANGES_CXX14_CONSTEXPR
+                    writable_postfix_increment_proxy const & operator*() const
+                    {
+                        return *this;
+                    }
+                    // So that iter_move(r++) moves the cached value out
+                    RANGES_CXX14_CONSTEXPR
+                    friend value_type && indirect_move(writable_postfix_increment_proxy const &ref)
+                    {
+                        return std::move(ref.value_);
+                    }
+                    // Provides readability of *r++
+                    RANGES_CXX14_CONSTEXPR
+                    operator value_type &() const
+                    {
+                        return value_;
+                    }
+                    // Provides writability of *r++
+                    template<typename T,
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(Writable<I, T>::value)>
+                        CONCEPT_REQUIRES_(Writable<I, T>::value)>
 #else
-                    CONCEPT_REQUIRES_(Writable<I, T>())>
+                        CONCEPT_REQUIRES_(Writable<I, T>())>
 #endif
-                RANGES_CXX14_CONSTEXPR
-                void operator=(T const &x) const
-                {
-                    *it_ = x;
-                }
-                // This overload just in case only non-const objects are writable
-                template<typename T,
+                    RANGES_CXX14_CONSTEXPR
+                    void operator=(T const &x) const
+                    {
+                        *it_ = x;
+                    }
+                    // This overload just in case only non-const objects are writable
+                    template<typename T,
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(Writable<I, T>::value)>
+                        CONCEPT_REQUIRES_(Writable<I, T>::value)>
 #else
-                    CONCEPT_REQUIRES_(Writable<I, T>())>
+                        CONCEPT_REQUIRES_(Writable<I, T>())>
 #endif
-                RANGES_CXX14_CONSTEXPR
-                void operator=(T &x) const
-                {
-                    *it_ = x;
-                }
-                template<typename T,
+                    RANGES_CXX14_CONSTEXPR
+                    void operator=(T &x) const
+                    {
+                        *it_ = x;
+                    }
+                    template<typename T,
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(MoveWritable<I, T>::value)>
+                        CONCEPT_REQUIRES_(MoveWritable<I, T>::value)>
 #else
-                    CONCEPT_REQUIRES_(MoveWritable<I, T>())>
+                        CONCEPT_REQUIRES_(MoveWritable<I, T>())>
 #endif
-                RANGES_CXX14_CONSTEXPR
-                void operator=(T &&x) const
-                {
-                    *it_ = std::move(x);
-                }
-                // Provides X(r++)
-                RANGES_CXX14_CONSTEXPR
-                operator I const &() const
-                {
-                    return it_;
-                }
-            };
+                    RANGES_CXX14_CONSTEXPR
+                    void operator=(T &&x) const
+                    {
+                        *it_ = std::move(x);
+                    }
+                    // Provides X(r++)
+                    RANGES_CXX14_CONSTEXPR
+                    operator I const &() const
+                    {
+                        return it_;
+                    }
+                };
+            }
+            using writable_postfix_increment_proxy_detail::writable_postfix_increment_proxy;
 
             template<typename Ref, typename Val>
             using is_non_proxy_reference =

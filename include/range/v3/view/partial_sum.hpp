@@ -86,14 +86,14 @@ namespace ranges
 
             adaptor<false> begin_adaptor()
             {
-                return empty(this->base()) ? adaptor<false>{*this} :
-                    adaptor<false>{*this, front(this->base())};
+                return ranges::empty(this->base()) ? adaptor<false>{*this} :
+                    adaptor<false>{*this, ranges::front(this->base())};
             }
             meta::if_<use_sentinel_t, adaptor_base, adaptor<false>> end_adaptor()
             {
-                if(use_sentinel_t() || empty(this->base()))
+                if(use_sentinel_t() || ranges::empty(this->base()))
                     return {*this};
-                return {*this, front(this->base())};
+                return {*this, ranges::front(this->base())};
             }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
@@ -104,8 +104,8 @@ namespace ranges
 #endif
             adaptor<true> begin_adaptor() const
             {
-                return empty(this->base()) ? adaptor<true>{*this} :
-                    adaptor<true>{*this, front(this->base())};
+                return ranges::empty(this->base()) ? adaptor<true>{*this} :
+                    adaptor<true>{*this, ranges::front(this->base())};
             }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
@@ -116,14 +116,18 @@ namespace ranges
 #endif
             meta::if_<use_sentinel_t, adaptor_base, adaptor<true>> end_adaptor() const
             {
-                if(use_sentinel_t() || empty(this->base()))
+                if(use_sentinel_t() || ranges::empty(this->base()))
                     return {*this};
-                return {*this, front(this->base())};
+                return {*this, ranges::front(this->base())};
             }
         public:
             partial_sum_view() = default;
             partial_sum_view(Rng rng, Fun fun)
+#ifdef WORKAROUND_207134
+              : partial_sum_view::view_adaptor{std::move(rng)}
+#else
               : view_adaptor_t<partial_sum_view>{std::move(rng)}
+#endif
               , fun_(as_function(std::move(fun)))
             {}
 #ifdef WORKAROUND_SFINAE_CONSTEXPR

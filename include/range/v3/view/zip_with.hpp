@@ -126,224 +126,227 @@ namespace ranges
         };
 #endif
 
-        /// \addtogroup group-views
-        /// @{
-        template<typename Fun, typename...Rngs>
-        struct iter_zip_with_view
-          : view_facade<
-                iter_zip_with_view<Fun, Rngs...>,
-                meta::fold<
-                    meta::list<range_cardinality<Rngs>...>,
-                    std::integral_constant<cardinality, infinite>,
-                    meta::quote<detail::zip_cardinality>>::value>
+        namespace iter_zip_with_view_detail
         {
-        private:
-            friend range_access;
-            semiregular_t<function_type<Fun>> fun_;
-            std::tuple<Rngs...> rngs_;
-            using difference_type_ = common_type_t<range_difference_t<Rngs>...>;
-            using size_type_ = meta::_t<std::make_unsigned<difference_type_>>;
-
-            struct sentinel;
-            struct cursor
+            /// \addtogroup group-views
+            /// @{
+            template<typename Fun, typename...Rngs>
+            struct iter_zip_with_view
+            : view_facade<
+                    iter_zip_with_view<Fun, Rngs...>,
+                    meta::fold<
+                        meta::list<range_cardinality<Rngs>...>,
+                        std::integral_constant<cardinality, infinite>,
+                        meta::quote<detail::zip_cardinality>>::value>
             {
             private:
-                friend sentinel;
-                using fun_ref_ = semiregular_ref_or_val_t<function_type<Fun>, true>;
-                fun_ref_ fun_;
+                friend range_access;
+                semiregular_t<function_type<Fun>> fun_;
+                std::tuple<Rngs...> rngs_;
+                using difference_type_ = common_type_t<range_difference_t<Rngs>...>;
+                using size_type_ = meta::_t<std::make_unsigned<difference_type_>>;
 
-                std::tuple<range_iterator_t<Rngs>...> its_;
+                struct sentinel;
+                struct cursor
+                {
+                private:
+                    friend sentinel;
+                    using fun_ref_ = semiregular_ref_or_val_t<function_type<Fun>, true>;
+                    fun_ref_ fun_;
 
-                template<std::size_t...Is>
-                auto indirect_move_(meta::index_sequence<Is...>) const
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    fun_(move_tag{}, std::get<Is>(its_)...)
-                )
-                template<typename Sent>
-                friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
+                    std::tuple<range_iterator_t<Rngs>...> its_;
+
+                    template<std::size_t...Is>
+                    auto indirect_move_(meta::index_sequence<Is...>) const
+                    RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                    (
+                        fun_(move_tag{}, std::get<Is>(its_)...)
+                    )
+                    template<typename Sent>
+                    friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
 #ifdef WORKAROUND_NOEXCEPT_DEPENDENT
-                -> decltype(get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{}))
-                {
-                    return get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{});
-                }
+                    -> decltype(get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{}))
+                    {
+                        return get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{});
+                    }
 #else
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{})
-                )
+                    RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                    (
+                        get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{})
+                    )
 #endif
-            public:
-                using difference_type =
-                    common_type_t<range_difference_t<Rngs>...>;
+                public:
+                    using difference_type =
+                        common_type_t<range_difference_t<Rngs>...>;
 
-                using single_pass =
+                    using single_pass =
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
 #ifdef WORKAROUND_215191
-                    meta::or_c<single_pass_helper<Rngs>::value...>;
+                        meta::or_c<single_pass_helper<Rngs>::value...>;
 #else
-                    meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>::value...>;
+                        meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>::value...>;
 #endif
 #else
-                    meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>()...>;
+                        meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>()...>;
 #endif
-                using value_type =
-                    detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rngs>{}...))>;
+                    using value_type =
+                        detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rngs>{}...))>;
 
-                cursor() = default;
-                cursor(fun_ref_ fun, std::tuple<range_iterator_t<Rngs>...> its)
-                  : fun_(std::move(fun)), its_(std::move(its))
-                {}
-                auto current() const
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    tuple_apply(fun_, its_)
-                )
-                void next()
-                {
-                    tuple_for_each(its_, detail::inc);
-                }
-                bool equal(cursor const &that) const
-                {
-                    // By returning true if *any* of the iterators are equal, we allow
-                    // zipped ranges to be of different lengths, stopping when the first
-                    // one reaches the end.
-                    return tuple_foldl(
-                        tuple_transform(its_, that.its_, detail::equal_to),
-                        false,
-                        [](bool a, bool b) { return a || b; });
-                }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>::value...>::value)
-#else
-                CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>()...>::value)
-#endif
-                void prev()
-                {
-                    tuple_for_each(its_, detail::dec);
-                }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
-#else
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
-#endif
-                void advance(difference_type n)
-                {
-                    using std::placeholders::_1;
-                    tuple_for_each(its_, std::bind(detail::advance_, _1, n));
-                }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
-#else
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
-#endif
-                difference_type distance_to(cursor const &that) const
-                {
-                    // Return the smallest distance (in magnitude) of any of the iterator
-                    // pairs. This is to accommodate zippers of sequences of different length.
-                    if(0 < std::get<0>(that.its_) - std::get<0>(its_))
+                    cursor() = default;
+                    cursor(fun_ref_ fun, std::tuple<range_iterator_t<Rngs>...> its)
+                    : fun_(std::move(fun)), its_(std::move(its))
+                    {}
+                    auto current() const
+                    RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                    (
+                        tuple_apply(fun_, its_)
+                    )
+                    void next()
+                    {
+                        tuple_for_each(its_, detail::inc);
+                    }
+                    bool equal(cursor const &that) const
+                    {
+                        // By returning true if *any* of the iterators are equal, we allow
+                        // zipped ranges to be of different lengths, stopping when the first
+                        // one reaches the end.
                         return tuple_foldl(
-                            tuple_transform(its_, that.its_, detail::distance_to),
-                            (std::numeric_limits<difference_type>::max)(),
+                            tuple_transform(its_, that.its_, detail::equal_to),
+                            false,
+                            [](bool a, bool b) { return a || b; });
+                    }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>::value...>::value)
+#else
+                    CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>()...>::value)
+#endif
+                    void prev()
+                    {
+                        tuple_for_each(its_, detail::dec);
+                    }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+#else
+                    CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+#endif
+                    void advance(difference_type n)
+                    {
+                        using std::placeholders::_1;
+                        tuple_for_each(its_, std::bind(detail::advance_, _1, n));
+                    }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+#else
+                    CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+#endif
+                    difference_type distance_to(cursor const &that) const
+                    {
+                        // Return the smallest distance (in magnitude) of any of the iterator
+                        // pairs. This is to accommodate zippers of sequences of different length.
+                        if(0 < std::get<0>(that.its_) - std::get<0>(its_))
+                            return tuple_foldl(
+                                tuple_transform(its_, that.its_, detail::distance_to),
+                                (std::numeric_limits<difference_type>::max)(),
+                                detail::min_);
+                        else
+                            return tuple_foldl(
+                                tuple_transform(its_, that.its_, detail::distance_to),
+                                (std::numeric_limits<difference_type>::min)(),
+                                detail::max_);
+                    }
+                };
+
+                struct sentinel
+                {
+                private:
+                    std::tuple<range_sentinel_t<Rngs>...> ends_;
+                public:
+                    sentinel() = default;
+                    sentinel(detail::any, std::tuple<range_sentinel_t<Rngs>...> ends)
+                    : ends_(std::move(ends))
+                    {}
+                    bool equal(cursor const &pos) const
+                    {
+                        // By returning true if *any* of the iterators are equal, we allow
+                        // zipped ranges to be of different lengths, stopping when the first
+                        // one reaches the end.
+                        return tuple_foldl(
+                            tuple_transform(pos.its_, ends_, detail::equal_to),
+                            false,
+                            [](bool a, bool b) { return a || b; });
+                    }
+                };
+
+                using end_cursor_t =
+                    meta::if_<
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                        meta::and_c<
+                            (bool) BoundedRange<Rngs>::value...,
+#ifdef WORKAROUND_215191
+                            !single_pass_helper<Rngs>::value...>,
+#else
+                            !SinglePass<range_iterator_t<Rngs>>::value...>,
+#endif
+#else
+                        meta::and_c<
+                            (bool) BoundedRange<Rngs>()...,
+                            !SinglePass<range_iterator_t<Rngs>>()...>,
+#endif
+                        cursor,
+                        sentinel>;
+
+                cursor begin_cursor()
+                {
+                    return {fun_, tuple_transform(rngs_, ranges::begin)};
+                }
+                end_cursor_t end_cursor()
+                {
+                    return {fun_, tuple_transform(rngs_, ranges::end)};
+                }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
+#else
+                CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
+#endif
+                cursor begin_cursor() const
+                {
+                    return {fun_, tuple_transform(rngs_, ranges::begin)};
+                }
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
+#else
+                CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
+#endif
+                end_cursor_t end_cursor() const
+                {
+                    return {fun_, tuple_transform(rngs_, ranges::end)};
+                }
+            public:
+                iter_zip_with_view() = default;
+                explicit iter_zip_with_view(Rngs ...rngs)
+                : fun_(as_function(Fun{}))
+                , rngs_{std::move(rngs)...}
+                {}
+                explicit iter_zip_with_view(Fun fun, Rngs ...rngs)
+                : fun_(as_function(std::move(fun)))
+                , rngs_{std::move(rngs)...}
+                {}
+#ifdef WORKAROUND_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>::value...>::value)
+#else
+                CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>()...>::value)
+#endif
+                constexpr size_type_ size() const
+                {
+                    return range_cardinality<iter_zip_with_view>::value >= 0 ?
+                        (size_type_)range_cardinality<iter_zip_with_view>::value :
+                        tuple_foldl(
+                            tuple_transform(rngs_, ranges::size),
+                            (std::numeric_limits<size_type_>::max)(),
                             detail::min_);
-                    else
-                        return tuple_foldl(
-                            tuple_transform(its_, that.its_, detail::distance_to),
-                            (std::numeric_limits<difference_type>::min)(),
-                            detail::max_);
                 }
             };
-
-            struct sentinel
-            {
-            private:
-                std::tuple<range_sentinel_t<Rngs>...> ends_;
-            public:
-                sentinel() = default;
-                sentinel(detail::any, std::tuple<range_sentinel_t<Rngs>...> ends)
-                  : ends_(std::move(ends))
-                {}
-                bool equal(cursor const &pos) const
-                {
-                    // By returning true if *any* of the iterators are equal, we allow
-                    // zipped ranges to be of different lengths, stopping when the first
-                    // one reaches the end.
-                    return tuple_foldl(
-                        tuple_transform(pos.its_, ends_, detail::equal_to),
-                        false,
-                        [](bool a, bool b) { return a || b; });
-                }
-            };
-
-            using end_cursor_t =
-                meta::if_<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    meta::and_c<
-                        (bool) BoundedRange<Rngs>::value...,
-#ifdef WORKAROUND_215191
-                        !single_pass_helper<Rngs>::value...>,
-#else
-                        !SinglePass<range_iterator_t<Rngs>>::value...>,
-#endif
-#else
-                    meta::and_c<
-                        (bool) BoundedRange<Rngs>()...,
-                        !SinglePass<range_iterator_t<Rngs>>()...>,
-#endif
-                    cursor,
-                    sentinel>;
-
-            cursor begin_cursor()
-            {
-                return {fun_, tuple_transform(rngs_, begin)};
-            }
-            end_cursor_t end_cursor()
-            {
-                return {fun_, tuple_transform(rngs_, end)};
-            }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
-#else
-            CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
-#endif
-            cursor begin_cursor() const
-            {
-                return {fun_, tuple_transform(rngs_, begin)};
-            }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
-#else
-            CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
-#endif
-            end_cursor_t end_cursor() const
-            {
-                return {fun_, tuple_transform(rngs_, end)};
-            }
-        public:
-            iter_zip_with_view() = default;
-            explicit iter_zip_with_view(Rngs ...rngs)
-              : fun_(as_function(Fun{}))
-              , rngs_{std::move(rngs)...}
-            {}
-            explicit iter_zip_with_view(Fun fun, Rngs ...rngs)
-              : fun_(as_function(std::move(fun)))
-              , rngs_{std::move(rngs)...}
-            {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>::value...>::value)
-#else
-            CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>()...>::value)
-#endif
-            constexpr size_type_ size() const
-            {
-                return range_cardinality<iter_zip_with_view>::value >= 0 ?
-                    (size_type_)range_cardinality<iter_zip_with_view>::value :
-                    tuple_foldl(
-                        tuple_transform(rngs_, ranges::size),
-                        (std::numeric_limits<size_type_>::max)(),
-                        detail::min_);
-            }
-        };
+        }
 
         template<typename Fun, typename...Rngs>
         struct zip_with_view
