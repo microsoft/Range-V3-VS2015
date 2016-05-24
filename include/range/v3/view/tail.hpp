@@ -53,7 +53,11 @@ namespace ranges
               : rng_(std::forward<Rng>(rng))
             {
                 CONCEPT_ASSERT(InputRange<Rng>());
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                 RANGES_ASSERT(!ForwardRange<Rng>() || !ranges::empty(rng_));
+#else
+                RANGES_ASSERT(!ForwardRange<Rng>() || !empty(rng_));
+#endif
             }
             iterator begin()
             {

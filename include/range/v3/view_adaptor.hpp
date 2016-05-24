@@ -122,12 +122,16 @@ namespace ranges
         template<typename Derived>
         using view_adaptor_t = meta::_t<range_access::view_adaptor<Derived>>;
 
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         namespace adaptor_cursor_detail
         {
+#endif
             template<typename BaseIt, typename Adapt>
             struct adaptor_cursor;
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         }
         using adaptor_cursor_detail::adaptor_cursor;
+#endif
 
         template<typename BaseSent, typename Adapt>
         struct adaptor_sentinel;
@@ -218,8 +222,10 @@ namespace ranges
             }
         };
 
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         namespace adaptor_cursor_detail
         {
+#endif
             // Build a cursor out of an iterator into the adapted range, and an
             // adaptor that customizes behavior.
             template<typename BaseIter, typename Adapt>
@@ -375,7 +381,9 @@ namespace ranges
                     return this->distance_to_(that, 42);
                 }
             };
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         }
+#endif
 
         // Build a sentinel out of a sentinel into the adapted range, and an
         // adaptor that customizes behavior.

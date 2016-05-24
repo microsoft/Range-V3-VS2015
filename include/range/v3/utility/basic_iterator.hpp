@@ -222,8 +222,10 @@ namespace ranges
                 }
             };
 
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
             namespace writable_postfix_increment_proxy_detail
             {
+#endif
                 // In general, we can't determine that such an iterator isn't
                 // writable -- we also need to store a copy of the old iterator so
                 // that it can be written into.
@@ -305,8 +307,10 @@ namespace ranges
                         return it_;
                     }
                 };
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
             }
             using writable_postfix_increment_proxy_detail::writable_postfix_increment_proxy;
+#endif
 
             template<typename Ref, typename Val>
             using is_non_proxy_reference =

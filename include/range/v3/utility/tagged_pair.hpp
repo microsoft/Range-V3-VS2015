@@ -24,12 +24,16 @@ namespace ranges
 {
     inline namespace v3
     {
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         namespace tagged_detail
         {
+#endif
             template<typename Base, typename...Tags>
             struct tagged;
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         }
         using tagged_detail::tagged;
+#endif
 
         /// \cond
         namespace detail
@@ -75,8 +79,10 @@ namespace ranges
         }
         /// \endcond
 
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         namespace tagged_detail
         {
+#endif
             template<typename Base, typename...Tags>
             struct tagged
             : Base
@@ -134,7 +140,9 @@ namespace ranges
                     x.swap(y);
                 }
             };
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         }
+#endif
 
         template<typename F, typename S>
         using tagged_pair =

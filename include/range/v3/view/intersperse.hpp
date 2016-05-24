@@ -116,11 +116,7 @@ namespace ranges
             struct sentinel_adaptor : adaptor_base
             {
                 bool empty(range_iterator_t<Rng> it, cursor_adaptor const &other,
-#ifdef BUGFIX
                     range_sentinel_t<Rng> sent) const
-#else
-                    range_sentinel_t<Rng> sent)
-#endif
                 {
                     return it == sent;
                 }

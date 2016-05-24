@@ -98,9 +98,17 @@ namespace ranges
                 void satisfy(meta::size_t<N>)
                 {
                     RANGES_ASSERT(its_.which() == N);
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                     if(ranges::get<N>(its_) == ranges::end(std::get<N>(rng_->rngs_)))
+#else
+                    if(ranges::get<N>(its_) == end(std::get<N>(rng_->rngs_)))
+#endif
                     {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                         ranges::set<N + 1>(its_, ranges::begin(std::get<N + 1>(rng_->rngs_)));
+#else
+                        ranges::set<N + 1>(its_, begin(std::get<N + 1>(rng_->rngs_)));
+#endif
                         this->satisfy(meta::size_t<N + 1>{});
                     }
                 }
@@ -124,13 +132,21 @@ namespace ranges
                     template<typename I>
                     void operator()(I &it, meta::size_t<0>) const
                     {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                         RANGES_ASSERT(it != ranges::begin(std::get<0>(pos->rng_->rngs_)));
+#else
+                        RANGES_ASSERT(it != begin(std::get<0>(pos->rng_->rngs_)));
+#endif
                         --it;
                     }
                     template<typename I, std::size_t N>
                     void operator()(I &it, meta::size_t<N>) const
                     {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                         if(it == ranges::begin(std::get<N>(pos->rng_->rngs_)))
+#else
+                        if(it == begin(std::get<N>(pos->rng_->rngs_)))
+#endif
                         {
                             auto &&rng = std::get<N - 1>(pos->rng_->rngs_);
                             ranges::set<N - 1>(pos->its_,
@@ -205,14 +221,22 @@ namespace ranges
                     {
                         if(to.its_.which() == N)
                             return distance(ranges::get<N>(from.its_), ranges::get<N>(to.its_));
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                         return distance(ranges::get<N>(from.its_), ranges::end(std::get<N>(from.rng_->rngs_))) +
+#else
+                        return distance(ranges::get<N>(from.its_), end(std::get<N>(from.rng_->rngs_))) +
+#endif
                             cursor::distance_to_(meta::size_t<N + 1>{}, from, to);
                     }
                     if(from.its_.which() < N && to.its_.which() > N)
                         return distance(std::get<N>(from.rng_->rngs_)) +
                             cursor::distance_to_(meta::size_t<N + 1>{}, from, to);
                     RANGES_ASSERT(to.its_.which() == N);
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                     return distance(ranges::begin(std::get<N>(from.rng_->rngs_)), ranges::get<N>(to.its_));
+#else
+                    return distance(begin(std::get<N>(from.rng_->rngs_)), ranges::get<N>(to.its_));
+#endif
                 }
             public:
                 // BUGBUG what about rvalue_reference and common_reference?
@@ -228,12 +252,22 @@ namespace ranges
 #endif
                 cursor() = default;
                 cursor(concat_view_t &rng, begin_tag)
-                  : rng_(&rng), its_{meta::size_t<0>{}, ranges::begin(std::get<0>(rng.rngs_))}
+                  : rng_(&rng)
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+                  , its_{meta::size_t<0>{}, ranges::begin(std::get<0>(rng.rngs_))}
+#else
+                  , its_{meta::size_t<0>{}, begin(std::get<0>(rng.rngs_))}
+#endif
                 {
                     this->satisfy(meta::size_t<0>{});
                 }
                 cursor(concat_view_t &rng, end_tag)
-                  : rng_(&rng), its_{meta::size_t<cranges-1>{}, ranges::end(std::get<cranges-1>(rng.rngs_))}
+                  : rng_(&rng)
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+                  , its_{meta::size_t<cranges-1>{}, ranges::end(std::get<cranges-1>(rng.rngs_))}
+#else
+                  , its_{meta::size_t<cranges-1>{}, end(std::get<cranges-1>(rng.rngs_))}
+#endif
                 {}
                 reference current() const
                 {
@@ -293,7 +327,11 @@ namespace ranges
             public:
                 sentinel() = default;
                 sentinel(concat_view_t &rng, end_tag)
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                   : end_(ranges::end(std::get<cranges - 1>(rng.rngs_)))
+#else
+                  : end_(end(std::get<cranges - 1>(rng.rngs_)))
+#endif
                 {}
                 bool equal(cursor<IsConst> const &pos) const
                 {

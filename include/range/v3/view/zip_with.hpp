@@ -126,8 +126,10 @@ namespace ranges
         };
 #endif
 
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         namespace iter_zip_with_view_detail
         {
+#endif
             /// \addtogroup group-views
             /// @{
             template<typename Fun, typename...Rngs>
@@ -165,10 +167,10 @@ namespace ranges
                     template<typename Sent>
                     friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
 #ifdef WORKAROUND_NOEXCEPT_DEPENDENT
-                    -> decltype(get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{}))
-                    {
-                        return get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{});
-                    }
+                    RANGES_DECLTYPE_AUTO_RETURN
+                    (
+                        get_cursor(it).indirect_move_(meta::make_index_sequence<sizeof...(Rngs)>{})
+                    )
 #else
                     RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
                     (
@@ -297,11 +299,19 @@ namespace ranges
 
                 cursor begin_cursor()
                 {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                     return {fun_, tuple_transform(rngs_, ranges::begin)};
+#else
+                    return {fun_, tuple_transform(rngs_, begin)};
+#endif
                 }
                 end_cursor_t end_cursor()
                 {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                     return {fun_, tuple_transform(rngs_, ranges::end)};
+#else
+                    return {fun_, tuple_transform(rngs_, end)};
+#endif
                 }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
@@ -310,7 +320,11 @@ namespace ranges
 #endif
                 cursor begin_cursor() const
                 {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                     return {fun_, tuple_transform(rngs_, ranges::begin)};
+#else
+                    return {fun_, tuple_transform(rngs_, begin)};
+#endif
                 }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
@@ -319,7 +333,11 @@ namespace ranges
 #endif
                 end_cursor_t end_cursor() const
                 {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                     return {fun_, tuple_transform(rngs_, ranges::end)};
+#else
+                    return {fun_, tuple_transform(rngs_, end)};
+#endif
                 }
             public:
                 iter_zip_with_view() = default;
@@ -346,7 +364,10 @@ namespace ranges
                             detail::min_);
                 }
             };
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         }
+        using iter_zip_with_view_detail::iter_zip_with_view;
+#endif
 
         template<typename Fun, typename...Rngs>
         struct zip_with_view

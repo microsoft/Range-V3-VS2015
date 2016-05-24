@@ -78,20 +78,26 @@
 #define WORKAROUND_SFINAE_FUNCTION_DECLTYPE
 // The same as WORKAROUND_204517
 #define WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
-//#define WORKAROUND_LAMBDA_PREPARSING
 
 // This requires __declspec(empty_bases)
 #define WORKAROUND_EBO
-
-#define WORKAROUND_PERMISSIVE
 
 #ifdef WORKAROUND_PERMISSIVE
 // fail only under /d1permissive
 // alias template
 #define WORKAROUND_207134
+// Qualify names to avoid collisions with definitions in dependent base classes
+#define WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+// "hidden" friend functions are not hidden. Relocate classes that declare hidden friends
+// that would interfere with a customization point into nested namespaces.
+#define WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
 #endif
 
-// /EHsc and noexcept
+// Enable the subset of the WORKAROUND_PERMISSIVE_HIDDEN_FRIEND changes that
+// indirect_move needs to work in permissive-.
+#define WORKAROUND_INDIRECT_MOVE
+
+// Destructors are implicitly noexcept only when compiling with /EHs or /EHa set
 #define WORKAROUND_140392
 // friend with different nested template parameter level
 #define WORKAROUND_159890
@@ -124,7 +130,6 @@
 // friend + default template argument
 #define WORKAROUND_216572
 
-// replace.cpp (prevent indirect_move in adaptor_cursor from being specialized)
 // variant.hpp (pack expansion doesn't happen for default argument)
 #define WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
 
@@ -142,8 +147,6 @@
 
 // Temporarily disabled tests
 #define TEST_FAILURES
-
-#define BUGFIX
 
 #endif
 

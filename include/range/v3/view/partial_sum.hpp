@@ -86,14 +86,25 @@ namespace ranges
 
             adaptor<false> begin_adaptor()
             {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                 return ranges::empty(this->base()) ? adaptor<false>{*this} :
                     adaptor<false>{*this, ranges::front(this->base())};
+#else
+                return empty(this->base()) ? adaptor<false>{*this} :
+                    adaptor<false>{*this, front(this->base())};
+#endif
             }
             meta::if_<use_sentinel_t, adaptor_base, adaptor<false>> end_adaptor()
             {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                 if(use_sentinel_t() || ranges::empty(this->base()))
                     return {*this};
                 return {*this, ranges::front(this->base())};
+#else
+                if(use_sentinel_t() || empty(this->base()))
+                    return {*this};
+                return {*this, front(this->base())};
+#endif
             }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
@@ -104,8 +115,13 @@ namespace ranges
 #endif
             adaptor<true> begin_adaptor() const
             {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                 return ranges::empty(this->base()) ? adaptor<true>{*this} :
                     adaptor<true>{*this, ranges::front(this->base())};
+#else
+                return empty(this->base()) ? adaptor<true>{*this} :
+                    adaptor<true>{*this, front(this->base())};
+#endif
             }
 #ifdef WORKAROUND_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
@@ -116,9 +132,15 @@ namespace ranges
 #endif
             meta::if_<use_sentinel_t, adaptor_base, adaptor<true>> end_adaptor() const
             {
+#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
                 if(use_sentinel_t() || ranges::empty(this->base()))
                     return {*this};
                 return {*this, ranges::front(this->base())};
+#else
+                if(use_sentinel_t() || empty(this->base()))
+                    return {*this};
+                return {*this, front(this->base())};
+#endif
             }
         public:
             partial_sum_view() = default;

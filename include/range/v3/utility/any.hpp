@@ -34,11 +34,15 @@ namespace ranges
             }
         };
 
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         namespace any_detail
         {
+#endif
             struct any;
         }
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         using any_detail::any;
+#endif
 
         template<typename T>
         meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
@@ -58,8 +62,10 @@ namespace ranges
         template<typename T>
         T const * any_cast(any const *) noexcept;
 
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         namespace any_detail
         {
+#endif
             struct any
             {
             private:
@@ -156,7 +162,9 @@ namespace ranges
                     x.swap(y);
                 }
             };
+#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         }
+#endif
 
         /// \throw bad_any_cast
         template<typename T>

@@ -673,12 +673,16 @@ namespace ranges
             struct values_fn;
         }
 
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         namespace iter_zip_with_view_detail
         {
+#endif
             template<typename Fun, typename...Rngs>
             struct iter_zip_with_view;
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         }
         using iter_zip_with_view_detail::iter_zip_with_view;
+#endif
 
         template<typename Fun, typename ...Rngs>
         struct zip_with_view;

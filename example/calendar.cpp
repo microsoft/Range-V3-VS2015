@@ -93,6 +93,12 @@ namespace ranges {
 }
 CONCEPT_ASSERT(Incrementable<date>());
 
+#if 0
+// TODO: Find the bug that these statements work around
+CONCEPT_ASSERT(InputRange<iota_view<date, void>>());
+CONCEPT_ASSERT(InputRange<iota_view<date, date>>());
+#endif
+
 auto dates(unsigned short start, unsigned short stop) {
     return view::iota(date{start,greg::Jan,1},
                       date{stop,greg::Jan,1});

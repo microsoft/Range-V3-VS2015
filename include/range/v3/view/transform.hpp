@@ -148,8 +148,10 @@ namespace ranges
             {}
         };
 
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         namespace iter_transform2_view_detail
         {
+#endif
             template<typename Rng1, typename Rng2, typename Fun>
             struct iter_transform2_view
             : view_facade<
@@ -329,8 +331,10 @@ namespace ranges
                         std::min<size_type_>(ranges::size(rng1_), ranges::size(rng2_));
                 }
             };
+#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
         }
         using iter_transform2_view_detail::iter_transform2_view;
+#endif
 
         template<typename Rng1, typename Rng2, typename Fun>
         struct transform2_view
