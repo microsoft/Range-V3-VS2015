@@ -76,8 +76,6 @@
 #define WORKAROUND_SFINAE_PARAMETERPACK
 #define WORKAROUND_SFINAE_ALIAS_DECLTYPE
 #define WORKAROUND_SFINAE_FUNCTION_DECLTYPE
-// The same as WORKAROUND_204517
-#define WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
 
 // This requires __declspec(empty_bases)
 #define WORKAROUND_EBO
@@ -97,7 +95,7 @@
 // indirect_move needs to work in permissive-.
 #define WORKAROUND_INDIRECT_MOVE
 
-// Destructors are implicitly noexcept only when compiling with /EHs or /EHa set
+// Destructors are implicitly noexcept only when compiling with /EHa or /EHs
 #define WORKAROUND_140392
 // friend with different nested template parameter level
 #define WORKAROUND_159890

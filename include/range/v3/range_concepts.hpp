@@ -60,23 +60,23 @@ namespace ranges
             {
                 // Associated types
 #ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
-                template <typename T>
+                template<typename>
                 using iterator_t_helper_void_t = void;
-                template <class T, class V = void> struct iterator_t_helper {};
-                template <class T> struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(val<T>()))>> {
-                    typedef decltype(begin(val<T>())) type;
+                template<typename, typename = void> struct iterator_t_helper {};
+                template<typename T> struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(val<T>()))>> {
+                    using type = decltype(begin(val<T>()));
                 };
                 template<typename T>
-                using iterator_t = typename iterator_t_helper<T>::type;
+                using iterator_t = meta::_t<iterator_t_helper<T>>;
 
-                template <typename T>
+                template<typename>
                 using sentinel_t_helper_void_t = void;
-                template <class T, class V = void> struct sentinel_t_helper {};
-                template <class T> struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(val<T>()))>> {
-                    typedef decltype(end(val<T>())) type;
+                template<typename, typename = void> struct sentinel_t_helper {};
+                template<typename T> struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(val<T>()))>> {
+                    using type = decltype(end(val<T>()));
                 };
                 template<typename T>
-                using sentinel_t = typename sentinel_t_helper<T>::type;
+                using sentinel_t = meta::_t<sentinel_t_helper<T>>;
 #else
                 template<typename T>
                 using iterator_t = decltype(begin(val<T>()));
@@ -174,8 +174,19 @@ namespace ranges
             struct SizedRange
               : refines<Range>
             {
+#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+                template<typename>
+                using size_t_helper_void_t = void;
+                template<typename, typename = void> struct size_t_helper {};
+                template<typename T> struct size_t_helper<T, size_t_helper_void_t<decltype(size(val<T>()))>> {
+                    using type = decltype(size(val<T>()));
+                };
+                template<typename T>
+                using size_t = meta::_t<size_t_helper<T>>;
+#else
                 template<typename T>
                 using size_t = decltype(size(val<T>()));
+#endif
 
                 template<typename T>
                 auto requires_(T&& t) -> decltype(
