@@ -63,8 +63,8 @@ namespace ranges
                 template<typename>
                 using iterator_t_helper_void_t = void;
                 template<typename, typename = void> struct iterator_t_helper {};
-                template<typename T> struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(val<T>()))>> {
-                    using type = decltype(begin(val<T>()));
+                template<typename T> struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(std::declval<T&>()))>> {
+                    using type = decltype(begin(std::declval<T&>()));
                 };
                 template<typename T>
                 using iterator_t = meta::_t<iterator_t_helper<T>>;
@@ -72,17 +72,17 @@ namespace ranges
                 template<typename>
                 using sentinel_t_helper_void_t = void;
                 template<typename, typename = void> struct sentinel_t_helper {};
-                template<typename T> struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(val<T>()))>> {
-                    using type = decltype(end(val<T>()));
+                template<typename T> struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(std::declval<T&>()))>> {
+                    using type = decltype(end(std::declval<T&>()));
                 };
                 template<typename T>
                 using sentinel_t = meta::_t<sentinel_t_helper<T>>;
 #else
                 template<typename T>
-                using iterator_t = decltype(begin(val<T>()));
+                using iterator_t = decltype(begin(std::declval<T&>()));
 
                 template<typename T>
-                using sentinel_t = decltype(end(val<T>()));
+                using sentinel_t = decltype(end(std::declval<T&>()));
 #endif
 
                 template<typename T>
@@ -178,14 +178,14 @@ namespace ranges
                 template<typename>
                 using size_t_helper_void_t = void;
                 template<typename, typename = void> struct size_t_helper {};
-                template<typename T> struct size_t_helper<T, size_t_helper_void_t<decltype(size(val<T>()))>> {
-                    using type = decltype(size(val<T>()));
+                template<typename T> struct size_t_helper<T, size_t_helper_void_t<decltype(size(std::declval<T&>()))>> {
+                    using type = decltype(size(std::declval<T&>()));
                 };
                 template<typename T>
                 using size_t = meta::_t<size_t_helper<T>>;
 #else
                 template<typename T>
-                using size_t = decltype(size(val<T>()));
+                using size_t = decltype(size(std::declval<T&>()));
 #endif
 
                 template<typename T>

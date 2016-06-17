@@ -32,9 +32,13 @@ namespace ranges
         /// \cond
         namespace detail
         {
-            inline unsigned int random_seed_()
+            template<typename = void>
+            std::random_device::result_type random_seed_()
             {
-                RANGES_STATIC_THREAD_LOCAL std::random_device s_rd;
+#if RANGES_CXX_THREAD_LOCAL < RANGES_CXX_THREAD_LOCAL_11
+#error This fork requires C++11 thread_local support.
+#endif
+                static thread_local std::random_device s_rd;
                 return s_rd();
             }
         }

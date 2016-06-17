@@ -84,12 +84,7 @@ private:
         return {};
     }
 public:
-#ifdef WORKAROUND_206729
-    typedef ranges::view_adaptor<my_reverse_view<BidiRange>, BidiRange> my_base;
-    using my_base::my_base;
-#else
-    using ranges::view_adaptor_t<my_reverse_view>::view_adaptor_t;
-#endif
+    using my_reverse_view::view_adaptor::view_adaptor;
 };
 
 struct my_delimited_range

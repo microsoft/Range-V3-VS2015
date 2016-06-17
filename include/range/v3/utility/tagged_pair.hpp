@@ -191,12 +191,9 @@ namespace ranges
     }                                                                           \
     /**/
 
-#ifndef NO_GCC_WARNING_PRAGMA
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wmismatched-tags"
-#endif
+RANGES_DIAGNOSTIC_PUSH
+RANGES_DIAGNOSTIC_IGNORE_PRAGMAS
+RANGES_DIAGNOSTIC_IGNORE_MISMATCHED_TAGS
 
 namespace std
 {
@@ -211,8 +208,6 @@ namespace std
     {};
 }
 
-#ifndef NO_GCC_WARNING_PRAGMA
-#pragma GCC diagnostic pop
-#endif
+RANGES_DIAGNOSTIC_POP
 
 #endif

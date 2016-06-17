@@ -148,6 +148,14 @@ namespace ranges
             template<typename T>
             using avoid_empty_braces =
               meta::_t<avoid_empty_braces_<uncvref_t<T>>>;
+
+#if defined(WORKAROUND_140392) && defined(_MSC_VER) && !defined(_CPPUNWIND)
+            // Without /EHa or /EHs, destructors are NOT implicitly noexcept
+            template<typename T>
+            using is_nothrow_destructible = std::is_destructible<T>;
+#else
+            using std::is_nothrow_destructible;
+#endif
         }
         /// \endcond
 
@@ -513,12 +521,7 @@ namespace ranges
                 auto requires_(T && t, T* const p = nullptr) -> decltype(
                     concepts::valid_expr(
                         (t.~T(), 42),
-#ifdef WORKAROUND_140392
-						// When /EHsc is not used, we don't mark dtor as noexcept implicitly
-						concepts::is_true(std::is_destructible<T>()),
-#else
-                        concepts::is_true(std::is_nothrow_destructible<T>()),
-#endif
+                        concepts::is_true(detail::is_nothrow_destructible<T>()),
                         concepts::has_type<T*>(&t),
                         concepts::has_type<const T*>(&std::declval<const T&>()),
                         (delete p, 42),

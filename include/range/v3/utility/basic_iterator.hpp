@@ -31,168 +31,6 @@ namespace ranges
         /// \cond
         namespace detail
         {
-            template<typename T>
-            struct is_reference_to_const
-              : std::false_type
-            {};
-
-            template<typename T>
-            struct is_reference_to_const<T const&>
-              : std::true_type
-            {};
-
-            template<typename T>
-            struct is_reference_to_const<T const&&>
-              : std::true_type
-            {};
-
-            //
-            // True iff the user has explicitly disabled writability of this
-            // iterator.  Pass the basic_iterator's Val parameter and its
-            // nested ::reference type.
-            //
-            template<typename ValueParam, typename Ref>
-            using iterator_writability_disabled =
-                meta::fast_or<
-                    std::is_const<Ref>,
-                    is_reference_to_const<Ref>,
-                    std::is_const<ValueParam>>;
-
-            // operator[] must return a proxy in case iterator destruction invalidates
-            // referents.
-            // To see why, consider the following implementation of operator[]:
-            //   reference operator[](difference_type n) const
-            //   { return *(*this + n); }
-            // The problem here is that operator[] would return a reference created from
-            // a temporary iterator.
-            template<typename Val>
-            struct operator_brackets_value
-            {
-                using type = Val;
-                template<typename I>
-                static RANGES_CXX14_CONSTEXPR type apply(I const & i)
-                {
-                    return *i;
-                }
-            };
-
-            template<typename I, typename Ref, typename CommonRef>
-            struct operator_brackets_const_proxy
-            {
-                using type = struct proxy
-                {
-                private:
-                    struct private_ {};
-                    using value_t =
-                        meta::if_<
-                            meta::not_<Same<uncvref_t<Ref>, iterator_value_t<I>>>,
-                            iterator_value_t<I>,
-                            private_>;
-                    I const it_;
-                    RANGES_CXX14_CONSTEXPR
-                    explicit proxy(I i)
-                      : it_(std::move(i))
-                    {}
-                    friend struct operator_brackets_const_proxy;
-                public:
-                    RANGES_CXX14_CONSTEXPR
-                    proxy(proxy const&) = default;
-                    RANGES_CXX14_CONSTEXPR
-                    proxy const & operator=(proxy &) const = delete;
-                    RANGES_CXX14_CONSTEXPR operator Ref() const
-                    {
-                        return *it_;
-                    }
-                    operator CommonRef() const volatile
-                    {
-                        return *it_;
-                    }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>::value)
-#else
-                    CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>())
-#endif
-                    RANGES_CXX14_CONSTEXPR operator value_t() const
-                    {
-                        return *it_;
-                    }
-                };
-                static RANGES_CXX14_CONSTEXPR type apply(I i)
-                {
-                    return type{std::move(i)};
-                }
-            };
-
-            template<typename I, typename Ref, typename CommonRef>
-            struct operator_brackets_proxy
-            {
-                using type = struct proxy
-                {
-                private:
-                    struct private_ {};
-                    using value_t =
-                        meta::if_<
-                            meta::not_<Same<uncvref_t<Ref>, iterator_value_t<I>>>,
-                            iterator_value_t<I>,
-                            private_>;
-                    I const it_;
-                    RANGES_CXX14_CONSTEXPR
-                    explicit proxy(I i)
-                      : it_(std::move(i))
-                    {}
-                    friend struct operator_brackets_proxy;
-                public:
-                    RANGES_CXX14_CONSTEXPR operator Ref() const
-                    {
-                        return *it_;
-                    }
-                    operator CommonRef() const volatile
-                    {
-                        return *it_;
-                    }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>::value)
-#else
-                    CONCEPT_REQUIRES(ImplicitlyConvertibleTo<Ref, value_t>())
-#endif
-                    RANGES_CXX14_CONSTEXPR operator value_t() const
-                    {
-                        return *it_;
-                    }
-                    RANGES_CXX14_CONSTEXPR
-                    proxy (proxy const&) = default;
-                    RANGES_CXX14_CONSTEXPR
-                    proxy const & operator=(proxy&) const = delete;
-                    // BUGBUG assign from common reference? from rvalue reference?
-                    RANGES_CXX14_CONSTEXPR
-                    proxy const & operator=(iterator_value_t<I> const & x) const
-                    {
-                        *it_ = x;
-                        return *this;
-                    }
-                    RANGES_CXX14_CONSTEXPR
-                    proxy const & operator=(iterator_value_t<I> && x) const
-                    {
-                        *it_ = std::move(x);
-                        return *this;
-                    }
-                };
-                static RANGES_CXX14_CONSTEXPR type apply(I i)
-                {
-                    return type{std::move(i)};
-                }
-            };
-
-            template<typename I, typename Val, typename Ref, typename CommonRef>
-            using operator_brackets_dispatch =
-                meta::if_<
-                    iterator_writability_disabled<Val, Ref>,
-                    meta::if_<
-                        std::is_pod<Val>,
-                        operator_brackets_value<meta::_t<std::remove_const<Val>>>,
-                        operator_brackets_const_proxy<I, Ref, CommonRef>>,
-                    operator_brackets_proxy<I, Ref, CommonRef>>;
-
             // iterators whose dereference operators reference the same value
             // for all iterators into the same sequence (like many input
             // iterators) need help with their postfix ++: the referenced
@@ -544,8 +382,6 @@ namespace ranges
             using postfix_increment_result_t =
                 detail::postfix_increment_result<
                     basic_iterator, value_type, reference, iterator_category>;
-            using operator_brackets_dispatch_t =
-                detail::operator_brackets_dispatch<basic_iterator, value_type, reference, common_reference>;
         public:
             constexpr basic_iterator() = default;
             RANGES_CXX14_CONSTEXPR basic_iterator(Cur pos)
@@ -832,10 +668,9 @@ namespace ranges
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
-            typename operator_brackets_dispatch_t::type
-            operator[](difference_type n) const
+            reference operator[](difference_type n) const
             {
-                return operator_brackets_dispatch_t::apply(*this + n);
+                return *(*this + n);
             }
         };
 

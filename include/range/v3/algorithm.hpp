@@ -14,7 +14,9 @@
 #ifndef RANGES_V3_ALGORITHM_HPP
 #define RANGES_V3_ALGORITHM_HPP
 
-#include <range/v3/detail/disable_warnings.hpp>
+#include <range/v3/detail/config.hpp>
+
+RANGES_DISABLE_WARNINGS
 
 #include <range/v3/algorithm/adjacent_find.hpp>
 #include <range/v3/algorithm/all_of.hpp>
@@ -45,10 +47,13 @@
 #include <range/v3/algorithm/is_sorted_until.hpp>
 #include <range/v3/algorithm/lexicographical_compare.hpp>
 #include <range/v3/algorithm/lower_bound.hpp>
+#include <range/v3/algorithm/max.hpp>
 #include <range/v3/algorithm/max_element.hpp>
 #include <range/v3/algorithm/merge.hpp>
 #include <range/v3/algorithm/merge_move.hpp>
+#include <range/v3/algorithm/min.hpp>
 #include <range/v3/algorithm/min_element.hpp>
+#include <range/v3/algorithm/minmax.hpp>
 #include <range/v3/algorithm/minmax_element.hpp>
 #include <range/v3/algorithm/mismatch.hpp>
 #include <range/v3/algorithm/move.hpp>
@@ -96,6 +101,6 @@
 #include <range/v3/algorithm/aux_/sort_n_with_buffer.hpp>
 #include <range/v3/algorithm/aux_/upper_bound_n.hpp>
 
-#include <range/v3/detail/re_enable_warnings.hpp>
+RANGES_RE_ENABLE_WARNINGS
 
 #endif

@@ -89,9 +89,7 @@ namespace ranges
                     {
                         if(++it == end)
                         {
-#ifndef RANGES_CXX_GREATER_THAN_11
                             rng_ = nullptr;
-#endif
                             it_ = detail::value_init{};
                             break;
                         }
@@ -120,13 +118,8 @@ namespace ranges
                 bool equal(range_iterator_t<Rng> const &it, range_iterator_t<Rng> const &other_it,
                     adaptor const &other_adapt) const
                 {
-#ifdef RANGES_CXX_GREATER_THAN_11
-                    RANGES_ASSERT(rng_ == other_adapt.rng_);
-                    return it == other_it && it_ == other_adapt.it_;
-#else
                     return (!rng_ && !other_adapt.rng_) ||
                         (it == other_it && it_ == other_adapt.it_);
-#endif
                 }
                 void next(range_iterator_t<Rng> &it)
                 {
@@ -151,11 +144,7 @@ namespace ranges
             }
             adaptor end_adaptor()
             {
-#ifdef RANGES_CXX_GREATER_THAN_11
-                return {*this};
-#else
                 return {};
-#endif
             }
             // TODO: could support const iteration if range_reference_t<Rng> is a true reference.
         public:
@@ -232,9 +221,7 @@ namespace ranges
                         {
                             if(++it == end)
                             {
-#ifndef RANGES_CXX_GREATER_THAN_11
                                 rng_ = nullptr;
-#endif
                                 it_ = detail::value_init{};
                                 break;
                             }
@@ -270,15 +257,9 @@ namespace ranges
                 bool equal(range_iterator_t<Rng> const &it, range_iterator_t<Rng> const &other_it,
                     adaptor const &other_adapt) const
                 {
-#ifdef RANGES_CXX_GREATER_THAN_11
-                    RANGES_ASSERT(rng_ == other_adapt.rng_);
-                    return it == other_it && toggl_ == other_adapt.toggl_ &&
-                        (toggl_ ? it_ == other_adapt.it_ : val_it_ == other_adapt.val_it_);
-#else
                     return (!rng_ && !other_adapt.rng_) ||
                         (it == other_it && toggl_ == other_adapt.toggl_ &&
                             (toggl_ ? it_ == other_adapt.it_ : val_it_ == other_adapt.val_it_));
-#endif
                 }
                 void next(range_iterator_t<Rng> &it)
                 {
@@ -311,11 +292,7 @@ namespace ranges
             }
             adaptor end_adaptor()
             {
-#ifdef RANGES_CXX_GREATER_THAN_11
-                return {*this};
-#else
                 return {};
-#endif
             }
             // TODO: could support const iteration if range_reference_t<Rng> is a true reference.
         public:

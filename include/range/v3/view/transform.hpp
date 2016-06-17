@@ -31,7 +31,6 @@
 #include <range/v3/utility/static_const.hpp>
 #include <range/v3/view/view.hpp>
 #include <range/v3/view/all.hpp>
-#include <range/v3/view/zip_with.hpp>
 
 namespace ranges
 {
@@ -355,7 +354,7 @@ namespace ranges
                 CONCEPT_REQUIRES(my_cardinality < 0 &&
                     SizedRange<Rng1>() && SizedRange<Rng2>())
 #endif
-                constexpr size_type_ size()
+                RANGES_CXX14_CONSTEXPR size_type_ size()
                 {
                     return std::min<size_type_>(ranges::size(rng1_), ranges::size(rng2_));
                 }

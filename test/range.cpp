@@ -21,10 +21,10 @@ struct empty
 {};
 
 #ifndef WORKAROUND_209653
-static_assert(sizeof(ranges::range<int*, empty>) == sizeof(int*),
+static_assert(ranges::detail::broken_ebo || sizeof(ranges::range<int*, empty>) == sizeof(int*),
     "Expected range to be compressed");
 
-static_assert(sizeof(ranges::sized_range<int*, empty>) == sizeof(int*) + sizeof(std::size_t),
+static_assert(ranges::detail::broken_ebo || sizeof(ranges::sized_range<int*, empty>) == sizeof(int*) + sizeof(std::size_t),
     "Expected sized_range to be compressed");
 #endif
 
@@ -57,7 +57,7 @@ int main()
 
     ranges::range<std::vector<int>::iterator, ranges::unreachable> r1 { r0.begin(), {} };
 #ifndef WORKAROUND_209653
-    static_assert(sizeof(r1) == sizeof(vi.begin()), "");
+    static_assert(ranges::detail::broken_ebo || sizeof(r1) == sizeof(vi.begin()), "");
 #endif
     ::models<ranges::concepts::View>(r1);
     ::models_not<ranges::concepts::SizedView>(r1);
@@ -78,7 +78,7 @@ int main()
     CHECK(p1.first == vi.begin()+1);
     CHECK(p1.second == ranges::unreachable{});
 #ifndef WORKAROUND_209653
-    static_assert(sizeof(p1) > sizeof(r1), "");
+    static_assert(ranges::detail::broken_ebo || sizeof(p1) > sizeof(r1), "");
 #endif
 
     ranges::range<std::vector<int>::iterator, ranges::unreachable> r2 { p1 };

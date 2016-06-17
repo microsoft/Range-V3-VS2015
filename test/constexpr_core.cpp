@@ -1,3 +1,18 @@
+// Range v3 library
+//
+//  Copyright Gonzalo Brito Gadeschi 2015
+//
+//  Use, modification and distribution is subject to the
+//  Boost Software License, Version 1.0. (See accompanying
+//  file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
+//
+// Project home: https://github.com/ericniebler/range-v3
+
+#include <range/v3/detail/config.hpp>
+
+#if RANGES_CXX_CONSTEXPR >= RANGES_CXX_CONSTEXPR_14
+
 #include <range/v3/begin_end.hpp>
 #include <range/v3/empty.hpp>
 #include <range/v3/back.hpp>
@@ -6,14 +21,6 @@
 #include <range/v3/size.hpp>
 #include "array.hpp"
 #include "test_iterators.hpp"
-
-#ifdef WORKAROUND_CONSTEXPR_CXX14
-// This test requires C++14 constexpr
-#undef RANGES_CXX_GREATER_THAN_11
-#endif
-
-#ifdef RANGES_CXX_GREATER_THAN_11
-
 
 // This is necessary since advance is a customization point, std::advance is imported for
 // non-range-v3 iterators, and it is not constexpr:
@@ -43,6 +50,21 @@ void advance(input_iterator<T> & i, ranges::iterator_difference_t<I> n) {
 
 // Test sequence 1,2,3,4
 template<typename It>
+RANGES_CXX14_CONSTEXPR auto test_it_back(It, It end,
+    ranges::concepts::BidirectionalIterator*) -> bool
+{
+    auto end_m1_2 = It{ranges::prev(end, 1)};
+    if (*end_m1_2 != 4) { return false; }
+    return true;
+}
+
+template<typename It, typename Concept>
+RANGES_CXX14_CONSTEXPR auto test_it_back(It, It, Concept) -> bool
+{
+    return true;
+}
+
+template<typename It>
 RANGES_CXX14_CONSTEXPR auto test_it_(It beg, It end) -> bool {
     if (*beg != 1) { return false; }
     if (ranges::distance(beg, end) != 4) { return false; }
@@ -50,11 +72,7 @@ RANGES_CXX14_CONSTEXPR auto test_it_(It beg, It end) -> bool {
     auto end_m1 = It{ranges::next(beg, 3)};
     if (*end_m1 != 4) { return false; }
 
-    if (std::is_convertible<ranges::iterator_concept<It>,
-                            ranges::concepts::BidirectionalIterator*>{}) {
-        auto end_m1_2 = It{ranges::prev(end, 1)};
-        if (*end_m1_2 != 4) { return false; }
-    }
+    if (!test_it_back(beg, end, ranges::iterator_concept<It>{})) { return false; }
     auto end2 = beg;
     ranges::advance(end2, end);
     if (end2 != end) { return false; }
@@ -186,10 +204,13 @@ RANGES_CXX14_CONSTEXPR auto test_array() -> bool {
 
     auto beg = ranges::begin(a);
     auto three = ranges::next(beg, 2);
-    // ranges::iter_swap(beg, three);
-    // if (*beg != 3) { return false; }
-    // if (*three != 1) { return false; }
-    // ranges::iter_swap(beg, three);
+
+    if ((false)) {
+      ranges::iter_swap(beg, three);
+      if (*beg != 3) { return false; }
+      if (*three != 1) { return false; }
+      ranges::iter_swap(beg, three);
+    }
 
     if (!test_its(a)) { return false; }
     if (!test_cits(a)) { return false; }
@@ -239,15 +260,13 @@ RANGES_CXX14_CONSTEXPR auto test_init_list() -> bool {
 
     return true;
 }
-#endif
 
 int main() {
-
-#ifdef RANGES_CXX_GREATER_THAN_11
     static_assert(test_array(), "");
     static_assert(test_c_array(), "");
     static_assert(test_init_list(), "");
-#endif
-
-    return 0;
 }
+
+#else
+int main() {}
+#endif
