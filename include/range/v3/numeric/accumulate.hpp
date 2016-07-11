@@ -39,7 +39,7 @@ namespace ranges
         struct accumulate_fn
         {
             template<typename I, typename S, typename T, typename Op = plus, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I, S>::value && Accumulateable<I, T, Op, P>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>() && Accumulateable<I, T, Op, P>())>
@@ -55,7 +55,7 @@ namespace ranges
 
             template<typename Rng, typename T, typename Op = plus, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng>::value && Accumulateable<I, T, Op, P>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<Rng>() && Accumulateable<I, T, Op, P>())>

@@ -32,7 +32,7 @@ namespace ranges
         namespace detail
         {
             template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>())>
@@ -43,7 +43,7 @@ namespace ranges
             }
 
             template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>())>
@@ -54,7 +54,7 @@ namespace ranges
             }
 
             template<bool B, typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>())>
@@ -178,7 +178,7 @@ namespace ranges
         public:
             template<typename I1, typename S1, typename I2, typename S2, typename R = equal_to,
                 typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I1>::value && IteratorRange<I1, S1>::value &&
                     ForwardIterator<I2>::value && IteratorRange<I2, S2>::value &&
                     IndirectCallableRelation<R, Project<I1, P>, I2>::value)>
@@ -200,7 +200,7 @@ namespace ranges
             template<typename Rng1, typename Rng2, typename R = equal_to, typename P = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>::value && ForwardRange<Rng2>::value &&
                     IndirectCallableRelation<R, Project<I1, P>, I2>::value)>
 #else

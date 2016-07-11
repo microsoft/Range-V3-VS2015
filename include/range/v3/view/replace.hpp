@@ -81,7 +81,7 @@ namespace ranges
                 template<typename Val1, typename Val2,
                     typename V1 = detail::decay_t<unwrap_reference_t<Val1>>,
                     typename V2 = detail::decay_t<unwrap_reference_t<Val2>>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Same<V1, V2>::value)>
 #else
                     CONCEPT_REQUIRES_(Same<V1, V2>())>
@@ -97,7 +97,7 @@ namespace ranges
                 template<typename Val1, typename Val2,
                     typename V1 = detail::decay_t<unwrap_reference_t<Val1>>,
                     typename V2 = detail::decay_t<unwrap_reference_t<Val2>>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Same<V1, V2>::value)>
 #else
                     CONCEPT_REQUIRES_(!Same<V1, V2>())>
@@ -122,7 +122,7 @@ namespace ranges
                     CommonReference<unwrap_reference_t<Val2 const &>, range_rvalue_reference_t<Rng>>>;
 
                 template<typename Rng, typename Val1, typename Val2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Val1, Val2>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Val1, Val2>())>
@@ -137,7 +137,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
                 template<typename Rng, typename Val1, typename Val2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Val1, Val2>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Val1, Val2>())>

@@ -36,7 +36,7 @@ namespace ranges
             private:
                 friend action_access;
                 template<typename Gen,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(UniformRandomNumberGenerator<Gen>::value)>
 #else
                     CONCEPT_REQUIRES_(UniformRandomNumberGenerator<Gen>())>
@@ -66,7 +66,7 @@ namespace ranges
                 using Concept = concepts::models<ConceptImpl, Rng, Gen>;
 
                 template<typename Rng, typename Gen,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Gen>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Gen>())>
@@ -79,7 +79,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Gen,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Gen>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Gen>())>

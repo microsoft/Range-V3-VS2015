@@ -35,7 +35,7 @@ namespace ranges
             {
             private:
                 friend action_access;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename F, typename P = ident, CONCEPT_REQUIRES_(!Range<F>::value)>
 #else
                 template<typename F, typename P = ident, CONCEPT_REQUIRES_(!Range<F>())>
@@ -62,7 +62,7 @@ namespace ranges
                 using Concept = concepts::models<ConceptImpl, Rng, F, P>;
 
                 template<typename Rng, typename F, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, F, P>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, F, P>())>
@@ -75,7 +75,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename F, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, F, P>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, F, P>())>

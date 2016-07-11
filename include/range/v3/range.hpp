@@ -43,11 +43,7 @@ namespace ranges
         /// \addtogroup group-core
         /// @{
         template<typename I, typename S /*= I*/>
-#ifdef WORKAROUND_EBO
-        struct __declspec(empty_bases) range
-#else
-        struct range
-#endif
+        struct RANGES_BROKEN_EBO range
           : private compressed_pair<I, S>
           , view_interface<range<I, S>>
         {
@@ -64,7 +60,7 @@ namespace ranges
               : compressed_pair<I, S>{detail::move(begin), detail::move(end)}
             {}
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>::value && ConvertibleTo<Y, sentinel>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>() && ConvertibleTo<Y, sentinel>())>
@@ -73,7 +69,7 @@ namespace ranges
               : compressed_pair<I, S>{detail::move(rng.first), detail::move(rng.second)}
             {}
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>::value && ConvertibleTo<Y, sentinel>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>() && ConvertibleTo<Y, sentinel>())>
@@ -90,7 +86,7 @@ namespace ranges
                 return second;
             }
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
@@ -103,7 +99,7 @@ namespace ranges
             {
                 ++first;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BidirectionalIterator<sentinel>::value)
 #else
             CONCEPT_REQUIRES(BidirectionalIterator<sentinel>())
@@ -123,11 +119,7 @@ namespace ranges
         //   distance(first, second) == third
         //
         template<typename I, typename S /* = I */>
-#ifdef WORKAROUND_EBO
-        struct __declspec(empty_bases) sized_range
-#else
-        struct sized_range
-#endif
+        struct RANGES_BROKEN_EBO sized_range
           : private compressed_pair<I const, S const>
           , view_interface<sized_range<I, S>>
         {
@@ -143,7 +135,7 @@ namespace ranges
                 return detail::unsafe_move(this->second);
             }
             template<typename J = I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<J>::value && IteratorRange<J, S>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardIterator<J>() && IteratorRange<J, S>())>
@@ -153,7 +145,7 @@ namespace ranges
                 RANGES_ASSERT(static_cast<iterator_size_t<I>>(iter_distance(first, second)) == third);
             }
             template<typename J = I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(!ForwardIterator<J>::value || !IteratorRange<J, S>::value)>
 #else
                 CONCEPT_REQUIRES_(!ForwardIterator<J>() || !IteratorRange<J, S>())>
@@ -185,7 +177,7 @@ namespace ranges
               : compressed_pair<I const, S const>{rng.move_first(), rng.move_second()}, third(rng.third)
             {}
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
@@ -194,7 +186,7 @@ namespace ranges
               : sized_range{std::move(rng).first, std::move(rng).second, size}
             {}
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
@@ -203,7 +195,7 @@ namespace ranges
               : sized_range{std::move(rng).first, std::move(rng).second, size}
             {}
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
@@ -226,7 +218,7 @@ namespace ranges
                 return *this;
             }
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Assignable<I&, X &&>::value && Assignable<S&, Y &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Assignable<I&, X &&>() && Assignable<S&, Y &&>())>
@@ -251,7 +243,7 @@ namespace ranges
                 return third;
             }
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
@@ -261,7 +253,7 @@ namespace ranges
                 return {first, second};
             }
             template<typename X, typename Y,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>

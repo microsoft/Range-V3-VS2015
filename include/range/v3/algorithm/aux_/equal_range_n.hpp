@@ -35,7 +35,7 @@ namespace ranges
             struct equal_range_n_fn
             {
                 template<typename I, typename V, typename R = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(BinarySearchable<I, V, R, P>::value)>
 #else
                     CONCEPT_REQUIRES_(BinarySearchable<I, V, R, P>())>

@@ -35,7 +35,7 @@ namespace ranges
         struct move_backward_fn
         {
             template<typename I, typename S, typename O,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value &&
                     BidirectionalIterator<O>::value && IndirectlyMovable<I, O>::value)>
 #else
@@ -52,7 +52,7 @@ namespace ranges
 
             template<typename Rng, typename O,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && BidirectionalIterator<O>::value &&
                     IndirectlyMovable<I, O>::value)>
 #else

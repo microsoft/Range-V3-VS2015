@@ -114,7 +114,7 @@ namespace ranges
                     IndirectCallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
@@ -126,7 +126,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>

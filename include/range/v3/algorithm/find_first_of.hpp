@@ -38,7 +38,7 @@ namespace ranges
             // end position.
             template<typename I0, typename S0, typename I1, typename S1,
                      typename R = equal_to, typename P0 = ident, typename P1 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(IteratorRange<I0, S0>::value && IteratorRange<I1, S1>::value &&
                         ForwardIterator<I1>::value && AsymmetricallyComparable<I0, I1, R, P0, P1>::value)>
 #else
@@ -62,7 +62,7 @@ namespace ranges
                      typename P0 = ident, typename P1 = ident,
                      typename I0 = range_iterator_t<Rng0>,
                      typename I1 = range_iterator_t<Rng1>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng0>::value && Range<Rng1>::value &&
                         ForwardIterator<I1>::value && AsymmetricallyComparable<I0, I1, R, P0, P1>::value)>
 #else

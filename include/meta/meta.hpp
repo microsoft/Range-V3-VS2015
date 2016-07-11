@@ -15,20 +15,23 @@
 #ifndef META_HPP
 #define META_HPP
 
-#if _MSC_VER >= 1900
-#define WORKAROUND_SFINAE_CONSTEXPR
-#define WORKAROUND_SFINAE_CONSTEXPR_2
-#define WORKAROUND_SFINAE_ALIAS_DECLTYPE
-#define WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#if defined(_MSC_VER) && !defined(__clang__)
+#define META_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#define META_WORKAROUND_MSVC_SFINAE_CONSTEXPR_2
+#define META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+#define META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
 // constexpr + static member array
-#define WORKAROUND_210794
+#define META_WORKAROUND_MSVC_210794
 // pack expansion + alias
 //   found in test\utility\meta.cpp
-#define WORKAROUND_214588
+#define META_WORKAROUND_MSVC_214588
 // decltype + pack expansion + partial specialization
-#define WORKAROUND_218738
+#define META_WORKAROUND_MSVC_218738
 // also see VSO 218943
-#define WORKAROUND_CANONICALMEMBER
+#define META_WORKAROUND_MSVC_CANONICAL_MEMBER
+
+// Temporarily disable failing tests that still need workarounds.
+#define DISABLE_MSVC_TEST_FAILURES
 #endif
 
 #include <cstddef>
@@ -138,7 +141,7 @@ namespace meta
             {
                 return nullptr;
             }
-#ifdef WORKAROUND_218738
+#ifdef META_WORKAROUND_MSVC_218738
             template <typename T>
             constexpr id<T> *_nullptr_v_id()
             {
@@ -208,7 +211,7 @@ namespace meta
         template <char Ch>
         using char_ = std::integral_constant<char, Ch>;
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         template<typename T>
         struct value_type_helper
         {
@@ -225,7 +228,7 @@ namespace meta
         /// An integral constant wrapper around the result of decrementing the wrapped integer \c
         /// T::type::value.
         template <typename T>
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         using dec = std::integral_constant<_t<value_type_helper<T>>, T::type::value - 1>;
 #else
         using dec = std::integral_constant<decltype(T::type::value), T::type::value - 1>;
@@ -666,7 +669,7 @@ namespace meta
         {
             // Indirection through defer_i here needed to avoid Core issue 1430
             // http://open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1430
-#ifdef WORKAROUND_214588
+#ifdef META_WORKAROUND_MSVC_214588
             template<typename T1, typename T2>
             struct helper {
                 static const T1 value = T2::type::value;
@@ -928,7 +931,7 @@ namespace meta
 
         /// Logically negate the Boolean parameter
         /// \ingroup logical
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <bool Bool>
         struct not_c_helper {
             static const bool value = !Bool;
@@ -942,7 +945,7 @@ namespace meta
 
         /// Logically negate the integral constant-wrapped Boolean parameter.
         /// \ingroup logical
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <typename Bool>
         struct not_helper {
             typedef not_c<Bool::type::value> type;
@@ -954,7 +957,7 @@ namespace meta
         using not_ = not_c<Bool::type::value>;
 #endif
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <bool Bool>
         struct and_c_helper {
             static const bool value = Bool || true;
@@ -963,7 +966,7 @@ namespace meta
 
         /// Logically and together all the Boolean parameters
         /// \ingroup logical
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <bool... Bools>
         using and_c = std::is_same<integer_sequence<bool, Bools...>,
                                     integer_sequence<bool, and_c_helper<Bools>::value...>>;
@@ -973,7 +976,7 @@ namespace meta
                                    integer_sequence<bool, (Bools || true)...>>;
 #endif
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <typename Bool>
         struct fast_and_helper {
             static const bool value = Bool::type::value;
@@ -1001,7 +1004,7 @@ namespace meta
         using or_c = not_<std::is_same<integer_sequence<bool, Bools...>,
                                        integer_sequence<bool, (Bools && false)...>>>;
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <typename Bool>
         struct fast_or_helper {
             static const bool value = Bool::type::value;
@@ -1170,7 +1173,7 @@ namespace meta
         /// An integral constant wrapper that is the size of the \c meta::list
         /// \p List.
         /// \ingroup list
-#ifdef WORKAROUND_SFINAE_ALIAS_DEPENDENTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <typename List>
         struct mysize_helper {
             static const std::size_t value = List::size();
@@ -1339,7 +1342,7 @@ namespace meta
 
             template <typename... Ts, typename N>
             struct at_<list<Ts...>, N>
-#ifdef WORKAROUND_218738
+#ifdef META_WORKAROUND_MSVC_218738
                 : decltype(at_impl_<repeat_n<N, void *>>::eval(detail::_nullptr_v_id<Ts>()...))
 #else
                 : decltype(at_impl_<repeat_n<N, void *>>::eval(detail::_nullptr_v<id<Ts>>()...))
@@ -1702,7 +1705,7 @@ namespace meta
                 using type = npos;
             };
 
-#ifdef WORKAROUND_210794
+#ifdef META_WORKAROUND_MSVC_210794
             constexpr std::size_t find_index_i_2(bool const *const first, std::size_t i1, std::size_t i2, std::size_t N = 0)
             {
                 return i1 == i2 ? npos::value : first[i1] ? N : find_index_i_2(first, i1 + 1, i2, N + 1);
@@ -1766,7 +1769,7 @@ namespace meta
                 using type = npos;
             };
 
-#ifdef WORKAROUND_210794
+#ifdef META_WORKAROUND_MSVC_210794
             constexpr std::size_t reverse_find_index_i_2(bool const *const first, std::size_t i1, std::size_t i2, std::size_t N)
             {
                 return i1 == i2 ? npos::value : first[i2 - 1] ? N - 1 : reverse_find_index_i_2(first, i1, i2 - 1, N - 1);
@@ -2440,7 +2443,7 @@ namespace meta
         /// \cond
         namespace detail
         {
-#ifdef WORKAROUND_CANONICALMEMBER
+#ifdef META_WORKAROUND_MSVC_CANONICAL_MEMBER
             template <typename, typename, typename, typename = void>
             struct partition_impl
             {
@@ -2585,7 +2588,7 @@ namespace meta
                 using type = list<Ts>;
             };
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template <typename As, typename Ts>
             using substitutions_ = push_back<
                 join<transform<
@@ -2805,7 +2808,7 @@ namespace meta
                 struct thunk
                 {
                     template <typename S, typename R = _t<impl<back<Tags>, S>>>
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef META_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     using apply = if_c<size<R>::value == 1, front<R>>;
 #else
                     using apply = if_c<size<R>{} == 1, front<R>>;
@@ -3083,7 +3086,7 @@ namespace meta
         /// Makes the integer sequence [from, to).
         /// \ingroup integral
         template <class T, T from, T to>
-        using integer_range = meta::_t< 
+        using integer_range = meta::_t<
             detail::offset_integer_sequence_<T, from, meta::make_integer_sequence<T, to - from>>>;
         /// \cond
     } // namespace v1

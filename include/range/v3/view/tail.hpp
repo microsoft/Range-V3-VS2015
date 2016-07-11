@@ -53,7 +53,7 @@ namespace ranges
               : rng_(std::forward<Rng>(rng))
             {
                 CONCEPT_ASSERT(InputRange<Rng>());
-#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
                 RANGES_ASSERT(!ForwardRange<Rng>() || !ranges::empty(rng_));
 #else
                 RANGES_ASSERT(!ForwardRange<Rng>() || !empty(rng_));
@@ -63,7 +63,7 @@ namespace ranges
             {
                 return next(ranges::begin(rng_));
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Range<Rng const>::value)
 #else
             CONCEPT_REQUIRES(Range<Rng const>())
@@ -76,7 +76,7 @@ namespace ranges
             {
                 return ranges::end(rng_);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Range<Rng const>::value)
 #else
             CONCEPT_REQUIRES(Range<Rng const>())
@@ -85,7 +85,7 @@ namespace ranges
             {
                 return ranges::end(rng_);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedView<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedView<Rng>())
@@ -110,7 +110,7 @@ namespace ranges
         {
             struct tail_fn
             {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>())>
@@ -123,7 +123,7 @@ namespace ranges
                 }
 
             #ifndef RANGES_DOXYGEN_INVOKED
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(!InputRange<Rng>())>

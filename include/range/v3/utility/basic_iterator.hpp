@@ -60,92 +60,92 @@ namespace ranges
                 }
             };
 
-#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
+#if defined(RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND) || defined(RANGES_WORKAROUND_MSVC_INDIRECT_MOVE)
             namespace writable_postfix_increment_proxy_detail
             {
 #endif
-                // In general, we can't determine that such an iterator isn't
-                // writable -- we also need to store a copy of the old iterator so
-                // that it can be written into.
-                template<typename I>
-                struct writable_postfix_increment_proxy
+            // In general, we can't determine that such an iterator isn't
+            // writable -- we also need to store a copy of the old iterator so
+            // that it can be written into.
+            template<typename I>
+            struct writable_postfix_increment_proxy
+            {
+                using value_type = iterator_value_t<I>;
+            private:
+                mutable value_type value_;
+                I it_;
+            public:
+                RANGES_CXX14_CONSTEXPR
+                writable_postfix_increment_proxy() = default;
+                RANGES_CXX14_CONSTEXPR
+                explicit writable_postfix_increment_proxy(I x)
+                  : value_(*x)
+                  , it_(std::move(x))
+                {}
+                // Dereferencing must return a proxy so that both *r++ = o and
+                // value_type(*r++) can work.  In this case, *r is the same as
+                // *r++, and the conversion operator below is used to ensure
+                // readability.
+                RANGES_CXX14_CONSTEXPR
+                writable_postfix_increment_proxy const & operator*() const
                 {
-                    using value_type = iterator_value_t<I>;
-                private:
-                    mutable value_type value_;
-                    I it_;
-                public:
-                    RANGES_CXX14_CONSTEXPR
-                    writable_postfix_increment_proxy() = default;
-                    RANGES_CXX14_CONSTEXPR
-                    explicit writable_postfix_increment_proxy(I x)
-                    : value_(*x)
-                    , it_(std::move(x))
-                    {}
-                    // Dereferencing must return a proxy so that both *r++ = o and
-                    // value_type(*r++) can work.  In this case, *r is the same as
-                    // *r++, and the conversion operator below is used to ensure
-                    // readability.
-                    RANGES_CXX14_CONSTEXPR
-                    writable_postfix_increment_proxy const & operator*() const
-                    {
-                        return *this;
-                    }
-                    // So that iter_move(r++) moves the cached value out
-                    RANGES_CXX14_CONSTEXPR
-                    friend value_type && indirect_move(writable_postfix_increment_proxy const &ref)
-                    {
-                        return std::move(ref.value_);
-                    }
-                    // Provides readability of *r++
-                    RANGES_CXX14_CONSTEXPR
-                    operator value_type &() const
-                    {
-                        return value_;
-                    }
-                    // Provides writability of *r++
-                    template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                        CONCEPT_REQUIRES_(Writable<I, T>::value)>
+                    return *this;
+                }
+                // So that iter_move(r++) moves the cached value out
+                RANGES_CXX14_CONSTEXPR
+                friend value_type && indirect_move(writable_postfix_increment_proxy const &ref)
+                {
+                    return std::move(ref.value_);
+                }
+                // Provides readability of *r++
+                RANGES_CXX14_CONSTEXPR
+                operator value_type &() const
+                {
+                    return value_;
+                }
+                // Provides writability of *r++
+                template<typename T,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Writable<I, T>::value)>
 #else
-                        CONCEPT_REQUIRES_(Writable<I, T>())>
+                    CONCEPT_REQUIRES_(Writable<I, T>())>
 #endif
-                    RANGES_CXX14_CONSTEXPR
-                    void operator=(T const &x) const
-                    {
-                        *it_ = x;
-                    }
-                    // This overload just in case only non-const objects are writable
-                    template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                        CONCEPT_REQUIRES_(Writable<I, T>::value)>
+                RANGES_CXX14_CONSTEXPR
+                void operator=(T const &x) const
+                {
+                    *it_ = x;
+                }
+                // This overload just in case only non-const objects are writable
+                template<typename T,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(Writable<I, T>::value)>
 #else
-                        CONCEPT_REQUIRES_(Writable<I, T>())>
+                    CONCEPT_REQUIRES_(Writable<I, T>())>
 #endif
-                    RANGES_CXX14_CONSTEXPR
-                    void operator=(T &x) const
-                    {
-                        *it_ = x;
-                    }
-                    template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-                        CONCEPT_REQUIRES_(MoveWritable<I, T>::value)>
+                RANGES_CXX14_CONSTEXPR
+                void operator=(T &x) const
+                {
+                    *it_ = x;
+                }
+                template<typename T,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(MoveWritable<I, T>::value)>
 #else
-                        CONCEPT_REQUIRES_(MoveWritable<I, T>())>
+                    CONCEPT_REQUIRES_(MoveWritable<I, T>())>
 #endif
-                    RANGES_CXX14_CONSTEXPR
-                    void operator=(T &&x) const
-                    {
-                        *it_ = std::move(x);
-                    }
-                    // Provides X(r++)
-                    RANGES_CXX14_CONSTEXPR
-                    operator I const &() const
-                    {
-                        return it_;
-                    }
-                };
-#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
+                RANGES_CXX14_CONSTEXPR
+                void operator=(T &&x) const
+                {
+                    *it_ = std::move(x);
+                }
+                // Provides X(r++)
+                RANGES_CXX14_CONSTEXPR
+                operator I const &() const
+                {
+                    return it_;
+                }
+            };
+#if defined(RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND) || defined(RANGES_WORKAROUND_MSVC_INDIRECT_MOVE)
             }
             using writable_postfix_increment_proxy_detail::writable_postfix_increment_proxy;
 #endif
@@ -221,7 +221,7 @@ namespace ranges
         private:
             T t_;
         public:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(DefaultConstructible<T>::value)
 #else
             CONCEPT_REQUIRES(DefaultConstructible<T>())
@@ -250,7 +250,7 @@ namespace ranges
         struct basic_sentinel : detail::mixin_base<S>
         {
             // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=60799
-#ifdef WORKAROUND_213536
+#ifdef RANGES_WORKAROUND_MSVC_213536
 #else
             #ifndef __GNUC__
         private:
@@ -264,17 +264,12 @@ namespace ranges
             {
                 return this->detail::mixin_base<S>::get();
             }
-#ifdef WORKAROUND_CONSTEXPR_CXX14
-            constexpr
-#else
-            RANGES_CXX14_CONSTEXPR
-#endif
-            S const &end() const noexcept
+            constexpr S const &end() const noexcept
             {
                 return this->detail::mixin_base<S>::get();
             }
         private:
-#ifdef WORKAROUND_214062
+#ifdef RANGES_WORKAROUND_MSVC_214062
             template<typename T> struct helper {
                 typedef detail::mixin_base<T> type;
             };
@@ -287,7 +282,7 @@ namespace ranges
             RANGES_CXX14_CONSTEXPR basic_sentinel(S end)
               : detail::mixin_base<S>(std::move(end))
             {}
-#ifdef WORKAROUND_214062
+#ifdef RANGES_WORKAROUND_MSVC_214062
             typedef detail::mixin_base<S> my_base;
             using my_base::my_base;
 #else
@@ -312,7 +307,7 @@ namespace ranges
             friend detail::mixin_base<Cur>;
             template<typename OtherCur, typename OtherS>
             friend struct basic_iterator;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_ASSERT(detail::InputCursor<Cur>::value);
 #else
             CONCEPT_ASSERT(detail::InputCursor<Cur>());
@@ -324,7 +319,7 @@ namespace ranges
                     range_access::InputCursorConcept,
                     detail::cursor_concept_t<Cur>>;
 
-#ifdef WORKAROUND_214062
+#ifdef RANGES_WORKAROUND_MSVC_214062
             template<typename T> struct helper {
                 typedef detail::mixin_base<T> type;
             };
@@ -336,11 +331,7 @@ namespace ranges
             {
                 return this->detail::mixin_base<Cur>::get();
             }
-#ifdef WORKAROUND_CONSTEXPR_CXX14
             constexpr Cur const &pos() const noexcept
-#else
-            RANGES_CXX14_CONSTEXPR Cur const &pos() const noexcept
-#endif
             {
                 return this->detail::mixin_base<Cur>::get();
             }
@@ -388,7 +379,7 @@ namespace ranges
               : detail::mixin_base<Cur>{std::move(pos)}
             {}
             template<typename OtherCur, typename OtherS,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ConvertibleTo<OtherCur, Cur>::value)>
 #else
                 CONCEPT_REQUIRES_(ConvertibleTo<OtherCur, Cur>())>
@@ -397,7 +388,7 @@ namespace ranges
               : detail::mixin_base<Cur>{std::move(that.pos())}
             {}
             // Mix in any additional constructors defined and exported by the cursor
-#ifdef WORKAROUND_214062
+#ifdef RANGES_WORKAROUND_MSVC_214062
             typedef detail::mixin_base<Cur> my_base;
             using my_base::my_base;
 #else
@@ -451,7 +442,7 @@ namespace ranges
             {
                 return !(left == right);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>())
@@ -462,7 +453,7 @@ namespace ranges
                 range_access::prev(pos());
                 return *this;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::BidirectionalCursor<Cur>())
@@ -474,7 +465,7 @@ namespace ranges
                 --*this;
                 return tmp;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -485,7 +476,7 @@ namespace ranges
                 range_access::advance(pos(), n);
                 return *this;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -496,7 +487,7 @@ namespace ranges
                 left += n;
                 return left;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -507,7 +498,7 @@ namespace ranges
                 right += n;
                 return right;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -518,7 +509,7 @@ namespace ranges
                 range_access::advance(pos(), -n);
                 return *this;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -529,7 +520,7 @@ namespace ranges
                 left -= n;
                 return left;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -541,7 +532,7 @@ namespace ranges
                 return range_access::distance_to(right.pos(), left.pos());
             }
             // symmetric comparisons
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -551,7 +542,7 @@ namespace ranges
             {
                 return 0 < (right - left);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -561,7 +552,7 @@ namespace ranges
             {
                 return 0 <= (right - left);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -571,7 +562,7 @@ namespace ranges
             {
                 return (right - left) < 0;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -582,7 +573,7 @@ namespace ranges
                 return (right - left) <= 0;
             }
             // asymmetric comparisons
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -592,7 +583,7 @@ namespace ranges
             {
                 return !range_access::empty(left.pos(), right.end());
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -602,7 +593,7 @@ namespace ranges
             {
                 return true;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -612,7 +603,7 @@ namespace ranges
             {
                 return false;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -622,7 +613,7 @@ namespace ranges
             {
                 return range_access::empty(left.pos(), right.end());
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -632,7 +623,7 @@ namespace ranges
             {
                 return false;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -642,7 +633,7 @@ namespace ranges
             {
                 return range_access::empty(right.pos(), left.end());
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -652,7 +643,7 @@ namespace ranges
             {
                 return !range_access::empty(right.pos(), left.end());
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -662,7 +653,7 @@ namespace ranges
             {
                 return true;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())

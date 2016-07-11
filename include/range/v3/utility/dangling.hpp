@@ -104,7 +104,7 @@ namespace ranges
         struct sanitize_fn
         {
         private:
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
             template <typename T>
             using result_t_helper_void_t = void;
             template <class T, class V = void> struct result_t_helper {};

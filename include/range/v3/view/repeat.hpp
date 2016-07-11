@@ -90,7 +90,7 @@ namespace ranges
             struct repeat_fn
             {
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(SemiRegular<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(SemiRegular<Val>())>
@@ -101,7 +101,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!SemiRegular<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(!SemiRegular<Val>())>

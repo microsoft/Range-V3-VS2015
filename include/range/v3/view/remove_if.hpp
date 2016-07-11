@@ -76,7 +76,7 @@ namespace ranges
                 {
                     this->satisfy(++it);
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
@@ -101,7 +101,7 @@ namespace ranges
         public:
             remove_if_view() = default;
             remove_if_view(remove_if_view &&that)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : remove_if_view::view_adaptor(std::move(that))
 #else
               : view_adaptor_t<remove_if_view>(std::move(that))
@@ -110,7 +110,7 @@ namespace ranges
               , begin_{}
             {}
             remove_if_view(remove_if_view const &that)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : remove_if_view::view_adaptor(that)
 #else
               : view_adaptor_t<remove_if_view>(that)
@@ -119,7 +119,7 @@ namespace ranges
               , begin_{}
             {}
             remove_if_view(Rng rng, Pred pred)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : remove_if_view::view_adaptor(std::move(rng))
 #else
               : view_adaptor_t<remove_if_view>{std::move(rng)}
@@ -162,7 +162,7 @@ namespace ranges
                     IndirectCallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
@@ -174,7 +174,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>

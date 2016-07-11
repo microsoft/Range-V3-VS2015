@@ -98,7 +98,7 @@ namespace ranges
         {
             struct single_fn
             {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Val, CONCEPT_REQUIRES_(SemiRegular<Val>::value)>
 #else
                 template<typename Val, CONCEPT_REQUIRES_(SemiRegular<Val>())>
@@ -109,7 +109,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Val, CONCEPT_REQUIRES_(!SemiRegular<uncvref_t<Val>>::value)>
 #else
                 template<typename Val, CONCEPT_REQUIRES_(!SemiRegular<uncvref_t<Val>>())>

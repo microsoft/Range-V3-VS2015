@@ -36,7 +36,7 @@ namespace ranges
             {
             private:
                 friend action_access;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename D, CONCEPT_REQUIRES_(Integral<D>::value)>
 #else
                 template<typename D, CONCEPT_REQUIRES_(Integral<D>())>
@@ -68,7 +68,7 @@ namespace ranges
                 template<typename Rng,
                     typename I = range_iterator_t<Rng>,
                     typename D = range_difference_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, D, D>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, D, D>())>
@@ -84,7 +84,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T, typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, T, U>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, T, U>())>

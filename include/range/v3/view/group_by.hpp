@@ -93,7 +93,7 @@ namespace ranges
             {
                 return {fun_, ranges::begin(rng_), ranges::end(rng_)};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
                 range_common_reference_t<Rng>>::value && Range<Rng const>::value)
 #else
@@ -132,7 +132,7 @@ namespace ranges
                         range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
@@ -144,7 +144,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>

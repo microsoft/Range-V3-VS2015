@@ -52,7 +52,7 @@ namespace ranges
             {
                 template<typename I0, typename I1, typename O, typename C = ordered_less,
                     typename P0 = ident, typename P1 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(
                         Mergeable<I0, I1, O, C, P0, P1>::value
                     )>

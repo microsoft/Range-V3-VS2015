@@ -74,12 +74,12 @@ namespace ranges
                 // SizedIteratorRangeLike_ is expressed in terms of operator-.
                 // The template breaks an cycle where templates are instantiated
                 // before their definitions are available.
-#ifdef WORKAROUND_216572
+#ifdef RANGES_WORKAROUND_MSVC_216572
                 template<typename T, int> struct helper { using type = T; };
                 template<int n = 0, CONCEPT_REQUIRES_FRIEND_(SizedIteratorRangeLike_<typename helper<I, n>::type, typename helper<S, n>::type>::value)>
 #else
                 template<typename I_ = I, typename S_ = S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_FRIEND_(SizedIteratorRangeLike_<I_, S_>::value)>
 #else
                     CONCEPT_REQUIRES_(SizedIteratorRangeLike_<I_, S_>())>
@@ -105,7 +105,7 @@ namespace ranges
                   : data_(meta::size_t<1>{}, std::move(se))
                 {}
                 template<typename I2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ExplicitlyConvertibleTo<I, I2>::value &&
                                       ExplicitlyConvertibleTo<S, S2>::value)>
 #else
@@ -123,7 +123,7 @@ namespace ranges
                     return *it();
                 }
                 template<typename I2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Common<I, I2>::value && Common<S, S2>::value)>
 #else
                     CONCEPT_REQUIRES_(Common<I, I2>() && Common<S, S2>())>

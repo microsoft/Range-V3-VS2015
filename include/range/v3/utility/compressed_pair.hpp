@@ -44,7 +44,7 @@ namespace ranges
             template<typename T>
             struct first_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>
             {
-#ifdef WORKAROUND_209653
+#ifdef RANGES_WORKAROUND_MSVC_209653
                 T first;
 #else
                 static T first;
@@ -56,10 +56,9 @@ namespace ranges
                 {}
             };
 
-#ifdef WORKAROUND_209653
-#else
+#ifndef RANGES_WORKAROUND_MSVC_209653
             template<typename T>
-#ifdef WORKAROUND_TEMPLATE_STATIC_INITIALIZER
+#ifdef RANGES_WORKAROUND_MSVC_TEMPLATE_STATIC_INITIALIZER
             T first_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::first = {};
 #else
             T first_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::first{};
@@ -81,7 +80,7 @@ namespace ranges
             template<typename T>
             struct second_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>
             {
-#ifdef WORKAROUND_209653
+#ifdef RANGES_WORKAROUND_MSVC_209653
                 T second;
 #else
                 static T second;
@@ -93,10 +92,9 @@ namespace ranges
                 {}
             };
 
-#ifdef WORKAROUND_209653
-#else
+#ifndef RANGES_WORKAROUND_MSVC_209653
             template<typename T>
-#ifdef WORKAROUND_TEMPLATE_STATIC_INITIALIZER
+#ifdef RANGES_WORKAROUND_MSVC_TEMPLATE_STATIC_INITIALIZER
             T second_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::second = {};
 #else
             T second_base<T, meta::if_<meta::and_<std::is_empty<T>, std::is_trivial<T>>>>::second{};
@@ -106,11 +104,7 @@ namespace ranges
         /// \endcond
 
         template<typename First, typename Second>
-#ifdef WORKAROUND_EBO
-        struct __declspec(empty_bases) compressed_pair
-#else
-        struct compressed_pair
-#endif
+        struct RANGES_BROKEN_EBO compressed_pair
           : private detail::first_base<First>
           , private detail::second_base<Second>
         {

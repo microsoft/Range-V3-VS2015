@@ -32,7 +32,7 @@ namespace ranges
         struct count_fn
         {
             template<typename I, typename S, typename V, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
                     IndirectCallableRelation<equal_to, Project<I, P>, V const *>::value)>
 #else
@@ -52,7 +52,7 @@ namespace ranges
 
             template<typename Rng, typename V, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value &&
                     IndirectCallableRelation<equal_to, Project<I, P>, V const *>::value)>
 #else

@@ -42,7 +42,7 @@ namespace ranges
             /// \pre `C` is a model of the `CallableRelation` concept
             ///
             template<typename I, typename S, typename C = equal_to, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Sortable<I, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(Sortable<I, C, P>() && IteratorRange<I, S>())>
@@ -66,7 +66,7 @@ namespace ranges
 
             template<typename Rng, typename C = equal_to, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Sortable<I, C, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Sortable<I, C, P>() && Range<Rng>())>

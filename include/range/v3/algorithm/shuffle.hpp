@@ -53,7 +53,7 @@ namespace ranges
         struct shuffle_fn
         {
             template<typename I, typename S, typename Gen,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value &&
                     Permutable<I>::value && UniformRandomNumberGenerator<Gen>::value &&
                     ConvertibleTo<
@@ -86,7 +86,7 @@ namespace ranges
 
             template<typename Rng, typename Gen,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Permutable<I>::value &&
                     UniformRandomNumberGenerator<Gen>::value && ConvertibleTo<
                     concepts::UniformRandomNumberGenerator::result_t<Gen>,

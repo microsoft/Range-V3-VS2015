@@ -115,7 +115,7 @@ namespace ranges
 
         struct iter_size_fn;
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         template<typename>
         using reference_t_void_t = void;
         template<typename, typename = void>
@@ -363,11 +363,7 @@ namespace ranges
             meta::if_<std::is_same<I, S>, I, basic_iterator<detail::common_cursor<I, S>>>;
 
         template<typename First, typename Second>
-#ifdef WORKAROUND_EBO
-        struct __declspec(empty_bases) compressed_pair;
-#else
-        struct compressed_pair;
-#endif
+        struct RANGES_BROKEN_EBO compressed_pair;
 
         template<typename...Ts>
         struct compressed_tuple;
@@ -673,13 +669,13 @@ namespace ranges
             struct values_fn;
         }
 
-#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
+#if defined(RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND) || defined(RANGES_WORKAROUND_MSVC_INDIRECT_MOVE)
         namespace iter_zip_with_view_detail
         {
 #endif
-            template<typename Fun, typename...Rngs>
-            struct iter_zip_with_view;
-#if defined(WORKAROUND_PERMISSIVE_HIDDEN_FRIEND) || defined(WORKAROUND_INDIRECT_MOVE)
+        template<typename Fun, typename...Rngs>
+        struct iter_zip_with_view;
+#if defined(RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND) || defined(RANGES_WORKAROUND_MSVC_INDIRECT_MOVE)
         }
         using iter_zip_with_view_detail::iter_zip_with_view;
 #endif

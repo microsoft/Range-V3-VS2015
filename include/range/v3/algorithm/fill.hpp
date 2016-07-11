@@ -29,7 +29,7 @@ namespace ranges
         struct fill_fn
         {
             template<typename O, typename S, typename V,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(OutputIterator<O, V>::value && IteratorRange<O, S>::value)>
 #else
                 CONCEPT_REQUIRES_(OutputIterator<O, V>() && IteratorRange<O, S>())>
@@ -43,7 +43,7 @@ namespace ranges
 
             template<typename Rng, typename V,
                 typename O = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(OutputRange<Rng, V>::value)>
 #else
                 CONCEPT_REQUIRES_(OutputRange<Rng, V>())>

@@ -123,7 +123,7 @@ namespace ranges
             /// \pre `O` is a model of the `WeakOutputIterator` concept
             /// \pre `C` is a model of the `CallableRelation` concept
             template<typename I, typename S, typename O, typename C = equal_to, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(UniqueCopyable<I, O, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(UniqueCopyable<I, O, C, P>() && IteratorRange<I, S>())>
@@ -137,7 +137,7 @@ namespace ranges
             /// \overload
             template<typename Rng, typename O, typename C = equal_to, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(UniqueCopyable<I, O, C, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(UniqueCopyable<I, O, C, P>() && Range<Rng>())>

@@ -74,8 +74,8 @@ int main()
     CHECK(a == 42);
     CHECK(b == 0);
 
-#ifdef WORKAROUND_CLASS_RVALUE_AS_LVALUE
-#else
+#ifndef RANGES_WORKAROUND_MSVC_LVALUE_BINDS_RVALUE
+    // FIXME: *not* a workaround; disabled test failure.
     CONCEPT_ASSERT(!ranges::Swappable<std::pair<int,int>&&,std::pair<int,int>&&>());
 #endif
     CONCEPT_ASSERT(ranges::Swappable<std::pair<int&,int&>&&,std::pair<int&,int&>&&>());

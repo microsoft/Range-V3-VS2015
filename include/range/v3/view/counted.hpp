@@ -65,7 +65,7 @@ namespace ranges
             struct counted_fn
             {
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(WeakIterator<I>::value)>
 #else
                     CONCEPT_REQUIRES_(WeakIterator<I>())>

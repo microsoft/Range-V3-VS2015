@@ -64,7 +64,7 @@ namespace ranges
             {
                 return {pred_};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Pred const, range_iterator_t<Rng>>::value)
 #else
             CONCEPT_REQUIRES(Callable<Pred const, range_iterator_t<Rng>>())
@@ -76,7 +76,7 @@ namespace ranges
         public:
             iter_take_while_view() = default;
             iter_take_while_view(Rng rng, Pred pred)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : iter_take_while_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<iter_take_while_view>{std::move(rng)}
@@ -116,7 +116,7 @@ namespace ranges
                     CallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
@@ -127,7 +127,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>
@@ -163,7 +163,7 @@ namespace ranges
                     IndirectCallablePredicate<Pred, range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred>())>
@@ -174,7 +174,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Pred,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred>())>

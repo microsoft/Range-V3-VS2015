@@ -54,7 +54,7 @@ namespace ranges
 
         public:
             template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value && Permutable<I>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() && Permutable<I>())>
@@ -67,7 +67,7 @@ namespace ranges
             }
 
             template<typename Rng, typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Permutable<I>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Permutable<I>())>

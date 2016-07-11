@@ -48,7 +48,7 @@ namespace ranges
             template<typename I, typename C, typename P,
                 typename V = iterator_common_reference_t<I>,
                 typename X = concepts::Function::result_t<P, V>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I>::value && Function<P, V>::value && Relation<C, X>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardIterator<I>() && Function<P, V>() && Relation<C, X>())>
@@ -90,7 +90,7 @@ namespace ranges
             template<typename I, typename C, typename P,
                 typename V = iterator_common_reference_t<I>,
                 typename X = concepts::Function::result_t<P, V>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && Function<P, V>::value && Relation<C, X>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && Function<P, V>() && Relation<C, X>())>
@@ -113,7 +113,7 @@ namespace ranges
         struct nth_element_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && Sortable<I, C, P>())>
@@ -309,7 +309,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     RandomAccessRange<Rng>::value &&
                     Sortable<I, C, P>::value

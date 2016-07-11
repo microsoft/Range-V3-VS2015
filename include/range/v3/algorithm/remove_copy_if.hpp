@@ -42,7 +42,7 @@ namespace ranges
         struct remove_copy_if_fn
         {
             template<typename I, typename S, typename O, typename C, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>() && IteratorRange<I, S>())>
@@ -65,7 +65,7 @@ namespace ranges
 
             template<typename Rng, typename O, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>::value && InputRange<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(RemoveCopyableIf<I, O, C, P>() && InputRange<Rng>())>

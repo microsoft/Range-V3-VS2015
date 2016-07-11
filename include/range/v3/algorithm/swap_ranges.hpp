@@ -33,7 +33,7 @@ namespace ranges
         {
             template<typename I1Ref, typename S1, typename I2,
                 typename I1 = uncvref_t<I1Ref>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I1>::value && IteratorRange<I1, S1>::value &&
                     WeakInputIterator<I2>::value &&
                     IndirectlySwappable<I1, I2>::value)>
@@ -50,7 +50,7 @@ namespace ranges
             }
 
             template<typename I1, typename S1, typename I2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I1>::value && IteratorRange<I1, S1>::value &&
                     InputIterator<I2>::value && IteratorRange<I2, S2>::value &&
                     IndirectlySwappable<I1, I2>::value)>
@@ -68,7 +68,7 @@ namespace ranges
 
             template<typename Rng1, typename I2,
                 typename I1 = range_iterator_t<Rng1>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng1>::value &&
                     WeakInputIterator<I2>::value &&
                     IndirectlySwappable<I1, I2>::value)>
@@ -85,7 +85,7 @@ namespace ranges
             template<typename Rng1, typename Rng2,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng1>::value &&
                     InputRange<Rng2>::value &&
                     IndirectlySwappable<I1, I2>::value)>

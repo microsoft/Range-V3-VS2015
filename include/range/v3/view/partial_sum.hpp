@@ -57,7 +57,7 @@ namespace ranges
                 optional<range_value_t<Rng>> sum_;
                 partial_sum_view_t *rng_;
             public:
-#ifdef WORKAROUND_207089
+#ifdef RANGES_WORKAROUND_MSVC_207089
                 using single_pass = SinglePass<range_iterator_t<Rng>>;
 #else
                 using single_pass = partial_sum_view::single_pass;
@@ -86,7 +86,7 @@ namespace ranges
 
             adaptor<false> begin_adaptor()
             {
-#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
                 return ranges::empty(this->base()) ? adaptor<false>{*this} :
                     adaptor<false>{*this, ranges::front(this->base())};
 #else
@@ -96,7 +96,7 @@ namespace ranges
             }
             meta::if_<use_sentinel_t, adaptor_base, adaptor<false>> end_adaptor()
             {
-#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
                 if(use_sentinel_t() || ranges::empty(this->base()))
                     return {*this};
                 return {*this, ranges::front(this->base())};
@@ -106,7 +106,7 @@ namespace ranges
                 return {*this, front(this->base())};
 #endif
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
                 range_common_reference_t<Rng>>::value)
 #else
@@ -115,7 +115,7 @@ namespace ranges
 #endif
             adaptor<true> begin_adaptor() const
             {
-#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
                 return ranges::empty(this->base()) ? adaptor<true>{*this} :
                     adaptor<true>{*this, ranges::front(this->base())};
 #else
@@ -123,7 +123,7 @@ namespace ranges
                     adaptor<true>{*this, front(this->base())};
 #endif
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_common_reference_t<Rng>,
                 range_common_reference_t<Rng>>::value)
 #else
@@ -132,7 +132,7 @@ namespace ranges
 #endif
             meta::if_<use_sentinel_t, adaptor_base, adaptor<true>> end_adaptor() const
             {
-#ifdef WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
                 if(use_sentinel_t() || ranges::empty(this->base()))
                     return {*this};
                 return {*this, ranges::front(this->base())};
@@ -145,14 +145,14 @@ namespace ranges
         public:
             partial_sum_view() = default;
             partial_sum_view(Rng rng, Fun fun)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : partial_sum_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<partial_sum_view>{std::move(rng)}
 #endif
               , fun_(as_function(std::move(fun)))
             {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng>())
@@ -187,7 +187,7 @@ namespace ranges
                         range_value_t<Rng>>>;
 
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
@@ -198,7 +198,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>

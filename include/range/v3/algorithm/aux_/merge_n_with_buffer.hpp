@@ -48,7 +48,7 @@ namespace ranges
                 template<typename I, typename B, typename C = ordered_less, typename P = ident,
                     typename VI = iterator_common_reference_t<I>,
                     typename VB = iterator_common_reference_t<B>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(
                         Same<VI, VB>::value &&
                         IndirectlyCopyable<I, B>::value &&

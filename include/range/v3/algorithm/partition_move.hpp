@@ -47,7 +47,7 @@ namespace ranges
         struct partition_move_fn
         {
             template<typename I, typename S, typename O0, typename O1, typename C, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>() && IteratorRange<I, S>())>
@@ -74,7 +74,7 @@ namespace ranges
 
             template<typename Rng, typename O0, typename O1, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(PartitionMovable<I, O0, O1, C, P>() && Range<Rng>())>

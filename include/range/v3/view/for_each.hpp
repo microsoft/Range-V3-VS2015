@@ -63,7 +63,7 @@ namespace ranges
                     Range<concepts::Callable::result_t<F, range_common_reference_t<Rng>>>>;
 
                 template<typename Rng, typename F,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, F>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, F>())>
@@ -76,7 +76,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For better error reporting
                 template<typename Rng, typename F,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, F>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, F>())>
@@ -122,7 +122,7 @@ namespace ranges
 
         struct yield_from_fn
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename Rng, CONCEPT_REQUIRES_(View<Rng>::value)>
 #else
             template<typename Rng, CONCEPT_REQUIRES_(View<Rng>())>
@@ -177,7 +177,7 @@ namespace ranges
         /// \cond
         template<typename Rng, typename Fun,
             typename Result = concepts::Function::result_t<Fun, range_common_reference_t<Rng>>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_(Range<Rng>::value &&
                               Function<Fun, range_common_reference_t<Rng>>::value &&
                               Range<Result>::value)>

@@ -50,7 +50,7 @@ namespace ranges
             struct is_heap_until_n_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value)>
 #else
                     CONCEPT_REQUIRES_(IsHeapable<I, C, P>())>
@@ -87,7 +87,7 @@ namespace ranges
             struct is_heap_n_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value)>
 #else
                     CONCEPT_REQUIRES_(IsHeapable<I, C, P>())>
@@ -110,7 +110,7 @@ namespace ranges
         struct is_heap_until_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && IteratorRange<I, S>())>
@@ -123,7 +123,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && Range<Rng>())>
@@ -145,7 +145,7 @@ namespace ranges
         struct is_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && IteratorRange<I, S>())>
@@ -158,7 +158,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(IsHeapable<I, C, P>() && Range<Rng>())>
@@ -284,7 +284,7 @@ namespace ranges
         struct push_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
@@ -298,7 +298,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Sortable<I, C, P>())>
@@ -326,7 +326,7 @@ namespace ranges
             struct pop_heap_n_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && Sortable<I, C, P>::value)>
 #else
                     CONCEPT_REQUIRES_(RandomAccessIterator<I>() && Sortable<I, C, P>())>
@@ -354,7 +354,7 @@ namespace ranges
         struct pop_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
@@ -368,7 +368,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Sortable<I, C, P>())>
@@ -392,7 +392,7 @@ namespace ranges
         struct make_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
@@ -411,7 +411,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>() && Sortable<I, C, P>())>
@@ -440,7 +440,7 @@ namespace ranges
         struct sort_heap_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
@@ -457,7 +457,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng &>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng &>() && Sortable<I, C, P>())>

@@ -31,7 +31,7 @@ namespace ranges
         struct fill_n_fn
         {
             template<typename O, typename V,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(WeakOutputIterator<O, V>::value)>
 #else
                 CONCEPT_REQUIRES_(WeakOutputIterator<O, V>())>

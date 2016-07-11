@@ -42,7 +42,7 @@ namespace ranges
         struct replace_copy_if_fn
         {
             template<typename I, typename S, typename O, typename C, typename T, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ReplaceCopyIfable<I, O, C, T, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(ReplaceCopyIfable<I, O, C, T, P>() && IteratorRange<I, S>())>
@@ -64,7 +64,7 @@ namespace ranges
 
             template<typename Rng, typename O, typename C, typename T, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ReplaceCopyIfable<I, O, C, T, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(ReplaceCopyIfable<I, O, C, T, P>() && Range<Rng>())>

@@ -17,9 +17,6 @@
 #include <meta/meta.hpp>
 #include "../simple_test.hpp"
 
-// Temporarily disabled tests
-#define TEST_FAILURES
-
 using namespace meta;
 
 // An implementation of tuple_cat gives Range v3's meta-programming and list
@@ -245,7 +242,7 @@ int main()
         static_assert(std::is_same<fl, meta::filter<l, meta::quote<std::is_floating_point>>>{}, "");
     }
 
-#ifdef TEST_FAILURES
+#ifdef DISABLE_MSVC_TEST_FAILURES
     // VSO 218670
     // constexpr
     //   error C2131: expression did not evaluate to a constant
@@ -332,7 +329,7 @@ int main()
         static_assert(!in<list<int, int, short, float>, double>::value, "");
     }
 
-#ifdef TEST_FAILURES
+#ifdef DISABLE_MSVC_TEST_FAILURES
     // WORKAROUND_CANONICALMEMBER
     // Assertion failed: (argument.IsTypeArgument() && argument.Type()->isUniqueType()) || (argument.IsNonTypeArgument() && argument.Expression()->IsUniqueExpression()), file c:\wcfb01\src\vctools\compiler\cxxfe\sl\p1\c\template.cpp, line 14337
 #else

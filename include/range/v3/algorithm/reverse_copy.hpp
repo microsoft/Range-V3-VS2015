@@ -42,7 +42,7 @@ namespace ranges
         struct reverse_copy_fn
         {
             template<typename I, typename S, typename O,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I, S>::value && ReverseCopyable<I, O>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>() && ReverseCopyable<I, O>())>
@@ -57,7 +57,7 @@ namespace ranges
 
             template<typename Rng, typename O,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng>::value && ReverseCopyable<I, O>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<Rng>() && ReverseCopyable<I, O>())>

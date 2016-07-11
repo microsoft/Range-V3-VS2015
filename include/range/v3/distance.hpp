@@ -50,7 +50,7 @@ namespace ranges
 
             template<typename Rng, typename D = range_difference_t<Rng>,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Integral<D>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Integral<D>() && Range<Rng>())>
@@ -88,7 +88,7 @@ namespace ranges
             using iter_distance_fn::operator();
 
             template<typename Rng, typename D = range_difference_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Integral<D>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Integral<D>() && Range<Rng>())>
@@ -113,7 +113,7 @@ namespace ranges
         {
         private:
             template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(!is_infinite<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(!is_infinite<Rng>())>
@@ -123,7 +123,7 @@ namespace ranges
                 return iter_distance_compare(begin(rng), end(rng), n);
             }
             template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(is_infinite<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(is_infinite<Rng>())>
@@ -148,7 +148,7 @@ namespace ranges
             using iter_distance_compare_fn::operator();
 
             template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<Rng>())>

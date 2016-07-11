@@ -49,7 +49,7 @@ namespace ranges
                 operator()(copy_tag, I const &i) const;
 
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Callable<Pred const, iterator_reference_t<I>>::value)>
 #else
                     CONCEPT_REQUIRES_(!Callable<Pred const, iterator_reference_t<I>>())>
@@ -63,7 +63,7 @@ namespace ranges
                     return (decltype(x) &&) x;
                 }
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Callable<Pred const, iterator_reference_t<I>>::value)>
 #else
                     CONCEPT_REQUIRES_(Callable<Pred const, iterator_reference_t<I>>())>
@@ -78,7 +78,7 @@ namespace ranges
                 }
 
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Callable<Pred const, iterator_rvalue_reference_t<I>>::value)>
 #else
                     CONCEPT_REQUIRES_(!Callable<Pred const, iterator_rvalue_reference_t<I>>())>
@@ -92,7 +92,7 @@ namespace ranges
                     return (decltype(x) &&) x;
                 }
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Callable<Pred const, iterator_rvalue_reference_t<I>>::value)>
 #else
                     CONCEPT_REQUIRES_(Callable<Pred const, iterator_rvalue_reference_t<I>>())>
@@ -133,7 +133,7 @@ namespace ranges
                     CommonReference<unwrap_reference_t<Val const &>, range_rvalue_reference_t<Rng>>>;
 
                 template<typename Rng, typename Pred, typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Pred, Val>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Pred, Val>())>
@@ -146,7 +146,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
                 template<typename Rng, typename Pred, typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred, Val>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Pred, Val>())>

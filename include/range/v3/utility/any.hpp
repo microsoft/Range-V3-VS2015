@@ -34,13 +34,13 @@ namespace ranges
             }
         };
 
-#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
         namespace any_detail
         {
 #endif
-            struct any;
+        struct any;
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
         }
-#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
         using any_detail::any;
 #endif
 
@@ -62,107 +62,107 @@ namespace ranges
         template<typename T>
         T const * any_cast(any const *) noexcept;
 
-#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
         namespace any_detail
         {
 #endif
-            struct any
+        struct any
+        {
+        private:
+            template<typename T>
+            friend meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
+            any_cast(any &);
+
+            template<typename T>
+            friend meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
+            any_cast(any const &);
+
+            template<typename T>
+            friend meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
+            any_cast(any &&);
+
+            template<typename T>
+            friend T * any_cast(any *) noexcept;
+
+            template<typename T>
+            friend T const * any_cast(any const *) noexcept;
+
+            struct interface
+            {
+                virtual ~interface() {}
+                virtual interface *clone() const = 0;
+                virtual std::type_info const & type() const noexcept = 0;
+            };
+
+            template<class T>
+            struct impl final : interface
             {
             private:
-                template<typename T>
-                friend meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
-                any_cast(any &);
-
-                template<typename T>
-                friend meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
-                any_cast(any const &);
-
-                template<typename T>
-                friend meta::if_c<std::is_reference<T>() || Copyable<T>(), T>
-                any_cast(any &&);
-
-                template<typename T>
-                friend T * any_cast(any *) noexcept;
-
-                template<typename T>
-                friend T const * any_cast(any const *) noexcept;
-
-                struct interface
-                {
-                    virtual ~interface() {}
-                    virtual interface *clone() const = 0;
-                    virtual std::type_info const & type() const noexcept = 0;
-                };
-
-                template<class T>
-                struct impl final : interface
-                {
-                private:
-                    T obj;
-                public:
-                    impl() = default;
-                    impl(T o) : obj(std::move(o)) {}
-                    T &get() { return obj; }
-                    T const &get() const { return obj; }
-                    interface *clone() const override
-                    {
-                        return new impl{obj};
-                    }
-                    std::type_info const & type() const noexcept override
-                    {
-                        return typeid(T);
-                    }
-                };
-
-                std::unique_ptr<interface> ptr_;
+                T obj;
             public:
-                any() noexcept = default;
-                template<typename T,
-                    CONCEPT_REQUIRES_(Copyable<T>() &&
-                        !Same<detail::decay_t<T>, any>())>
-                any(T &&t)
-                : ptr_(new impl<detail::decay_t<T>>(std::forward<T>(t)))
-                {}
-                any(any &&) noexcept = default;
-                any(any const &that)
-                : ptr_{that.ptr_ ? that.ptr_->clone() : nullptr}
-                {}
-                any &operator=(any &&) noexcept = default;
-                any &operator=(any const &that)
+                impl() = default;
+                impl(T o) : obj(std::move(o)) {}
+                T &get() { return obj; }
+                T const &get() const { return obj; }
+                interface *clone() const override
                 {
-                    ptr_.reset(that.ptr_ ? that.ptr_->clone() : nullptr);
-                    return *this;
+                    return new impl{obj};
                 }
-                template<typename T,
-                    CONCEPT_REQUIRES_(Copyable<T>() &&
-                        !Same<detail::decay_t<T>, any>())>
-                any &operator=(T &&t)
+                std::type_info const & type() const noexcept override
                 {
-                    any{std::forward<T>(t)}.swap(*this);
-                    return *this;
-                }
-                void clear() noexcept
-                {
-                    ptr_.reset();
-                }
-                bool empty() const noexcept
-                {
-                    return !ptr_;
-                }
-                std::type_info const & type() const noexcept
-                {
-                    return ptr_ ? ptr_->type() : typeid(void);
-                }
-                void swap(any &that) noexcept
-                {
-                    ptr_.swap(that.ptr_);
-                }
-                friend void swap(any &x, any &y) noexcept
-                {
-                    x.swap(y);
+                    return typeid(T);
                 }
             };
-#ifdef WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
+
+            std::unique_ptr<interface> ptr_;
+        public:
+            any() noexcept = default;
+            template<typename T,
+                CONCEPT_REQUIRES_(Copyable<T>() &&
+                    !Same<detail::decay_t<T>, any>())>
+            any(T &&t)
+              : ptr_(new impl<detail::decay_t<T>>(std::forward<T>(t)))
+            {}
+            any(any &&) noexcept = default;
+            any(any const &that)
+              : ptr_{that.ptr_ ? that.ptr_->clone() : nullptr}
+            {}
+            any &operator=(any &&) noexcept = default;
+            any &operator=(any const &that)
+            {
+                ptr_.reset(that.ptr_ ? that.ptr_->clone() : nullptr);
+                return *this;
+            }
+            template<typename T,
+                CONCEPT_REQUIRES_(Copyable<T>() &&
+                    !Same<detail::decay_t<T>, any>())>
+            any &operator=(T &&t)
+            {
+                any{std::forward<T>(t)}.swap(*this);
+                return *this;
+            }
+            void clear() noexcept
+            {
+                ptr_.reset();
+            }
+            bool empty() const noexcept
+            {
+                return !ptr_;
+            }
+            std::type_info const & type() const noexcept
+            {
+                return ptr_ ? ptr_->type() : typeid(void);
+            }
+            void swap(any &that) noexcept
+            {
+                ptr_.swap(that.ptr_);
+            }
+            friend void swap(any &x, any &y) noexcept
+            {
+                x.swap(y);
+            }
+        };
+#ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
         }
 #endif
 

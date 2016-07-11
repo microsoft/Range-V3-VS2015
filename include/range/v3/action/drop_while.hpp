@@ -37,7 +37,7 @@ namespace ranges
             {
             private:
                 friend action_access;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Fun, CONCEPT_REQUIRES_(!Range<Fun>::value)>
 #else
                 template<typename Fun, CONCEPT_REQUIRES_(!Range<Fun>())>
@@ -65,7 +65,7 @@ namespace ranges
 
                 template<typename Rng, typename Fun,
                     typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Fun>())>
@@ -79,7 +79,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Fun>())>

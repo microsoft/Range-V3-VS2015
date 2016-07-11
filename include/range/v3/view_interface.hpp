@@ -37,7 +37,7 @@ namespace ranges
                 From from;
                 To to;
                 template<typename F, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ConvertibleTo<F, From>::value && ConvertibleTo<T, To>::value)>
 #else
                     CONCEPT_REQUIRES_(ConvertibleTo<F, From>() && ConvertibleTo<T, To>())>
@@ -53,7 +53,7 @@ namespace ranges
                 Int dist_;
 
                 template<typename Other,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Integral<Other>::value && ExplicitlyConvertibleTo<Other, Int>::value)>
 #else
                     CONCEPT_REQUIRES_(Integral<Other>() && ExplicitlyConvertibleTo<Other, Int>())>
@@ -98,8 +98,8 @@ namespace ranges
             }
             /// Access the size of the range, if it can be determined:
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-				CONCEPT_REQUIRES_(Same<D, Derived>::value && (Cardinality >= 0 ||
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Same<D, Derived>::value && (Cardinality >= 0 ||
                     SizedIteratorRange<range_iterator_t<D>, range_sentinel_t<D>>::value))>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && (Cardinality >= 0 ||
@@ -113,7 +113,7 @@ namespace ranges
             }
             /// Access the first element in a range:
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -124,7 +124,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -135,7 +135,7 @@ namespace ranges
             }
             /// Access the last element in a range:
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value && BoundedView<D>::value && BidirectionalView<D>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && BoundedView<D>() && BidirectionalView<D>())>
@@ -146,7 +146,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value && BoundedView<D const>::value && BidirectionalView<D const>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && BoundedView<D const>() && BidirectionalView<D const>())>
@@ -157,7 +157,7 @@ namespace ranges
             }
             /// Simple indexing:
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value && RandomAccessView<D>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && RandomAccessView<D>())>
@@ -169,7 +169,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value && RandomAccessView<D const>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>() && RandomAccessView<D const>())>
@@ -182,7 +182,7 @@ namespace ranges
             /// Python-ic slicing:
             //      rng[{4,6}]
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -194,7 +194,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -207,7 +207,7 @@ namespace ranges
             //      rng[{4,end-2}]
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -220,7 +220,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -234,7 +234,7 @@ namespace ranges
             //      rng[{end-4,end-2}]
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -247,7 +247,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -261,7 +261,7 @@ namespace ranges
             //      rng[{4,end}]
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -273,7 +273,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -286,7 +286,7 @@ namespace ranges
             //      rng[{end-4,end}]
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -298,7 +298,7 @@ namespace ranges
             }
             /// \overload
             template<typename D = Derived, typename Slice = view::slice_fn,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -311,7 +311,7 @@ namespace ranges
             /// Implicit conversion to something that looks like a container.
             template<typename Container, typename D = Derived,
                 typename Alloc = typename Container::allocator_type, // HACKHACK
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(detail::ConvertibleToContainer<D, Container>::value)>
 #else
                 CONCEPT_REQUIRES_(detail::ConvertibleToContainer<D, Container>())>
@@ -323,7 +323,7 @@ namespace ranges
             /// \overload
             template<typename Container, typename D = Derived,
                 typename Alloc = typename Container::allocator_type, // HACKHACK
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(detail::ConvertibleToContainer<D const, Container>::value)>
 #else
                 CONCEPT_REQUIRES_(detail::ConvertibleToContainer<D const, Container>())>
@@ -347,7 +347,7 @@ namespace ranges
             }
             /// \overload
             template<bool B = true, typename Stream = meta::if_c<B, std::ostream>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 typename D = Derived, CONCEPT_REQUIRES_(InputView<D const>::value)>
 #else
                 typename D = Derived, CONCEPT_REQUIRES_(InputView<D const>())>

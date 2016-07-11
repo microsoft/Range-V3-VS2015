@@ -28,7 +28,7 @@ struct cursor
     };
     cursor() = default;
     explicit cursor(I i) : it_(i) {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
     template<class J, CONCEPT_REQUIRES_(ranges::ConvertibleTo<J, I>::value)>
 #else
     template<class J, CONCEPT_REQUIRES_(ranges::ConvertibleTo<J, I>())>

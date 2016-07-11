@@ -33,7 +33,7 @@ namespace ranges
         struct mutable_
         {
             mutable T value;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(DefaultConstructible<T>::value)
 #else
             CONCEPT_REQUIRES(DefaultConstructible<T>())
@@ -137,7 +137,7 @@ namespace ranges
         {
             Element value;
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(DefaultConstructible<Element>::value)
 #else
             CONCEPT_REQUIRES(DefaultConstructible<Element>())
@@ -147,7 +147,7 @@ namespace ranges
             {}
 
             template<typename E,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<Element, E &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<Element, E &&>())>
@@ -161,7 +161,7 @@ namespace ranges
         struct box<Element, Tag, true>
           : Element
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(DefaultConstructible<Element>::value)
 #else
             CONCEPT_REQUIRES(DefaultConstructible<Element>())
@@ -171,7 +171,7 @@ namespace ranges
             {}
 
             template<typename E,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<Element, E &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<Element, E &&>())>

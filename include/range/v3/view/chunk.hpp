@@ -44,7 +44,7 @@ namespace ranges
                 is_finite<Rng>::value ? finite : range_cardinality<Rng>::value>
         {
         private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_ASSERT(ForwardRange<Rng>::value);
 #else
             CONCEPT_ASSERT(ForwardRange<Rng>());
@@ -64,7 +64,7 @@ namespace ranges
         public:
             chunk_view() = default;
             chunk_view(Rng rng, range_difference_t<Rng> n)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : chunk_view::view_adaptor(std::move(rng))
 #else
               : view_adaptor_t<chunk_view>(std::move(rng))
@@ -73,7 +73,7 @@ namespace ranges
             {
                 RANGES_ASSERT(0 < n_);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng>())
@@ -112,7 +112,7 @@ namespace ranges
                 RANGES_ASSERT(0 == offset());
                 offset() = ranges::advance(it, n_, end_);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(BidirectionalRange<Rng>())
@@ -122,7 +122,7 @@ namespace ranges
                 ranges::advance(it, -n_ + offset());
                 offset() = 0;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -134,7 +134,7 @@ namespace ranges
                 //RANGES_ASSERT(0 == ((there - here) + that.offset() - offset()) % n_);
                 return ((there - here) + that.offset() - offset()) / n_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -158,7 +158,7 @@ namespace ranges
             private:
                 friend view_access;
                 template<typename Int,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                     CONCEPT_REQUIRES_(Integral<Int>())>
@@ -170,7 +170,7 @@ namespace ranges
                 )
             public:
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ForwardRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(ForwardRange<Rng>())>
@@ -184,7 +184,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
             private:
                 template<typename Int,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Integral<Int>::value)>
 #else
                     CONCEPT_REQUIRES_(!Integral<Int>())>
@@ -197,7 +197,7 @@ namespace ranges
                 }
             public:
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!(ForwardRange<Rng>::value && Integral<T>::value))>
 #else
                     CONCEPT_REQUIRES_(!(ForwardRange<Rng>() && Integral<T>()))>

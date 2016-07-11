@@ -39,7 +39,7 @@ namespace ranges
         struct replace_fn
         {
             template<typename I, typename S, typename T0, typename T1, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Replaceable<I, T0, T1, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(Replaceable<I, T0, T1, P>() && IteratorRange<I, S>())>
@@ -55,7 +55,7 @@ namespace ranges
 
             template<typename Rng, typename T0, typename T1, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Replaceable<I, T0, T1, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Replaceable<I, T0, T1, P>() && Range<Rng>())>

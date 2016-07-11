@@ -118,7 +118,7 @@ namespace ranges
             template<typename Val>
             using iota_difference_t = meta::_t<iota_difference<Val>>;
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename Val, CONCEPT_REQUIRES_(!Integral<Val>::value)>
 #else
             template<typename Val, CONCEPT_REQUIRES_(!Integral<Val>())>
@@ -128,7 +128,7 @@ namespace ranges
                 return v0 - v1;
             }
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename Val, CONCEPT_REQUIRES_(SignedIntegral<Val>::value)>
 #else
             template<typename Val, CONCEPT_REQUIRES_(SignedIntegral<Val>())>
@@ -139,7 +139,7 @@ namespace ranges
                 return (D) v0 - (D) v1;
             }
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename Val, CONCEPT_REQUIRES_(UnsignedIntegral<Val>::value)>
 #else
             template<typename Val, CONCEPT_REQUIRES_(UnsignedIntegral<Val>())>
@@ -183,7 +183,7 @@ namespace ranges
             {
                 return done_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Incrementable<From>::value)
 #else
             CONCEPT_REQUIRES(Incrementable<From>())
@@ -192,7 +192,7 @@ namespace ranges
             {
                 return that.from_ == from_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>())
@@ -201,7 +201,7 @@ namespace ranges
             {
                 --from_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
@@ -211,7 +211,7 @@ namespace ranges
                 RANGES_ASSERT(detail::iota_minus(to_, from_) >= n);
                 from_ += n;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
@@ -250,7 +250,7 @@ namespace ranges
             {
                 return from_ == to_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Incrementable<From>::value)
 #else
             CONCEPT_REQUIRES(Incrementable<From>())
@@ -259,7 +259,7 @@ namespace ranges
             {
                 return that.from_ == from_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>())
@@ -268,7 +268,7 @@ namespace ranges
             {
                 --from_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
@@ -278,7 +278,7 @@ namespace ranges
                 RANGES_ASSERT(detail::iota_minus(to_, from_) >= n);
                 from_ += n;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
@@ -317,7 +317,7 @@ namespace ranges
             {
                 return false;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Incrementable<From>::value)
 #else
             CONCEPT_REQUIRES(Incrementable<From>())
@@ -326,7 +326,7 @@ namespace ranges
             {
                 return that.value_ == value_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(BidirectionalIncrementable<From>())
@@ -335,7 +335,7 @@ namespace ranges
             {
                 --value_;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
@@ -344,7 +344,7 @@ namespace ranges
             {
                 value_ += n;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>::value)
 #else
             CONCEPT_REQUIRES(RandomAccessIncrementable<From>())
@@ -379,7 +379,7 @@ namespace ranges
                 }
             public:
                 template<typename From,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(WeaklyIncrementable<From>::value)>
 #else
                     CONCEPT_REQUIRES_(WeaklyIncrementable<From>())>
@@ -390,7 +390,7 @@ namespace ranges
                 }
                 template<typename From, typename To>
                 meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value,
 #else
                     WeaklyIncrementable<From>() && EqualityComparable<From, To>(),
@@ -403,7 +403,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename From,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!WeaklyIncrementable<From>::value)>
 #else
                     CONCEPT_REQUIRES_(!WeaklyIncrementable<From>())>
@@ -416,7 +416,7 @@ namespace ranges
                         " difference_type");
                 }
                 template<typename From, typename To,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value))>
 #else
                     CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>() && EqualityComparable<From, To>()))>
@@ -435,7 +435,7 @@ namespace ranges
 
             template<typename From, typename To>
             meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value,
 #else
                 WeaklyIncrementable<From>() && EqualityComparable<From, To>(),
@@ -466,7 +466,7 @@ namespace ranges
                 }
             public:
                 template<typename From, typename To,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value)>
 #else
                     CONCEPT_REQUIRES_(WeaklyIncrementable<From>() && EqualityComparable<From, To>())>
@@ -481,7 +481,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename From, typename To,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>::value && EqualityComparable<From, To>::value))>
 #else
                     CONCEPT_REQUIRES_(!(WeaklyIncrementable<From>() && EqualityComparable<From, To>()))>
@@ -518,7 +518,7 @@ namespace ranges
                 ints_fn() = default;
 
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Integral<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(Integral<Val>())>
@@ -529,7 +529,7 @@ namespace ranges
                 }
                 template<typename Val>
                 meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     (bool)Integral<Val>::value,
 #else
                     (bool)Integral<Val>(),
@@ -539,7 +539,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Integral<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(!Integral<Val>())>
@@ -550,7 +550,7 @@ namespace ranges
                         "The object passed to view::ints must be Integral");
                 }
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Integral<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(!Integral<Val>())>
@@ -565,7 +565,7 @@ namespace ranges
 
             template<typename Val>
             meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 (bool)Integral<Val>::value,
 #else
                 (bool)Integral<Val>(),
@@ -579,7 +579,7 @@ namespace ranges
             struct closed_ints_fn
             {
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Integral<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(Integral<Val>())>
@@ -590,7 +590,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Integral<Val>::value)>
 #else
                     CONCEPT_REQUIRES_(!Integral<Val>())>

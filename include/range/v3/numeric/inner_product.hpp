@@ -50,7 +50,7 @@ namespace ranges
             template<typename I1, typename S1, typename I2, typename T,
                 typename BOp1 = plus, typename BOp2 = multiplies,
                 typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     IteratorRange<I1, S1>::value &&
                     InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>::value
@@ -77,7 +77,7 @@ namespace ranges
             template<typename I1, typename S1, typename I2, typename S2, typename T,
                 typename BOp1 = plus, typename BOp2 = multiplies,
                 typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     IteratorRange<I1, S1>::value &&
                     IteratorRange<I2, S2>::value &&
@@ -107,7 +107,7 @@ namespace ranges
                 typename BOp2 = multiplies, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = uncvref_t<I2Ref>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     Range<Rng1>::value && Iterator<I2>::value &&
                     InnerProductable<I1, I2, T, BOp1, BOp2, P1, P2>::value
@@ -129,7 +129,7 @@ namespace ranges
                 typename BOp2 = multiplies, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     Range<Rng1>::value &&
                     Range<Rng2>::value &&

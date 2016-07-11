@@ -69,7 +69,7 @@ namespace ranges
             union variant_data<>
             {
                 template <typename That,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Same<variant_data, uncvref_t<That>>::value)>
 #else
                     CONCEPT_REQUIRES_(Same<variant_data,uncvref_t<That>>())>
@@ -114,7 +114,7 @@ namespace ranges
                 variant_data()
                 {}
                 template<typename ...Args,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Constructible<head_t, Args...>::value)>
 #else
                     CONCEPT_REQUIRES_(Constructible<head_t, Args...>())>
@@ -123,7 +123,7 @@ namespace ranges
                   : head(std::forward<Args>(args)...)
                 {}
                 template<std::size_t N, typename ...Args,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(0 != N && Constructible<tail_t, meta::size_t<N - 1>, Args...>::value)>
 #else
                     CONCEPT_REQUIRES_(0 != N && Constructible<tail_t, meta::size_t<N - 1>, Args...>())>
@@ -134,7 +134,7 @@ namespace ranges
                 ~variant_data()
                 {}
                 template <typename That,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Same<variant_data, decay_t<That>>::value)>
 #else
                     CONCEPT_REQUIRES_(Same<variant_data, decay_t<That>>())>
@@ -214,7 +214,7 @@ namespace ranges
                 std::tuple<Ts...> t_;
 
                 template<typename U, std::size_t ...Is,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Constructible<U, Ts...>::value)>
 #else
                     CONCEPT_REQUIRES_(Constructible<U, Ts...>())>
@@ -228,7 +228,7 @@ namespace ranges
                   : t_{std::forward<Ts>(ts)...}
                 {}
                 template<typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Constructible<U, Ts...>::value)>
 #else
                     CONCEPT_REQUIRES_(Constructible<U, Ts...>())>
@@ -382,7 +382,7 @@ namespace ranges
                     meta::replace<
                         meta::transform<
                             Types,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                             meta::as_list<meta::make_index_sequence<meta::size<Types>::value>>,
 #else
                             meta::as_list<meta::make_index_sequence<Types::size()>>,
@@ -437,7 +437,7 @@ namespace ranges
             }
 
             template <typename That,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Same<tagged_variant, detail::decay_t<That>>::value)>
 #else
                 CONCEPT_REQUIRES_(Same<tagged_variant, detail::decay_t<That>>())>
@@ -457,7 +457,7 @@ namespace ranges
             {}
 
         public:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(!Constructible<data_t, meta::size_t<0>>::value)
 #else
             CONCEPT_REQUIRES(!Constructible<data_t, meta::size_t<0>>())
@@ -465,7 +465,7 @@ namespace ranges
             tagged_variant()
               : tagged_variant{empty_tag{}}
             {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Constructible<data_t, meta::size_t<0>>::value)
 #else
             CONCEPT_REQUIRES(Constructible<data_t, meta::size_t<0>>())
@@ -474,7 +474,7 @@ namespace ranges
               : tagged_variant{meta::size_t<0>{}}
             {}
             template<std::size_t N, typename...Args,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>())>
@@ -515,7 +515,7 @@ namespace ranges
                 return sizeof...(Ts);
             }
             template<std::size_t N, typename ...Args,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<data_t, meta::size_t<N>, Args...>())>
@@ -535,7 +535,7 @@ namespace ranges
                 return which_;
             }
 
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
             using Args_default = meta::transform<types_t, detail::add_ref_t>;
             template<typename Fun>
             using Result_default = detail::variant_result_t<Fun, Args_default>;
@@ -543,7 +543,7 @@ namespace ranges
             using Result_i_default = detail::variant_result_i_t<Fun, Args_default>;
 #endif
 
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
             template<typename Fun>
             Result_default<Fun> apply(Fun &&fun)
 #else
@@ -553,7 +553,7 @@ namespace ranges
             Result apply(Fun &&fun)
 #endif
             {
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
                 Result_default<Fun> res;
 #else
                 Result res;
@@ -561,7 +561,7 @@ namespace ranges
                 data_.apply(which_, detail::make_unary_visitor(detail::unwrap_ref_fun<Fun>{std::forward<Fun>(fun)}, res));
                 return res;
             }
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
             template<typename Fun>
             Result_default<Fun> apply(Fun &&fun) const
 #else
@@ -571,7 +571,7 @@ namespace ranges
             Result apply(Fun &&fun) const
 #endif
             {
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
                 Result_default<Fun> res;
 #else
                 Result res;
@@ -580,7 +580,7 @@ namespace ranges
                 return res;
             }
 
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
             template<typename Fun>
             Result_i_default<Fun> apply_i(Fun &&fun)
 #else
@@ -590,7 +590,7 @@ namespace ranges
             Result apply_i(Fun &&fun)
 #endif
             {
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
                 Result_i_default<Fun> res;
 #else
                 Result res;
@@ -598,7 +598,7 @@ namespace ranges
                 data_.apply(which_, detail::make_binary_visitor(detail::unwrap_ref_fun<Fun>{std::forward<Fun>(fun)}, res));
                 return res;
             }
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
             template<typename Fun>
             Result_i_default<Fun> apply_i(Fun &&fun) const
 #else
@@ -608,7 +608,7 @@ namespace ranges
             Result apply_i(Fun &&fun) const
 #endif
             {
-#ifdef WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#ifdef RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
                 Result_i_default<Fun> res;
 #else
                 Result res;
@@ -619,7 +619,7 @@ namespace ranges
         };
 
         template<typename...Ts, typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>::value...>::value)>
 #else
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>()...>::value)>
@@ -633,7 +633,7 @@ namespace ranges
         }
 
         template<typename...Ts, typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>::value...>::value)>
 #else
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>()...>::value)>

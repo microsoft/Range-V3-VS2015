@@ -60,7 +60,7 @@ namespace ranges
         template<typename Rng>
         using range_common_iterator_t = common_iterator<range_iterator_t<Rng>, range_sentinel_t<Rng>>;
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         template <typename T>
         using range_safe_iterator_t_helper_void_t = void;
         template <class T, class V = void> struct range_safe_iterator_t_helper {};

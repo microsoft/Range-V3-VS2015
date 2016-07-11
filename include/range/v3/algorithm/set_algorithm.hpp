@@ -46,7 +46,7 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Comparable<I1, I2, C, P1, P2>::value &&
                     IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
 #else
@@ -73,7 +73,7 @@ namespace ranges
                 typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Comparable<I1, I2, C, P1, P2>::value &&
                     Range<Rng1>::value && Range<Rng2>::value)>
 #else
@@ -99,7 +99,7 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
 #else
@@ -143,7 +143,7 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     Range<Rng1>::value && Range<Rng2>::value)>
 #else
@@ -170,7 +170,7 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
 #else
@@ -205,7 +205,7 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     Range<Rng1>::value && Range<Rng2>::value)>
 #else
@@ -231,7 +231,7 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
 #else
@@ -268,7 +268,7 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     Range<Rng1>::value && Range<Rng2>::value)>
 #else
@@ -294,7 +294,7 @@ namespace ranges
         {
             template<typename I1, typename S1, typename I2, typename S2, typename O,
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value)>
 #else
@@ -340,7 +340,7 @@ namespace ranges
                 typename C = ordered_less, typename P1 = ident, typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Mergeable<I1, I2, O, C, P1, P2>::value &&
                     Range<Rng1>::value && Range<Rng2>::value)>
 #else

@@ -72,7 +72,7 @@ namespace ranges
             template<typename T, typename U>
             using _builtin_common_t = meta::_t<_builtin_common<T, U>>;
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
             template <typename T>
             using _cond_res_void_t = void;
             template <class T, class U, class V = void> struct _cond_res_helper {};

@@ -65,7 +65,7 @@ namespace ranges
         {
             // Single-range variant
             template<typename I, typename S, typename O, typename F, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I, S>::value && Transformable1<I, O, F, P>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>() && Transformable1<I, O, F, P>())>
@@ -81,7 +81,7 @@ namespace ranges
 
             template<typename Rng, typename O, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng>::value && Transformable1<I, O, F, P>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<Rng>() && Transformable1<I, O, F, P>())>
@@ -95,7 +95,7 @@ namespace ranges
             // Double-range variant, 4-iterator version
             template<typename I0, typename S0, typename I1, typename S1, typename O, typename F,
                 typename P0 = ident, typename P1 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I0, S0>::value && IteratorRange<I1, S1>::value &&
                     Transformable2<I0, I1, O, F, P0, P1>::value)>
 #else
@@ -117,7 +117,7 @@ namespace ranges
                 typename P0 = ident, typename P1 = ident,
                 typename I0 = range_iterator_t<Rng0>,
                 typename I1 = range_iterator_t<Rng1>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng0>::value && Range<Rng1>::value &&
                     Transformable2<I0, I1, O, F, P0, P1>::value)>
 #else
@@ -135,7 +135,7 @@ namespace ranges
             // Double-range variant, 3-iterator version
             template<typename I0, typename S0, typename I1, typename O, typename F,
                 typename P0 = ident, typename P1 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I0, S0>::value &&
                     Transformable2<I0, I1, O, F, P0, P1>::value)>
 #else
@@ -153,7 +153,7 @@ namespace ranges
             template<typename Rng0, typename I1Ref, typename O, typename F,
                 typename P0 = ident, typename P1 = ident, typename I1 = uncvref_t<I1Ref>,
                 typename I0 = range_iterator_t<Rng0>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng0>::value && Iterator<I1>::value &&
                     Transformable2<I0, I1, O, F, P0, P1>::value)>
 #else

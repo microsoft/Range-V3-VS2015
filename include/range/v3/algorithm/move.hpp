@@ -37,7 +37,7 @@ namespace ranges
             using aux::move_fn::operator();
 
             template<typename I, typename S, typename O,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
                     WeaklyIncrementable<O>::value && IndirectlyMovable<I, O>::value)>
 #else
@@ -53,7 +53,7 @@ namespace ranges
 
             template<typename Rng, typename O,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value && WeaklyIncrementable<O>::value &&
                     IndirectlyMovable<I, O>::value)>
 #else

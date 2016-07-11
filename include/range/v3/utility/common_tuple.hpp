@@ -34,7 +34,7 @@ namespace ranges
                 return std::tuple<Us...>{std::get<Is>(std::forward<Tup>(tup))...};
             }
 
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_215598
             template<typename... T>
             struct and_c_class
             {
@@ -100,7 +100,7 @@ namespace ranges
             };
         public:
             // Construction
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(meta::and_c<(bool) DefaultConstructible<Ts>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool) DefaultConstructible<Ts>()...>::value)
@@ -110,8 +110,8 @@ namespace ranges
               : std::tuple<Ts...>{}
             {}
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>::value...>::value)>
@@ -120,15 +120,15 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>()...>::value)>
 #endif
             explicit common_tuple(Us &&... us)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us &&>::value...>::value)
 #endif
               : std::tuple<Ts...>{std::forward<Us>(us)...}
             {}
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &>::value...>::value)>
@@ -137,15 +137,15 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &>()...>::value)>
 #endif
             common_tuple(std::tuple<Us...> &that)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us &>::value...>::value)
 #endif
               : common_tuple(that, meta::make_index_sequence<sizeof...(Ts)>{})
             {}
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us const &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us const &>::value...>::value)>
@@ -154,15 +154,15 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us const &>()...>::value)>
 #endif
             common_tuple(std::tuple<Us...> const &that)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us const &>::value...>::value)
 #endif
               : common_tuple(that, meta::make_index_sequence<sizeof...(Ts)>{})
             {}
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Ts...>, meta::list<Us &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>::value...>::value)>
@@ -171,7 +171,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Ts, Us &&>()...>::value)>
 #endif
             common_tuple(std::tuple<Us...> &&that)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Ts, Us &&>::value...>::value)
 #endif
@@ -180,8 +180,8 @@ namespace ranges
 
             // Assignment
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Assignable<meta::list<Ts &...>, meta::list<Us &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &>::value...>::value)>
@@ -190,7 +190,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &>()...>::value)>
 #endif
             common_tuple &operator=(std::tuple<Us...> &that)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_assignable<Ts &, Us &>::value...>::value)
 #endif
@@ -199,8 +199,8 @@ namespace ranges
                 return *this;
             }
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Assignable<meta::list<Ts &...>, meta::list<Us const &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us const &>::value...>::value)>
@@ -209,7 +209,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us const &>()...>::value)>
 #endif
             common_tuple &operator=(std::tuple<Us...> const & that)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_assignable<Ts &, Us const &>::value...>::value)
 #endif
@@ -218,8 +218,8 @@ namespace ranges
                 return *this;
             }
             template<typename...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Assignable<meta::list<Ts &...>, meta::list<Us &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &&>::value...>::value)>
@@ -228,7 +228,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Assignable<Ts &, Us &&>()...>::value)>
 #endif
             common_tuple &operator=(std::tuple<Us...> &&that)
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_assignable<Ts &, Us &&>::value...>::value)
 #endif
@@ -239,8 +239,8 @@ namespace ranges
 
             // Conversion
             template<typename ...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Us...>, meta::list<Ts &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts &>::value...>::value)>
@@ -249,7 +249,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts &>()...>::value)>
 #endif
             operator std::tuple<Us...> () &
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Us, Ts &>::value...>::value)
 #endif
@@ -257,8 +257,8 @@ namespace ranges
                 return detail::to_std_tuple<Us...>(*this, meta::make_index_sequence<sizeof...(Ts)>{});
             }
             template<typename ...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Us...>, meta::list<const Ts &...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts const &>::value...>::value)>
@@ -267,7 +267,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts const &>()...>::value)>
 #endif
             operator std::tuple<Us...> () const &
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Us, Ts const &>::value...>::value)
 #endif
@@ -275,8 +275,8 @@ namespace ranges
                 return detail::to_std_tuple<Us...>(*this, meta::make_index_sequence<sizeof...(Ts)>{});
             }
             template<typename ...Us,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
                 CONCEPT_REQUIRES_(detail::and_c_Constructible<meta::list<Us...>, meta::list<Ts &&...>, sizeof...(Ts) == sizeof...(Us)>::value)>
 #else
                 CONCEPT_REQUIRES_(meta::and_c<(bool)Constructible<Us, Ts &&>::value...>::value)>
@@ -285,7 +285,7 @@ namespace ranges
                 CONCEPT_REQUIRES_(meta::and_c<(bool) Constructible<Us, Ts &&>()...>::value)>
 #endif
             operator std::tuple<Us...> () &&
-#ifdef WORKAROUND_215598_NOEXCEPT
+#ifdef RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 #else
                 noexcept(meta::and_c<std::is_nothrow_constructible<Us, Ts &&>::value...>::value)
 #endif
@@ -294,8 +294,8 @@ namespace ranges
             }
 
         // Logical operators
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
-#ifdef WORKAROUND_215598
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_215598
 #define LOGICAL_OP(OP, CONCEPT)\
             CONCEPT_REQUIRES_FRIEND(meta::and_c<(bool)CONCEPT<Ts>::value...>::value)\
                 friend bool operator OP(common_tuple const &a, common_tuple const &b)\
@@ -417,7 +417,7 @@ namespace ranges
             }
         public:
             // Construction
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(DefaultConstructible<F>::value && DefaultConstructible<S>::value)
 #else
             CONCEPT_REQUIRES(DefaultConstructible<F>() && DefaultConstructible<S>())
@@ -428,7 +428,7 @@ namespace ranges
               : std::pair<F, S>{}
             {}
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F, F2 &&>::value && Constructible<S, S2 &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F, F2 &&>() && Constructible<S, S2 &&>())>
@@ -439,7 +439,7 @@ namespace ranges
               : std::pair<F, S>{std::forward<F2>(f2), std::forward<S2>(s2)}
             {}
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F, F2 &>::value && Constructible<S, S2 &>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F, F2 &>() && Constructible<S, S2 &>())>
@@ -450,7 +450,7 @@ namespace ranges
               : std::pair<F, S>{that.first, that.second}
             {}
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F, F2 const &>::value && Constructible<S, S2 const &>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F, F2 const &>() && Constructible<S, S2 const &>())>
@@ -461,7 +461,7 @@ namespace ranges
               : std::pair<F, S>{that.first, that.second}
             {}
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F, F2 &&>::value && Constructible<S, S2 &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F, F2 &&>() && Constructible<S, S2 &&>())>
@@ -474,7 +474,7 @@ namespace ranges
 
             // Conversion
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F2, F &>::value && Constructible<S2, S &>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F2, F &>() && Constructible<S2, S &>())>
@@ -486,7 +486,7 @@ namespace ranges
                 return {this->first, this->second};
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F2, F const &>::value && Constructible<S2, S const &>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F2, F const &>() && Constructible<S2, S const &>())>
@@ -498,7 +498,7 @@ namespace ranges
                 return {this->first, this->second};
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<F2, F &&>::value && Constructible<S2, S &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<F2, F &&>() && Constructible<S2, S &&>())>
@@ -512,7 +512,7 @@ namespace ranges
 
             // Assignment
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Assignable<F &, F2 &>::value && Assignable<S &, S2 &>::value)>
 #else
                 CONCEPT_REQUIRES_(Assignable<F &, F2 &>() && Assignable<S &, S2 &>())>
@@ -526,7 +526,7 @@ namespace ranges
                 return *this;
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Assignable<F &, F2 const &>::value && Assignable<S &, S2 const &>::value)>
 #else
                 CONCEPT_REQUIRES_(Assignable<F &, F2 const &>() && Assignable<S &, S2 const &>())>
@@ -540,7 +540,7 @@ namespace ranges
                 return *this;
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Assignable<F &, F2 &&>::value && Assignable<S &, S2 &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Assignable<F &, F2 &&>() && Assignable<S &, S2 &&>())>
@@ -555,7 +555,7 @@ namespace ranges
             }
 
             // Logical operators
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(EqualityComparable<F>::value && EqualityComparable<S>::value)
 #else
             CONCEPT_REQUIRES(EqualityComparable<F>() && EqualityComparable<S>())
@@ -565,7 +565,7 @@ namespace ranges
                 return a.first == b.first && a.second == b.second;
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
@@ -575,7 +575,7 @@ namespace ranges
                 return a.first == b.first && a.second == b.second;
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
@@ -585,7 +585,7 @@ namespace ranges
                 return a.first == b.first && a.second == b.second;
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
@@ -594,7 +594,7 @@ namespace ranges
             {
                 return a.first == b.first && a.second == b.second;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_FRIEND(EqualityComparable<F>::value && EqualityComparable<S>::value)
 #else
             CONCEPT_REQUIRES(EqualityComparable<F>() && EqualityComparable<S>())
@@ -604,7 +604,7 @@ namespace ranges
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
@@ -614,7 +614,7 @@ namespace ranges
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
@@ -624,7 +624,7 @@ namespace ranges
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
             template<typename F2, typename S2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_FRIEND_(EqualityComparable<F, F2>::value && EqualityComparable<S, S2>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<F, F2>() && EqualityComparable<S, S2>())>
@@ -633,7 +633,7 @@ namespace ranges
             {
                 return a.first < b.first || (!(b.first < a.first) && a.second < b.second);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
 #define LOGICAL_OP(OP, CONCEPT, RET)\
             CONCEPT_REQUIRES_FRIEND(CONCEPT<F>::value && CONCEPT<S>::value)\
             friend bool operator OP(common_pair const &a, common_pair const &b)\

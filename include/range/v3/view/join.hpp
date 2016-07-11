@@ -64,7 +64,7 @@ namespace ranges
                     range_cardinality<range_value_t<Rng>>>::value>
         {
         private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_ASSERT(Range<Rng>::value);
             CONCEPT_ASSERT(Range<range_value_t<Rng>>::value);
 #else
@@ -150,14 +150,14 @@ namespace ranges
         public:
             join_view() = default;
             explicit join_view(Rng rng)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : join_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<join_view>{std::move(rng)}
 #endif
               , cur_{}
             {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 && SizedRange<range_value_t<Rng>>::value)
 #else
             CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 && SizedRange<range_value_t<Rng>>())
@@ -180,7 +180,7 @@ namespace ranges
                     range_cardinality<ValRng>>::value>
         {
         private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_ASSERT(InputRange<Rng>::value);
             CONCEPT_ASSERT(ForwardRange<ValRng>::value);
             CONCEPT_ASSERT(InputRange<range_value_t<Rng>>::value);
@@ -298,14 +298,14 @@ namespace ranges
         public:
             join_view() = default;
             join_view(Rng rng, ValRng val)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : join_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<join_view>{std::move(rng)}
 #endif
               , cur_{}, val_(std::move(val))
             {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(range_cardinality<Rng>::value >= 0 &&
                 SizedRange<range_value_t<Rng>>::value && SizedRange<ValRng>::value)
 #else
@@ -338,7 +338,7 @@ namespace ranges
                         Rng>>;
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>())>
@@ -348,7 +348,7 @@ namespace ranges
                     return join_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
                 template<typename Rng, typename Val = range_value_t<range_value_t<Rng>>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>())>
@@ -362,7 +362,7 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), single(std::move(v))};
                 }
                 template<typename Rng, typename ValRng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>::value && ForwardRange<ValRng>::value)>
 #else
                     CONCEPT_REQUIRES_(JoinableRange_<Rng>() && ForwardRange<ValRng>())>
@@ -383,7 +383,7 @@ namespace ranges
                 }
             private:
                friend view_access;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                template<typename T, CONCEPT_REQUIRES_(!JoinableRange_<T>::value)>
 #else
                template<typename T, CONCEPT_REQUIRES_(!JoinableRange_<T>())>

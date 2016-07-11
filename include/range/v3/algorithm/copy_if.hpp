@@ -35,7 +35,7 @@ namespace ranges
         struct copy_if_fn
         {
             template<typename I, typename S, typename O, typename F, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
                     WeaklyIncrementable<O>::value && IndirectCallablePredicate<F, Project<I, P> >::value &&
                     IndirectlyCopyable<I, O>::value)>
@@ -63,7 +63,7 @@ namespace ranges
 
             template<typename Rng, typename O, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value && WeaklyIncrementable<O>::value &&
                     IndirectCallablePredicate<F, Project<I, P> >::value && IndirectlyCopyable<I, O>::value)>
 #else

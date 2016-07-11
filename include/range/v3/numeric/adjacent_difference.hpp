@@ -47,7 +47,7 @@ namespace ranges
         {
             template <typename I, typename S, typename O, typename BOp = minus,
                       typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                       CONCEPT_REQUIRES_(IteratorRange<I, S>::value &&
                                         AdjacentDifferentiable<I, O, BOp, P>::value)>
 #else
@@ -81,7 +81,7 @@ namespace ranges
 
             template <typename I, typename S, typename O, typename S2,
                       typename BOp = minus, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                       CONCEPT_REQUIRES_(IteratorRange<I, S>::value && IteratorRange<O, S2>::value &&
                                         AdjacentDifferentiable<I, O, BOp, P>::value)>
 #else
@@ -116,7 +116,7 @@ namespace ranges
 
             template <typename Rng, typename ORef, typename BOp = minus, typename P = ident,
                       typename I = range_iterator_t<Rng>, typename O = uncvref_t<ORef>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                       CONCEPT_REQUIRES_(Range<Rng &>::value &&
                                         AdjacentDifferentiable<I, O, BOp, P>::value)>
 #else
@@ -133,7 +133,7 @@ namespace ranges
             template <typename Rng, typename ORng, typename BOp = minus,
                       typename P = ident, typename I = range_iterator_t<Rng>,
                       typename O = range_iterator_t<ORng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                       CONCEPT_REQUIRES_(Range<Rng &>::value && Range<ORng &>::value &&
                                         AdjacentDifferentiable<I, O, BOp, P>::value)>
 #else

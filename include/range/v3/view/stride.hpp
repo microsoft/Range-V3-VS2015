@@ -68,7 +68,7 @@ namespace ranges
                 stride_view const *rng_;
                 offset_t & offset() { return *this; }
                 offset_t const & offset() const { return *this; }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
@@ -107,7 +107,7 @@ namespace ranges
                     offset() = ranges::advance(it, rng_->stride_ + offset(),
                         ranges::end(rng_->mutable_base()));
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
@@ -119,7 +119,7 @@ namespace ranges
                         ranges::begin(rng_->mutable_base()));
                     RANGES_ASSERT(0 == offset());
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -132,7 +132,7 @@ namespace ranges
                     RANGES_ASSERT(0 == ((there - here) + that.offset() - offset()) % rng_->stride_);
                     return ((there - here) + that.offset() - offset()) / rng_->stride_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -158,7 +158,7 @@ namespace ranges
             // speaking, we don't have to adapt the end iterator of Input and Forward
             // Ranges, but in the interests of making the resulting stride view model
             // BoundedView, adapt it anyway.
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(!BoundedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(!BoundedRange<Rng>())
@@ -167,7 +167,7 @@ namespace ranges
             {
                 return {};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BoundedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(BoundedRange<Rng>())
@@ -179,7 +179,7 @@ namespace ranges
         public:
             stride_view() = default;
             stride_view(Rng rng, difference_type_ stride)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : stride_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<stride_view>{std::move(rng)}
@@ -188,7 +188,7 @@ namespace ranges
             {
                 RANGES_ASSERT(0 < stride_);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng>())
@@ -206,7 +206,7 @@ namespace ranges
             {
             private:
                 friend view_access;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Difference, CONCEPT_REQUIRES_(Integral<Difference>::value)>
 #else
                 template<typename Difference, CONCEPT_REQUIRES_(Integral<Difference>())>
@@ -217,7 +217,7 @@ namespace ranges
                     make_pipeable(std::bind(stride, std::placeholders::_1, std::move(step)))
                 )
             public:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>())>
@@ -230,7 +230,7 @@ namespace ranges
                 // For the purpose of better error messages:
             #ifndef RANGES_DOXYGEN_INVOKED
             private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Difference, CONCEPT_REQUIRES_(!Integral<Difference>::value)>
 #else
                 template<typename Difference, CONCEPT_REQUIRES_(!Integral<Difference>())>
@@ -245,7 +245,7 @@ namespace ranges
                 }
             public:
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!InputRange<Rng>())>

@@ -28,7 +28,7 @@ namespace ranges
         using tagged_tuple =
             tagged<std::tuple<detail::tag_elem<Ts>...>, detail::tag_spec<Ts>...>;
 
-#ifdef WORKAROUND_PACK_EXPANSION
+#ifdef RANGES_WORKAROUND_MSVC_PACK_EXPANSION
         template<typename Tag, typename T>
         struct tagged_tuple_helper {
             using type = Tag(bind_element_t<T>);
@@ -41,7 +41,7 @@ namespace ranges
 #endif
         make_tagged_tuple(Ts &&... ts)
         {
-#ifdef WORKAROUND_PACK_EXPANSION
+#ifdef RANGES_WORKAROUND_MSVC_PACK_EXPANSION
             return tagged_tuple<typename tagged_tuple_helper<Tags, Ts>::type...>{detail::forward<Ts>(ts)...};
 #else
             return tagged_tuple<Tags(bind_element_t<Ts>)...>{detail::forward<Ts>(ts)...};

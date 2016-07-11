@@ -109,74 +109,70 @@
 #endif // _MSC_VER switch
 
 // mainly for T{} / T() where T is a type trait
-#define WORKAROUND_SFINAE_CONSTEXPR
+#define RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
 // more complex constexpr
-#define WORKAROUND_SFINAE_CONSTEXPR_2
-#define WORKAROUND_SFINAE_PARAMETERPACK
-#define WORKAROUND_SFINAE_ALIAS_DECLTYPE
-#define WORKAROUND_SFINAE_FUNCTION_DECLTYPE
+#define RANGES_WORKAROUND_MSVC_SFINAE_PARAMETERPACK
+#define RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+#define RANGES_WORKAROUND_MSVC_SFINAE_FUNCTION_DECLTYPE
 
-// This requires __declspec(empty_bases)
-#define WORKAROUND_EBO
-
-#ifdef WORKAROUND_PERMISSIVE
-// fail only under /d1permissive
+#ifndef RANGES_NOT_PERMISSIVE
+// Workarounds that are unnecessary with /d1permissive-
 // alias template
-#define WORKAROUND_207134
+#define RANGES_WORKAROUND_MSVC_207134
 // Qualify names to avoid collisions with definitions in dependent base classes
-#define WORKAROUND_PERMISSIVE_DEPENDENT_BASE
+#define RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
 // "hidden" friend functions are not hidden. Relocate classes that declare hidden friends
 // that would interfere with a customization point into nested namespaces.
-#define WORKAROUND_PERMISSIVE_HIDDEN_FRIEND
+#define RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
 #endif
 
-// Enable the subset of the WORKAROUND_PERMISSIVE_HIDDEN_FRIEND changes that
+// Enable the subset of the RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND changes that
 // indirect_move needs to work in permissive-.
-#define WORKAROUND_INDIRECT_MOVE
+#define RANGES_WORKAROUND_MSVC_INDIRECT_MOVE
 
 // Destructors are implicitly noexcept only when compiling with /EHa or /EHs
-#define WORKAROUND_140392
+#define RANGES_WORKAROUND_MSVC_140392
 // friend with different nested template parameter level
-#define WORKAROUND_159890
+#define RANGES_WORKAROUND_MSVC_159890
 // name lookup
-#define WORKAROUND_207089
+#define RANGES_WORKAROUND_MSVC_207089
 // alias template + parser error
-#define WORKAROUND_209577
+#define RANGES_WORKAROUND_MSVC_209577
 // static data member in constexpr function
-#define WORKAROUND_209653
+#define RANGES_WORKAROUND_MSVC_209653
 // friend
-#define WORKAROUND_213536
+#define RANGES_WORKAROUND_MSVC_213536
 // pack expansion + alias
-#define WORKAROUND_213933
+#define RANGES_WORKAROUND_MSVC_213933
 // decltype in qname
-#define WORKAROUND_214014
+#define RANGES_WORKAROUND_MSVC_214014
 // pack expansion + base
-#define WORKAROUND_214039
+#define RANGES_WORKAROUND_MSVC_214039
 // using declaration + alias
-#define WORKAROUND_214062
+#define RANGES_WORKAROUND_MSVC_214062
 // dependent expression + template arguments used in nested class
-#define WORKAROUND_215191
+#define RANGES_WORKAROUND_MSVC_215191
 // nested pack expansion
 //   found in test\view\zip.cpp
-#define WORKAROUND_215598
-#define WORKAROUND_215598_NOEXCEPT
+#define RANGES_WORKAROUND_MSVC_215598
+#define RANGES_WORKAROUND_MSVC_215598_NOEXCEPT
 // reference + ternary operator
-#define WORKAROUND_215653
+#define RANGES_WORKAROUND_MSVC_215653
 // friend + default template argument
-#define WORKAROUND_216572
+#define RANGES_WORKAROUND_MSVC_216572
 // variant.hpp (pack expansion doesn't happen for default argument)
-#define WORKAROUND_DEFAULT_TEMPLATE_ARGUMENT
+#define RANGES_WORKAROUND_MSVC_DEFAULT_TEMPLATE_ARGUMENT
 // dependent expression + noexcept operator
 // also see bug 211850
-#define WORKAROUND_NOEXCEPT_DEPENDENT
-#define WORKAROUND_211850
-#define WORKAROUND_CLASS_RVALUE_AS_LVALUE
-#define WORKAROUND_TEMPLATE_STATIC_INITIALIZER
-#define WORKAROUND_PACK_EXPANSION // nested alias template
-#define WORKAROUND_CONSTEXPR_CXX14
+#define RANGES_WORKAROUND_MSVC_NOEXCEPT_DEPENDENT
+#define RANGES_WORKAROUND_MSVC_211850
+#define RANGES_WORKAROUND_MSVC_LVALUE_BINDS_RVALUE
+#define RANGES_WORKAROUND_MSVC_TEMPLATE_STATIC_INITIALIZER
+// nested alias template
+#define RANGES_WORKAROUND_MSVC_PACK_EXPANSION
 
-// Temporarily disabled tests
-#define TEST_FAILURES
+// Temporarily disable failing tests that still need workarounds.
+#define RANGES_DISABLE_MSVC_TEST_FAILURES
 
 #define RANGES_DIAGNOSTIC_PUSH __pragma(warning(push))
 #define RANGES_DIAGNOSTIC_POP __pragma(warning(pop))
@@ -353,6 +349,12 @@
 #define RANGES_GCC_BROKEN_CUSTPOINT inline
 #else
 #define RANGES_GCC_BROKEN_CUSTPOINT
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#define RANGES_BROKEN_EBO __declspec(empty_bases)
+#else
+#define RANGES_BROKEN_EBO
 #endif
 
 #ifdef RANGES_FEWER_WARNINGS

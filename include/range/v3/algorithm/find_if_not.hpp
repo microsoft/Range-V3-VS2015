@@ -43,7 +43,7 @@ namespace ranges
             /// \pre `F` models `CallablePredicate<X>`, where `X` is the result type
             ///      of `Callable<P, V>`
             template<typename I, typename S, typename F, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
                     IndirectCallablePredicate<F, Project<I, P> >::value)>
 #else
@@ -63,7 +63,7 @@ namespace ranges
             /// \overload
             template<typename Rng, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value &&
                     IndirectCallablePredicate<F, Project<I, P> >::value)>
 #else

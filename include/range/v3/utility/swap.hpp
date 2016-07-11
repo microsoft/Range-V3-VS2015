@@ -85,7 +85,7 @@ namespace ranges
               : std::true_type
             {};
 
-#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+#ifdef RANGES_WORKAROUND_MSVC_NOEXCEPT_DEPENDENT
             template<typename T, typename U>
             struct my_is_nothrow_swappable_
             {
@@ -167,7 +167,7 @@ namespace ranges
                 is_indirectly_movable<Readable0, Readable1>::value &&
                 is_indirectly_movable<Readable1, Readable0>::value>
             indirect_swap(Readable0 a, Readable1 b)
-#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+#ifdef RANGES_WORKAROUND_MSVC_NOEXCEPT_DEPENDENT
                 ; // TODO
 #else
                 noexcept(
@@ -232,7 +232,7 @@ namespace ranges
                 is_indirectly_movable<Readable0, Readable1>::value &&
                 is_indirectly_movable<Readable1, Readable0>::value>
             indirect_swap(Readable0 a, Readable1 b)
-#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+#ifdef RANGES_WORKAROUND_MSVC_NOEXCEPT_DEPENDENT
                 // TODO
 #else
                 noexcept(

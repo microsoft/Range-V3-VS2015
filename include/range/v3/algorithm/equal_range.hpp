@@ -32,7 +32,7 @@ namespace ranges
         struct equal_range_fn
         {
             template<typename I, typename S, typename V, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I, S>::value && BinarySearchable<I, V, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>() && BinarySearchable<I, V, C, P>())>
@@ -46,7 +46,7 @@ namespace ranges
 
             template<typename Rng, typename V, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng>::value && BinarySearchable<I, V, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<Rng>() && BinarySearchable<I, V, C, P>())>

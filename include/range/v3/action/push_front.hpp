@@ -30,7 +30,7 @@ namespace ranges
         namespace adl_push_front_detail
         {
             template<typename Cont, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Constructible<range_value_t<Cont>, T &&>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Constructible<range_value_t<Cont>, T &&>())>
@@ -42,7 +42,7 @@ namespace ranges
             }
 
             template<typename Cont, typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Range<Rng>())>
@@ -81,7 +81,7 @@ namespace ranges
                 using Concept = concepts::models<ConceptImpl, Rng, Fun>;
 
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, T>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, T>())>
@@ -94,7 +94,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, T>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, T>())>

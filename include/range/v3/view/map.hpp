@@ -66,7 +66,7 @@ namespace ranges
                     detail::PairLike<range_value_t<Rng>>>;
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -77,7 +77,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>
@@ -101,7 +101,7 @@ namespace ranges
                     detail::PairLike<range_value_t<Rng>>>;
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -112,7 +112,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>

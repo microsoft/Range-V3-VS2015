@@ -92,7 +92,7 @@ namespace ranges
             };
         public:
             template<typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Function<Fun>::value &&
                     ConvertibleTo<concepts::Function::result_t<Fun>, any_input_view<Ref>>::value)>
 #else

@@ -73,7 +73,7 @@ namespace ranges
                     meta::not_<std::is_reference<Rng>>>;
                 // Pipeing requires things are passed by value.
                 template<typename Rng, typename Act,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ActionPipeConcept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(ActionPipeConcept<Rng>())>
@@ -86,7 +86,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For better error messages:
                 template<typename Rng, typename Act,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!ActionPipeConcept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!ActionPipeConcept<Rng>())>
@@ -112,7 +112,7 @@ namespace ranges
                 {}
                 // Calling directly requires things are passed by reference.
                 template<typename Rng, typename...Rest,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng &>::value && Function<Action, Rng &, Rest &&...>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng &>() && Function<Action, Rng &, Rest &&...>())>
@@ -133,7 +133,7 @@ namespace ranges
             };
 
             template<typename Rng, typename Action,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(is_pipeable<Action>::value && Range<Rng &>::value &&
                     Function<bitwise_or, ref_t<Rng &> &&, Action>::value &&
                     Same<ref_t<Rng &>,

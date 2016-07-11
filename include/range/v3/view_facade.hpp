@@ -30,7 +30,7 @@ namespace ranges
         /// \cond
         namespace detail
         {
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
             template <typename T>
             using begin_cursor_t_void_t = void;
             template <class T, class V = void> struct begin_cursor_t_helper {};
@@ -100,7 +100,7 @@ namespace ranges
                 return {};
             }
         public:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -110,7 +110,7 @@ namespace ranges
                 return {range_access::begin_cursor(derived(), 42)};
             }
             /// \overload
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -119,7 +119,7 @@ namespace ranges
             {
                 return {range_access::begin_cursor(derived(), 42)};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -129,7 +129,7 @@ namespace ranges
                 return {range_access::end_cursor(derived(), 42)};
             }
             /// \overload
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>

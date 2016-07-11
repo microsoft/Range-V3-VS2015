@@ -51,7 +51,7 @@ namespace ranges
         struct partition_point_fn
         {
             template<typename I, typename S, typename C, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(PartitionPointable<I, C, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(PartitionPointable<I, C, P>() && IteratorRange<I, S>())>
@@ -78,7 +78,7 @@ namespace ranges
 
             template<typename Rng, typename C, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(PartitionPointable<I, C, P>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(PartitionPointable<I, C, P>() && Range<Rng>())>

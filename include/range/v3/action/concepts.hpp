@@ -119,15 +119,15 @@ namespace ranges
         /// \cond
         namespace detail
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename T, CONCEPT_REQUIRES_(Container<T>::value)>
 #else
             template<typename T, CONCEPT_REQUIRES_(Container<T>())>
 #endif
             std::true_type is_lvalue_container_like(T &);
 
-#ifdef WORKAROUND_CLASS_RVALUE_AS_LVALUE
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_LVALUE_BINDS_RVALUE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename T, CONCEPT_REQUIRES_(!std::is_reference<T>::value && Container<T>::value)>
 #else
             template<typename T, CONCEPT_REQUIRES_(!std::is_reference<T>() && Container<T>())>
@@ -135,14 +135,14 @@ namespace ranges
             void is_lvalue_container_like(T &&) = delete;
 #endif
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename T, CONCEPT_REQUIRES_(Container<T>::value)>
 #else
             template<typename T, CONCEPT_REQUIRES_(Container<T>())>
 #endif
             std::true_type is_lvalue_container_like(reference_wrapper<T>);
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename T, CONCEPT_REQUIRES_(Container<T>::value)>
 #else
             template<typename T, CONCEPT_REQUIRES_(Container<T>())>

@@ -31,7 +31,7 @@ namespace ranges
         struct for_each_fn
         {
             template<typename I, typename S, typename F, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
                     IndirectCallable<F, Project<I, P>>::value)>
 #else
@@ -51,7 +51,7 @@ namespace ranges
 
             template<typename Rng, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallable<F, Project<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallable<F, Project<I, P>>())>

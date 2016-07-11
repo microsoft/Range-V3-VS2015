@@ -30,7 +30,7 @@ namespace ranges
         {
             /// \return `begin(rng)[n]`
             template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessRange<Rng>())>

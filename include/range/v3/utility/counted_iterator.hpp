@@ -31,7 +31,7 @@ namespace ranges
             template<typename A, typename B>
             using UnambiguouslyConvertible =
                 meta::or_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     (bool)Same<A, B>::value,
                     ConvertibleTo<A, B>::value == !ConvertibleTo<B, A>::value>;
 #else
@@ -43,7 +43,7 @@ namespace ranges
             using UnambiguouslyConvertibleType =
                 meta::_t<
                     meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                         (bool)Same<A, B>::value,
                         meta::id<A>,
                         meta::if_c<
@@ -124,7 +124,7 @@ namespace ranges
                   : it_(std::move(it)), n_(n)
                 {}
                 template<typename OtherI, typename OtherD,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ConvertibleTo<OtherI, I>::value && ConvertibleTo<OtherD, D>::value)>
 #else
                     CONCEPT_REQUIRES_(ConvertibleTo<OtherI, I>() && ConvertibleTo<OtherD, D>())>
@@ -141,7 +141,7 @@ namespace ranges
                     ++it_;
                     --n_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(EqualityComparable<D>::value)
 #else
                 CONCEPT_REQUIRES(EqualityComparable<D>())
@@ -150,7 +150,7 @@ namespace ranges
                 {
                     return n_ == that.n_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(BidirectionalIterator<I>::value)
 #else
                 CONCEPT_REQUIRES(BidirectionalIterator<I>())
@@ -160,7 +160,7 @@ namespace ranges
                     --it_;
                     ++n_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
@@ -170,7 +170,7 @@ namespace ranges
                     it_ += n;
                     n_ -= n;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
@@ -207,7 +207,7 @@ namespace ranges
         // For RandomAccessIterator, operator- will be defined by basic_iterator
         template<typename I0, typename D0, typename I1, typename D1,
             typename CI = detail::UnambiguouslyConvertibleType<I0, I1>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_(detail::UnambiguouslyConvertible<I0, I1>::value &&
                 !RandomAccessIterator<CI>::value)>
 #else

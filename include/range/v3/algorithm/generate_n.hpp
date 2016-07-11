@@ -34,7 +34,7 @@ namespace ranges
         struct generate_n_fn
         {
             template<typename O, typename F,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Function<F>::value &&
                     WeakOutputIterator<O, concepts::Function::result_t<F>>::value)>
 #else

@@ -35,7 +35,7 @@ namespace ranges
         struct rotate_copy_fn
         {
             template<typename I, typename S, typename O, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value && WeaklyIncrementable<O>::value &&
                     IndirectlyCopyable<I, O>::value)>
 #else
@@ -53,7 +53,7 @@ namespace ranges
 
             template<typename Rng, typename O, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<Rng>::value && WeaklyIncrementable<O>::value &&
                     IndirectlyCopyable<I, O>::value)>
 #else

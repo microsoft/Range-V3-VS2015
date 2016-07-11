@@ -26,7 +26,7 @@ namespace ranges
         struct iota_fn
         {
             template<typename O, typename S, class T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(OutputIterator<O, T>::value && IteratorRange<O, S>::value && WeaklyIncrementable<T>::value)>
 #else
                 CONCEPT_REQUIRES_(OutputIterator<O, T>() && IteratorRange<O, S>() && WeaklyIncrementable<T>())>
@@ -39,7 +39,7 @@ namespace ranges
             }
 
             template<typename Rng, class T, typename O = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(OutputRange<Rng &, T>::value && WeaklyIncrementable<T>::value)>
 #else
                 CONCEPT_REQUIRES_(OutputRange<Rng &, T>() && WeaklyIncrementable<T>())>

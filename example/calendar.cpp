@@ -159,7 +159,7 @@ auto layout_months() {
 //                       The last range may have fewer.
 template<class Rng>
 class chunk_view : public view_adaptor<chunk_view<Rng>, Rng> {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
     CONCEPT_ASSERT(ForwardRange<Rng>::value);
 #else
     CONCEPT_ASSERT(ForwardRange<Rng>());
@@ -173,7 +173,7 @@ class chunk_view : public view_adaptor<chunk_view<Rng>, Rng> {
 public:
     chunk_view() = default;
     chunk_view(Rng rng, std::size_t n)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
       : chunk_view::view_adaptor(std::move(rng))
 #else
       : view_adaptor_t<chunk_view>(std::move(rng))
@@ -244,7 +244,7 @@ struct interleave_view<Rngs>::cursor  {
         return n_ == 0 && its_.end() != mismatch(its_,
             view::transform(*rngs_, ranges::end), std::not_equal_to<>()).first;
     }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
     CONCEPT_REQUIRES(ForwardRange<range_value_t<Rngs>>::value)
 #else
     CONCEPT_REQUIRES(ForwardRange<range_value_t<Rngs>>())

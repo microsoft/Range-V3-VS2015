@@ -66,7 +66,7 @@ namespace ranges
                 /// If it is container-like, turn it into an range, being careful
                 /// to preserve the Sized-ness of the range.
                 template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!View<T>::value),
 #else
                     CONCEPT_REQUIRES_(!View<T>()),
@@ -86,7 +86,7 @@ namespace ranges
 
             public:
                 template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<T>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<T>())>
@@ -98,7 +98,7 @@ namespace ranges
                 }
 
                 template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<T &>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<T &>())>
@@ -116,7 +116,7 @@ namespace ranges
                 constexpr auto&& all = static_const<all_fn>::value;
             }
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
             template <typename T>
             using all_t_void_t = void;
             template <class T, class V = void> struct all_t_helper {};

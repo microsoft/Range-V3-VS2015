@@ -40,7 +40,7 @@ namespace ranges
                 template<typename Rng>
                 using join_value_t =
                     meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                         (bool)ranges::Container<range_value_t<Rng>>::value,
 #else
                         (bool)ranges::Container<range_value_t<Rng>>(),
@@ -55,7 +55,7 @@ namespace ranges
                     SemiRegular<join_value_t<Rng>>>;
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -71,7 +71,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>

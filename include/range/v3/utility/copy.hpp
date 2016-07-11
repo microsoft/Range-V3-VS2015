@@ -29,7 +29,7 @@ namespace ranges
             struct copy_fn : copy_tag
             {
                 template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Constructible<detail::decay_t<T>, T &&>::value)>
 #else
                     CONCEPT_REQUIRES_(Constructible<detail::decay_t<T>, T &&>())>
@@ -50,7 +50,7 @@ namespace ranges
             /// \ingroup group-utility
             /// \sa `copy_fn`
             template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Constructible<detail::decay_t<T>, T &&>::value)>
 #else
                 CONCEPT_REQUIRES_(Constructible<detail::decay_t<T>, T &&>())>

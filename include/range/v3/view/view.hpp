@@ -88,7 +88,7 @@ namespace ranges
 
                 // Pipeing requires range arguments or lvalue containers.
                 template<typename Rng, typename Vw,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ViewConcept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(ViewConcept<Rng>())>
@@ -101,7 +101,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For better error messages:
                 template<typename Rng, typename Vw,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!ViewConcept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!ViewConcept<Rng>())>
@@ -126,7 +126,7 @@ namespace ranges
                 {}
                 // Calling directly requires range arguments or lvalue containers.
                 template<typename Rng, typename...Rest,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ViewConcept<Rng, Rest...>::value)>
 #else
                     CONCEPT_REQUIRES_(ViewConcept<Rng, Rest...>())>

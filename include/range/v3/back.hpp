@@ -30,7 +30,7 @@ namespace ranges
         {
             /// \return `*prev(end(rng))`
             template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BoundedRange<Rng>::value && BidirectionalRange<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(BoundedRange<Rng>() && BidirectionalRange<Rng>())>

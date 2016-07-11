@@ -149,7 +149,7 @@ namespace ranges
             using avoid_empty_braces =
               meta::_t<avoid_empty_braces_<uncvref_t<T>>>;
 
-#if defined(WORKAROUND_140392) && defined(_MSC_VER) && !defined(_CPPUNWIND)
+#if defined(RANGES_WORKAROUND_MSVC_140392) && !defined(_CPPUNWIND)
             // Without /EHa or /EHs, destructors are NOT implicitly noexcept
             template<typename T>
             using is_nothrow_destructible = std::is_destructible<T>;
@@ -217,7 +217,7 @@ namespace ranges
 
             ////////////////////////////////////////////////////////////////////////////////////////////
             // models
-#ifdef WORKAROUND_214014
+#ifdef RANGES_WORKAROUND_MSVC_214014
             template<typename Concept, typename...Ts>
             struct models_helper {
                 typedef decltype(detail::models_<Ts...>(_nullptr_v<Concept>())) type;
@@ -698,31 +698,31 @@ namespace ranges
             // Function concepts
             ////////////////////////////////////////////////////////////////////////////////////////////
 
-			struct Function
-			{
-#if defined(WORKAROUND_SFINAE_ALIAS_DECLTYPE) || defined(WORKAROUND_SFINAE_PARAMETERPACK)
-				template<typename T>
-				struct helper1 {};
-				template<typename Fun2, typename ...Args2>
-				struct helper2 {
-					template<typename Fun, typename ...Args>
-					static short f(helper1<decltype(val<Fun>()(val<Args>()...))> * = 0);
-					template<typename Fun, typename ...Args>
-					static char f(...);
+            struct Function
+            {
+#if defined(RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE) || defined(RANGES_WORKAROUND_MSVC_SFINAE_PARAMETERPACK)
+                template<typename T>
+                struct helper1 {};
+                template<typename Fun2, typename ...Args2>
+                struct helper2 {
+                    template<typename Fun, typename ...Args>
+                    static short f(helper1<decltype(val<Fun>()(val<Args>()...))> * = 0);
+                    template<typename Fun, typename ...Args>
+                    static char f(...);
 
-					static const bool value = sizeof(helper2::f<Fun2, Args2...>(0)) == 2;
-				};
+                    static const bool value = sizeof(helper2::f<Fun2, Args2...>(0)) == 2;
+                };
 
-				template<bool, typename Fun, typename ...Args>
-				struct helper {
-				};
-				template<typename Fun, typename ...Args>
-				struct helper<true, Fun, Args...> {
-					typedef decltype(val<Fun>()(val<Args>()...)) type;
-				};
+                template<bool, typename Fun, typename ...Args>
+                struct helper {
+                };
+                template<typename Fun, typename ...Args>
+                struct helper<true, Fun, Args...> {
+                    typedef decltype(val<Fun>()(val<Args>()...)) type;
+                };
 
-				template<typename Fun, typename ...Args>
-				using result_t = typename helper<helper2<Fun, Args...>::value, Fun, Args...>::type;
+                template<typename Fun, typename ...Args>
+                using result_t = typename helper<helper2<Fun, Args...>::value, Fun, Args...>::type;
 #else
                 template<typename Fun, typename ...Args>
                 using result_t = decltype(val<Fun>()(val<Args>()...));
@@ -914,7 +914,7 @@ namespace ranges
         >::type = 0>                                                                \
     /**/
 
-#ifdef WORKAROUND_159890
+#ifdef RANGES_WORKAROUND_MSVC_159890
 #define CONCEPT_REQUIRES_FRIEND_(...)                                               \
     int CONCEPT_PP_CAT(_concept_requires_, __LINE__) = 44,                          \
     typename std::enable_if<                                                        \

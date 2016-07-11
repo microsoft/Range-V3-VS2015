@@ -22,7 +22,7 @@ struct my_reverse_view
   : ranges::view_adaptor<my_reverse_view<BidiRange>, BidiRange>
 {
 private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
     CONCEPT_ASSERT(ranges::BidirectionalRange<BidiRange>::value);
     CONCEPT_ASSERT(ranges::BoundedRange<BidiRange>::value);
 #else
@@ -55,7 +55,7 @@ private:
         {
             return *ranges::prev(it);
         }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
         CONCEPT_REQUIRES(ranges::RandomAccessRange<BidiRange>::value)
 #else
         CONCEPT_REQUIRES(ranges::RandomAccessRange<BidiRange>())
@@ -64,7 +64,7 @@ private:
         {
             it -= n;
         }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
         CONCEPT_REQUIRES(ranges::RandomAccessRange<BidiRange>::value)
 #else
         CONCEPT_REQUIRES(ranges::RandomAccessRange<BidiRange>())

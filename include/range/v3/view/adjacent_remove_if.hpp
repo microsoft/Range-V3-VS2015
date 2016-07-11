@@ -72,7 +72,7 @@ namespace ranges
         public:
             adjacent_remove_if_view() = default;
             adjacent_remove_if_view(Rng rng, F pred)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : adjacent_remove_if_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<adjacent_remove_if_view>{std::move(rng)}
@@ -102,7 +102,7 @@ namespace ranges
                         range_iterator_t<Rng>>>;
 
                 template<typename Rng, typename F,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, F>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, F>())>
@@ -113,7 +113,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename F,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, F>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, F>())>

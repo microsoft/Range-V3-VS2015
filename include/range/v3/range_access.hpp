@@ -182,7 +182,7 @@ namespace ranges
             )
 
         private:
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
             template <typename T>
             using random_access_cursor_difference_t_void_t = void;
             template <class T, class V = void> struct random_access_cursor_difference_t_helper {};

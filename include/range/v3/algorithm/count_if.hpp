@@ -32,7 +32,7 @@ namespace ranges
         struct count_if_fn
         {
             template<typename I, typename S, typename R, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
                     IndirectCallablePredicate<R, Project<I, P> >::value)>
 #else
@@ -53,7 +53,7 @@ namespace ranges
 
             template<typename Rng, typename R, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<R, Project<I, P> >::value)>
 #else
                 CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<R, Project<I, P> >())>

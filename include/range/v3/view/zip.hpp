@@ -35,7 +35,7 @@ namespace ranges
             {
                 // tuple value
                 template<typename ...Its,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>::value && sizeof...(Its) != 2)>
 #else
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>() && sizeof...(Its) != 2)>
@@ -45,7 +45,7 @@ namespace ranges
 
                 // tuple reference
                 template<typename ...Its,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>::value && sizeof...(Its) != 2)>
 #else
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>() && sizeof...(Its) != 2)>
@@ -59,7 +59,7 @@ namespace ranges
 
                 // tuple rvalue reference
                 template<typename ...Its,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>::value && sizeof...(Its) != 2)>
 #else
                     CONCEPT_REQUIRES_(meta::and_<Readable<Its>...>() && sizeof...(Its) != 2)>
@@ -74,7 +74,7 @@ namespace ranges
 
                 // pair value
                 template<typename It1, typename It2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Readable<It1>::value && Readable<It2>::value)>
 #else
                     CONCEPT_REQUIRES_(Readable<It1>() && Readable<It2>())>
@@ -84,7 +84,7 @@ namespace ranges
 
                 // pair reference
                 template<typename It1, typename It2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Readable<It1>::value && Readable<It2>::value)>
 #else
                     CONCEPT_REQUIRES_(Readable<It1>() && Readable<It2>())>
@@ -99,7 +99,7 @@ namespace ranges
 
                 // pair rvalue reference
                 template<typename It1, typename It2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Readable<It1>::value && Readable<It2>::value)>
 #else
                     CONCEPT_REQUIRES_(Readable<It1>() && Readable<It2>())>
@@ -136,7 +136,7 @@ namespace ranges
                 template<typename ...Rngs>
                 using Concept = meta::and_<InputRange<Rngs>...>;
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename ...Rngs>
                 struct Concept_helper {
                     static const bool value = meta::and_<InputRange<Rngs>...>::value;
@@ -144,7 +144,7 @@ namespace ranges
 #endif
 
                 template<typename...Rngs,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept_helper<Rngs...>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rngs...>())>
@@ -157,7 +157,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename...Rngs,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept_helper<Rngs...>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rngs...>())>

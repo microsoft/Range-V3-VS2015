@@ -37,7 +37,7 @@ namespace ranges
         struct copy_n_fn
         {
             template<typename I, typename O, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     WeakInputIterator<I>::value &&
                     WeaklyIncrementable<O>::value &&

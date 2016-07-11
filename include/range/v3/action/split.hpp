@@ -42,7 +42,7 @@ namespace ranges
                 template<typename Rng>
                 using split_value_t =
                     meta::if_c<
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                         (bool) ranges::Container<Rng>::value,
 #else
                         (bool) ranges::Container<Rng>(),
@@ -53,7 +53,7 @@ namespace ranges
                 // BUGBUG something is not right with the actions. It should be possible
                 // to move a container into a split and have elements moved into the result.
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(view::split_fn::FunctionConcept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(view::split_fn::FunctionConcept<Rng, Fun>())>
@@ -64,7 +64,7 @@ namespace ranges
                          | view::transform(to_<split_value_t<Rng>>()) | to_vector;
                 }
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(view::split_fn::ElementConcept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(view::split_fn::ElementConcept<Rng>())>
@@ -75,7 +75,7 @@ namespace ranges
                          | view::transform(to_<split_value_t<Rng>>()) | to_vector;
                 }
                 template<typename Rng, typename Sub,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(view::split_fn::SubRangeConcept<Rng, Sub>::value)>
 #else
                     CONCEPT_REQUIRES_(view::split_fn::SubRangeConcept<Rng, Sub>())>
@@ -88,7 +88,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!ConvertibleTo<T, range_value_t<Rng>>::value)>
 #else
                     CONCEPT_REQUIRES_(!ConvertibleTo<T, range_value_t<Rng>>())>

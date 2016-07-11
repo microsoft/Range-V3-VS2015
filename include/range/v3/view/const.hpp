@@ -69,13 +69,13 @@ namespace ranges
         public:
             const_view() = default;
             explicit const_view(Rng rng)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : const_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<const_view>{std::move(rng)}
 #endif
             {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng>())

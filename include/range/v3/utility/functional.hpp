@@ -34,7 +34,7 @@ namespace ranges
         struct equal_to
         {
             template<typename T, typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(EqualityComparable<T, U>::value)>
 #else
                 CONCEPT_REQUIRES_(EqualityComparable<T, U>())>
@@ -48,7 +48,7 @@ namespace ranges
         struct less
         {
             template<typename T, typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(WeaklyOrdered<T, U>::value)>
 #else
                 CONCEPT_REQUIRES_(WeaklyOrdered<T, U>())>
@@ -62,7 +62,7 @@ namespace ranges
         struct ordered_less
         {
             template<typename T, typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(TotallyOrdered<T, U>::value)>
 #else
                 CONCEPT_REQUIRES_(TotallyOrdered<T, U>())>
@@ -214,7 +214,7 @@ namespace ranges
             constexpr auto&& as_function = static_const<as_function_fn>::value;
         }
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         template <typename T>
         using function_type_void_t = void;
         template <class T, class V = void> struct function_type_helper {};
@@ -241,7 +241,7 @@ namespace ranges
             {}
 
             template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Predicate<Pred, T>::value)>
 #else
                 CONCEPT_REQUIRES_(Predicate<Pred, T>())>
@@ -252,7 +252,7 @@ namespace ranges
             }
             /// \overload
             template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Predicate<Pred const, T>::value)>
 #else
                 CONCEPT_REQUIRES_(Predicate<Pred const, T>())>
@@ -263,7 +263,7 @@ namespace ranges
             }
             /// \overload
             template<typename T, typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Predicate<Pred, T, U>::value)>
 #else
                 CONCEPT_REQUIRES_(Predicate<Pred, T, U>())>
@@ -274,7 +274,7 @@ namespace ranges
             }
             /// \overload
             template<typename T, typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Predicate<Pred const, T, U>::value)>
 #else
                 CONCEPT_REQUIRES_(Predicate<Pred const, T, U>())>
@@ -555,7 +555,7 @@ namespace ranges
 
         // Evaluate the pipe with an argument
         template<typename Arg, typename Pipe,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_(!is_pipeable<Arg>::value && is_pipeable<Pipe>::value)>
 #else
             CONCEPT_REQUIRES_(!is_pipeable<Arg>() && is_pipeable<Pipe>())>
@@ -568,7 +568,7 @@ namespace ranges
 
         // Compose two pipes
         template<typename Pipe0, typename Pipe1,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES_(is_pipeable<Pipe0>::value && is_pipeable<Pipe1>::value)>
 #else
             CONCEPT_REQUIRES_(is_pipeable<Pipe0>() && is_pipeable<Pipe1>())>
@@ -727,7 +727,7 @@ namespace ranges
 
         struct ref_fn : pipeable<ref_fn>
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>::value)>
 #else
             template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>())>
@@ -757,7 +757,7 @@ namespace ranges
             constexpr auto&& ref = static_const<ref_fn>::value;
         }
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         template <typename T>
         using ref_t_void_t = void;
         template <class T, class V = void> struct ref_t_helper {};
@@ -774,7 +774,7 @@ namespace ranges
         struct rref_fn : pipeable<rref_fn>
         {
             template<typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(!is_reference_wrapper_t<T>::value &&
                     !std::is_lvalue_reference<T>::value)>
 #else
@@ -805,7 +805,7 @@ namespace ranges
 
         struct unwrap_reference_fn : pipeable<unwrap_reference_fn>
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper<T>::value)>
 #else
             template<typename T, CONCEPT_REQUIRES_(!is_reference_wrapper<T>())>
@@ -957,7 +957,7 @@ namespace ranges
 
         struct protect_fn
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename F, CONCEPT_REQUIRES_(std::is_bind_expression<uncvref_t<F>>::value)>
 #else
             template<typename F, CONCEPT_REQUIRES_(std::is_bind_expression<uncvref_t<F>>())>
@@ -968,7 +968,7 @@ namespace ranges
             }
             /// \overload
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename F, CONCEPT_REQUIRES_(!std::is_bind_expression<uncvref_t<F>>::value)>
 #else
             template<typename F, CONCEPT_REQUIRES_(!std::is_bind_expression<uncvref_t<F>>())>

@@ -42,7 +42,7 @@ namespace ranges
             /// \pre `R` is a model of the `Relation<Value_Type<I>>` concept
             ///
             template<typename I, typename S, typename R = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value &&
                     IndirectCallableRelation<R, Project<I, P>>::value)>
 #else
@@ -68,7 +68,7 @@ namespace ranges
 
             template<typename Rng, typename R = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng>::value &&
                     IndirectCallableRelation<R, Project<I, P>>::value)>
 #else

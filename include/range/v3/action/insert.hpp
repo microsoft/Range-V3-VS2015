@@ -33,7 +33,7 @@ namespace ranges
         namespace adl_insert_detail
         {
             template<typename Cont, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Constructible<range_value_t<Cont>, T &&>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Constructible<range_value_t<Cont>, T &&>())>
@@ -46,7 +46,7 @@ namespace ranges
 
             template<typename Cont, typename I, typename S,
                 typename C = common_iterator<I, S>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && IteratorRange<I, S>())>
@@ -59,7 +59,7 @@ namespace ranges
 
             template<typename Cont, typename Rng,
                 typename C = range_common_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Range<Rng>())>
@@ -71,7 +71,7 @@ namespace ranges
             }
 
             template<typename Cont, typename I, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value &&
                     Constructible<range_value_t<Cont>, T &&>::value)>
 #else
@@ -85,7 +85,7 @@ namespace ranges
             }
 
             template<typename Cont, typename I, typename N, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Integral<N>::value &&
                     Constructible<range_value_t<Cont>, T &&>::value)>
 #else
@@ -109,7 +109,7 @@ namespace ranges
 
                 template<typename Cont, typename P, typename I, typename S,
                     typename C = common_iterator<I, S>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value)>
 #else
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && IteratorRange<I, S>())>
@@ -122,7 +122,7 @@ namespace ranges
 
                 template<typename Cont, typename P, typename I, typename S,
                     typename C = common_iterator<I, S>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value &&
                                       ReserveConcept<Cont, I, S>::value)>
 #else
@@ -140,7 +140,7 @@ namespace ranges
 
                 template<typename Cont, typename I, typename Rng,
                     typename C = range_common_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Range<Rng>())>
@@ -153,7 +153,7 @@ namespace ranges
 
                 template<typename Cont, typename I, typename Rng,
                     typename C = range_common_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value &&
                                       ReserveConcept<Cont, range_iterator_t<Rng>, range_sentinel_t<Rng>>::value)>
 #else
@@ -172,7 +172,7 @@ namespace ranges
 
             template<typename Cont, typename P, typename I, typename S,
                 typename C = common_iterator<I, S>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && IteratorRange<I, S>())>
@@ -186,7 +186,7 @@ namespace ranges
 
             template<typename Cont, typename I, typename Rng,
                 typename C = range_common_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Range<Rng>())>
@@ -201,7 +201,7 @@ namespace ranges
             struct insert_fn
             {
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Constructible<range_value_t<Rng>, T &&>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && Constructible<range_value_t<Rng>, T &&>())>
@@ -213,7 +213,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename Rng2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Range<Rng2>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && Range<Rng2>())>
@@ -227,7 +227,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>())>
@@ -239,7 +239,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && IteratorRange<I, S>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && IteratorRange<I, S>())>
@@ -251,7 +251,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value &&
                         Constructible<range_value_t<Rng>, T &&>::value)>
 #else
@@ -265,7 +265,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename Rng2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value && Range<Rng2>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<I>() && Range<Rng2>())>
@@ -279,7 +279,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<I>())>
@@ -291,7 +291,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename I, typename N, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<I>::value && Integral<N>::value
                         && Constructible<range_value_t<Rng>, T &&>::value)>
 #else
@@ -305,7 +305,7 @@ namespace ranges
                 }
 
                 template<typename Rng, typename P, typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && Iterator<P>::value && IteratorRange<I, S>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && Iterator<P>() && IteratorRange<I, S>())>

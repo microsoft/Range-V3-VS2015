@@ -105,7 +105,7 @@ namespace ranges
                     meta::not_<Same<void, concepts::Function::result_t<G>>>>;
 
                 template<typename G,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<G>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<G>())>
@@ -116,7 +116,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename G,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<G>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<G>())>

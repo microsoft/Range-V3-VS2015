@@ -251,7 +251,7 @@ public:
 
     RANGES_CXX14_CONSTEXPR bidirectional_iterator() : it_() {}
     RANGES_CXX14_CONSTEXPR explicit bidirectional_iterator(It it) : it_(it) {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
     template <class U, class = typename std::enable_if<std::is_convertible<U, It>::value>::type>
 #else
     template <class U, class = typename std::enable_if<std::is_convertible<U, It>{}>::type>
@@ -303,7 +303,7 @@ public:
 
     RANGES_CXX14_CONSTEXPR random_access_iterator() : it_() {}
     RANGES_CXX14_CONSTEXPR explicit random_access_iterator(It it) : it_(it) {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
     template <class U, class = typename std::enable_if<std::is_convertible<U, It>::value>::type>
 #else
     template <class U, class = typename std::enable_if<std::is_convertible<U, It>{}>::type>

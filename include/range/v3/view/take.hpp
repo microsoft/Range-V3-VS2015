@@ -63,7 +63,7 @@ namespace ranges
                 return {ranges::begin(rng_), n_};
             }
             template<typename BaseRng = Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<BaseRng const>())>
@@ -77,7 +77,7 @@ namespace ranges
                 return {ranges::end(rng_)};
             }
             template<typename BaseRng = Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
 #else
                 CONCEPT_REQUIRES_(Range<BaseRng const>())>
@@ -111,7 +111,7 @@ namespace ranges
                 friend view_access;
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!SizedRange<Rng>::value && !is_infinite<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!SizedRange<Rng>() && !is_infinite<Rng>())>
@@ -122,7 +122,7 @@ namespace ranges
                 }
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(SizedRange<Rng>::value || is_infinite<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(SizedRange<Rng>() || is_infinite<Rng>())>
@@ -135,7 +135,7 @@ namespace ranges
                         is_infinite<Rng>() ? n : std::min(n, distance(rng)))
                 )
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -147,7 +147,7 @@ namespace ranges
                 )
 
             #ifndef RANGES_DOXYGEN_INVOKED
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(!Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(!Integral<Int>())>
@@ -161,7 +161,7 @@ namespace ranges
             #endif
 
             public:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(InputRange<Rng>())>
@@ -173,7 +173,7 @@ namespace ranges
                 )
 
             #ifndef RANGES_DOXYGEN_INVOKED
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, typename T, CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
 #else
                 template<typename Rng, typename T, CONCEPT_REQUIRES_(!InputRange<Rng>())>

@@ -53,7 +53,7 @@ namespace ranges
         private:
             template<typename I1, typename D1, typename I2, typename S2, typename D2,
                 typename C, typename P1, typename P2,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(RandomAccessIterator<I1>::value)>
 #else
                 CONCEPT_REQUIRES_(RandomAccessIterator<I1>())>
@@ -164,7 +164,7 @@ namespace ranges
         public:
             template<typename I1, typename S1, typename I2, typename S2,
                 typename C = equal_to, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     Searchable<I1, I2, C, P1, P2>::value &&
                     IteratorRange<I1, S1>::value &&
@@ -198,7 +198,7 @@ namespace ranges
                 typename P2 = ident,
                 typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     Searchable<I1, I2, C, P1, P2>::value &&
                     Range<Rng1>::value &&

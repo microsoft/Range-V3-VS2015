@@ -104,7 +104,7 @@ namespace ranges
         public:
             template<typename I1, typename S1, typename I2, typename C = equal_to,
                 typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I1, S1>::value && IsPermutationable<I1, I2, C, P1, P2>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I1, S1>() && IsPermutationable<I1, I2, C, P1, P2>())>
@@ -157,7 +157,7 @@ namespace ranges
 
             template<typename I1, typename S1, typename I2, typename S2,
                 typename C = equal_to, typename P1 = ident, typename P2 = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I1, S1>::value && IteratorRange<I2, S2>::value &&
                     IsPermutationable<I1, I2, C, P1, P2>::value)>
 #else
@@ -179,7 +179,7 @@ namespace ranges
             template<typename Rng1, typename I2Ref, typename C = equal_to, typename P1 = ident,
                 typename P2 = ident, typename I1 = range_iterator_t<Rng1>,
                 typename I2 = uncvref_t<I2Ref>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>::value && Iterator<I2>::value &&
                     IsPermutationable<I1, I2, C, P1, P2>::value)>
 #else
@@ -196,7 +196,7 @@ namespace ranges
             template<typename Rng1, typename Rng2, typename C = equal_to, typename P1 = ident,
                 typename P2 = ident, typename I1 = range_iterator_t<Rng1>,
                 typename I2 = range_iterator_t<Rng2>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>::value && ForwardRange<Rng2>::value &&
                     IsPermutationable<I1, I2, C, P1, P2>::value)>
 #else
@@ -225,7 +225,7 @@ namespace ranges
         struct next_permutation_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
@@ -261,7 +261,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Sortable<I, C, P>())>
@@ -282,7 +282,7 @@ namespace ranges
         struct prev_permutation_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && IteratorRange<I, S>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && IteratorRange<I, S>() && Sortable<I, C, P>())>
@@ -318,7 +318,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Sortable<I, C, P>())>

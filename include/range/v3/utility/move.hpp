@@ -95,7 +95,7 @@ namespace ranges
                 static_const<adl_move_detail::indirect_move_fn>::value;
         }
 
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
         template<typename>
         using rvalue_reference_t_void_t = void;
         template<typename, typename = void> struct rvalue_reference_t_helper {};
@@ -113,7 +113,7 @@ namespace ranges
         {
             // impact algorithm\swap_ranges.cpp
             template<typename I, typename O>
-#ifdef WORKAROUND_SFINAE_FUNCTION_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_FUNCTION_DECLTYPE
             meta::_t<meta::detail::_and_<
                 std::is_constructible<
                     meta::_t<value_type<I>>,

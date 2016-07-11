@@ -101,7 +101,7 @@ namespace ranges
             public:
                 // Advance a certain number of steps:
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(WeakIterator<I>::value)>
 #else
                     CONCEPT_REQUIRES_(WeakIterator<I>())>
@@ -115,7 +115,7 @@ namespace ranges
                 }
                 // Advance to a certain position:
                 template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(WeakIterator<I>::value)>
 #else
                     CONCEPT_REQUIRES_(WeakIterator<I>())>
@@ -126,7 +126,7 @@ namespace ranges
                     i = std::move(s);
                 }
                 template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
 #else
                     CONCEPT_REQUIRES_(IteratorRange<I, S>())>
@@ -138,7 +138,7 @@ namespace ranges
                 }
                 // Advance a certain number of times, with a bound:
                 template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
 #else
                     CONCEPT_REQUIRES_(IteratorRange<I, S>())>
@@ -215,7 +215,7 @@ namespace ranges
         struct next_fn
         {
             template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(WeakIterator<I>::value)>
 #else
                 CONCEPT_REQUIRES_(WeakIterator<I>())>
@@ -227,7 +227,7 @@ namespace ranges
                 return it;
             }
             template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(WeakIterator<I>::value)>
 #else
                 CONCEPT_REQUIRES_(WeakIterator<I>())>
@@ -239,7 +239,7 @@ namespace ranges
                 return it;
             }
             template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>())>
@@ -251,7 +251,7 @@ namespace ranges
                 return it;
             }
             template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(IteratorRange<I, S>())>
@@ -315,7 +315,7 @@ namespace ranges
             }
         public:
             template<typename I, typename S, typename D = iterator_difference_t<I>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value && Integral<D>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() && Integral<D>())>
@@ -352,7 +352,7 @@ namespace ranges
             }
         public:
             template<typename I, typename S, typename D = iterator_difference_t<I>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value && Integral<D>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() && Integral<D>())>
@@ -406,7 +406,7 @@ namespace ranges
             }
         public:
             template<typename I, typename S,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>())>
@@ -429,7 +429,7 @@ namespace ranges
         // Like distance(b,e), but guaranteed to be O(1)
         struct iter_size_fn
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename I, typename S, CONCEPT_REQUIRES_(SizedIteratorRange<I, S>::value)>
 #else
             template<typename I, typename S, CONCEPT_REQUIRES_(SizedIteratorRange<I, S>())>
@@ -452,7 +452,7 @@ namespace ranges
         struct iter_swap_fn
         {
             template<typename Readable0, typename Readable1,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(IndirectlySwappable<Readable0, Readable1>::value)>
 #else
                 CONCEPT_REQUIRES_(IndirectlySwappable<Readable0, Readable1>())>
@@ -475,7 +475,7 @@ namespace ranges
         struct iter_move_fn
         {
             template<typename I,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Readable<I>::value)>
 #else
                 CONCEPT_REQUIRES_(Readable<I>())>
@@ -625,7 +625,7 @@ namespace ranges
                   : it_(std::move(it))
                 {}
                 template<typename U,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ConvertibleTo<U, I>::value)>
 #else
                     CONCEPT_REQUIRES_(ConvertibleTo<U, I>())>
@@ -662,7 +662,7 @@ namespace ranges
                 {
                     ++it_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())
@@ -672,7 +672,7 @@ namespace ranges
                 {
                     it_ -= n;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessIterator<I>())

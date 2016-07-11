@@ -34,7 +34,7 @@ namespace ranges
         struct partial_sort_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Sortable<I, C, P>::value && RandomAccessIterator<I>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(Sortable<I, C, P>() && RandomAccessIterator<I>() && IteratorRange<I, S>())>
@@ -61,7 +61,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Sortable<I, C, P>::value && RandomAccessRange<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Sortable<I, C, P>() && RandomAccessRange<Rng>())>

@@ -59,7 +59,7 @@ namespace ranges
             {
                 return iterator{ranges::end(rng_)};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(View<Rng const>::value)
 #else
             CONCEPT_REQUIRES(View<Rng const>())
@@ -68,7 +68,7 @@ namespace ranges
             {
                 return iterator{ranges::begin(rng_)};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(View<Rng const>::value)
 #else
             CONCEPT_REQUIRES(View<Rng const>())
@@ -77,7 +77,7 @@ namespace ranges
             {
                 return iterator{ranges::end(rng_)};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedView<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedView<Rng>())
@@ -101,7 +101,7 @@ namespace ranges
             struct bounded_fn
             {
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && !BoundedRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && !BoundedRange<Rng>())>
@@ -111,7 +111,7 @@ namespace ranges
                     return bounded_view<all_t<Rng>>{all(std::forward<Rng>(rng))};
                 }
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<Rng>::value && BoundedRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<Rng>() && BoundedRange<Rng>())>
@@ -122,7 +122,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Range<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!Range<Rng>())>

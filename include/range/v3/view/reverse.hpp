@@ -51,7 +51,7 @@ namespace ranges
           , private detail::reverse_end_<Rng>
         {
         private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_ASSERT(BidirectionalRange<Rng>::value);
 #else
             CONCEPT_ASSERT(BidirectionalRange<Rng>());
@@ -114,7 +114,7 @@ namespace ranges
                     if(0 != ranges::advance(it, 1, ranges::end(rng_->mutable_base())))
                         it = ranges::begin(rng_->mutable_base());
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -126,7 +126,7 @@ namespace ranges
                     else if(n < 0)
                         this->prev(it), ranges::advance(it, -n - 1);
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -152,7 +152,7 @@ namespace ranges
             {
                 return {*this};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BoundedRange<Rng const>::value)
 #else
             CONCEPT_REQUIRES(BoundedRange<Rng const>())
@@ -161,7 +161,7 @@ namespace ranges
             {
                 return {*this};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BoundedRange<Rng const>::value)
 #else
             CONCEPT_REQUIRES(BoundedRange<Rng const>())
@@ -183,7 +183,7 @@ namespace ranges
         public:
             reverse_view() = default;
             reverse_view(reverse_view &&that)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : reverse_view::view_adaptor(std::move(that))
 #else
               : view_adaptor_t<reverse_view>{std::move(that)}
@@ -191,7 +191,7 @@ namespace ranges
               , detail::reverse_end_<Rng>{}
             {}
             reverse_view(reverse_view const &that)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : reverse_view::view_adaptor(that)
 #else
               : view_adaptor_t<reverse_view>{that}
@@ -199,7 +199,7 @@ namespace ranges
               , detail::reverse_end_<Rng>{}
             {}
             explicit reverse_view(Rng rng)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : reverse_view::view_adaptor(std::move(rng))
 #else
               : view_adaptor_t<reverse_view>{std::move(rng)}
@@ -218,7 +218,7 @@ namespace ranges
                 this->dirty_(BoundedRange<Rng>{});
                 return *this;
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value || RandomAccessRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng>() || RandomAccessRange<Rng>())
@@ -227,7 +227,7 @@ namespace ranges
             {
                 return this->size_(SizedRange<Rng>());
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng const>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng const>())
@@ -245,7 +245,7 @@ namespace ranges
                 template<typename Rng>
                 using Concept = BidirectionalRange<Rng>;
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -256,7 +256,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 // For error reporting
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>())>

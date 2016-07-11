@@ -46,7 +46,7 @@ namespace ranges
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>, typename V = iterator_value_t<I>,
                 typename R = tagged_pair<tag::min(V), tag::max(V)>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value && Copyable<V>::value &&
                     IndirectCallableRelation<C, Project<I, P>>::value)>
 #else
@@ -103,7 +103,7 @@ namespace ranges
             }
 
             template<typename T, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
                     IndirectCallableRelation<C, Project<const T *, P>>::value)>
 #else

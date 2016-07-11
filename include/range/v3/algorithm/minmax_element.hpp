@@ -37,7 +37,7 @@ namespace ranges
         struct minmax_element_fn
         {
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value &&
                     IndirectCallableRelation<C, Project<I, P>>::value)>
 #else
@@ -90,7 +90,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng>::value &&
                     IndirectCallableRelation<C, Project<I, P>>::value)>
 #else

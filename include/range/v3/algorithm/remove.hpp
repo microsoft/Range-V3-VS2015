@@ -41,7 +41,7 @@ namespace ranges
         struct remove_fn
         {
             template<typename I, typename S, typename T, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Removable<I, T, P>::value && IteratorRange<I, S>::value)>
 #else
                 CONCEPT_REQUIRES_(Removable<I, T, P>() && IteratorRange<I, S>())>
@@ -66,7 +66,7 @@ namespace ranges
 
             template<typename Rng, typename T, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(Removable<I, T, P>::value && ForwardRange<Rng>::value)>
 #else
                 CONCEPT_REQUIRES_(Removable<I, T, P>() && ForwardRange<Rng>())>

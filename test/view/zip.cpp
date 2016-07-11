@@ -201,8 +201,8 @@ int main()
         CONCEPT_ASSERT(Same<
             range_rvalue_reference_t<Rng>,
             common_pair<MoveOnlyString const &&, MoveOnlyString const &&>>());
-#ifdef WORKAROUND_215653
-#else
+#ifndef RANGES_WORKAROUND_MSVC_215653
+        // FIXME: *not* a workaround; disabled test failure.
         CONCEPT_ASSERT(Same<
             range_common_reference_t<Rng>,
             common_pair<MoveOnlyString const &, MoveOnlyString const &>>());
@@ -236,9 +236,10 @@ int main()
         auto x = view::zip(rg1, rg2);
         std::pair<std::unique_ptr<int>, std::unique_ptr<int>> p = iter_move(x.begin());
         auto it = x.begin();
-#ifdef WORKAROUND_NOEXCEPT_DEPENDENT
+#ifdef RANGES_WORKAROUND_MSVC_NOEXCEPT_DEPENDENT
         // see friend function indirect_move defined in iter_zip_with_view
 #else
+        // FIXME: *not* a workaround; disabled test failure.
         static_assert(noexcept(iter_move(it)), "");
 #endif
     }

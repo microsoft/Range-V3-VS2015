@@ -75,7 +75,7 @@ namespace ranges
                         ++it;
                     toggl_ = !toggl_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
@@ -86,7 +86,7 @@ namespace ranges
                     if(toggl_)
                         --it;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -101,7 +101,7 @@ namespace ranges
                         return d * 2 + (toggl_ != other.toggl_);
                     return other.toggl_ - toggl_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -125,7 +125,7 @@ namespace ranges
             {
                 return {val_, ranges::empty(this->mutable_base())};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BoundedRange<Rng>::value && !SinglePass<range_iterator_t<Rng>>::value)
 #else
             CONCEPT_REQUIRES(BoundedRange<Rng>() && !SinglePass<range_iterator_t<Rng>>())
@@ -134,7 +134,7 @@ namespace ranges
             {
                 return {val_, true};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(!BoundedRange<Rng>::value || SinglePass<range_iterator_t<Rng>>::value)
 #else
             CONCEPT_REQUIRES(!BoundedRange<Rng>() || SinglePass<range_iterator_t<Rng>>())
@@ -146,14 +146,14 @@ namespace ranges
         public:
             intersperse_view() = default;
             intersperse_view(Rng rng, range_value_t<Rng> val)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : intersperse_view::view_adaptor{std::move(rng)}
 #else
               : view_adaptor_t<intersperse_view>{std::move(rng)}
 #endif
               , val_(std::move(val))
             {}
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)
 #else
             CONCEPT_REQUIRES(SizedRange<Rng>())
@@ -171,7 +171,7 @@ namespace ranges
             {
             private:
                 friend view_access;
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename T, CONCEPT_REQUIRES_(SemiRegular<T>::value)>
 #else
                 template<typename T, CONCEPT_REQUIRES_(SemiRegular<T>())>
@@ -190,7 +190,7 @@ namespace ranges
                     SemiRegular<range_value_t<Rng>>>;
 
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -202,7 +202,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, T>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, T>())>

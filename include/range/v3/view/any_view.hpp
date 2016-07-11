@@ -204,7 +204,7 @@ namespace ranges
                 using single_pass = meta::bool_<Cat == category::input>;
                 any_cursor() = default;
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_cursor>::value),
                     CONCEPT_REQUIRES_(InputRange<Rng>::value &&
                                       ConvertibleTo<range_reference_t<Rng>, Ref>::value)>
@@ -268,7 +268,7 @@ namespace ranges
             public:
                 any_sentinel() = default;
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_sentinel>::value),
                     CONCEPT_REQUIRES_(InputRange<Rng>::value)>
 #else
@@ -371,7 +371,7 @@ namespace ranges
         public:
             any_view() = default;
             template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(!Same<detail::decay_t<Rng>, any_view>::value),
                 CONCEPT_REQUIRES_(InputRange<Rng>::value &&
                                   ConvertibleTo<range_reference_t<Rng>, Ref>::value)>

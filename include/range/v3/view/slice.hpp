@@ -70,7 +70,7 @@ namespace ranges
                     return next(ranges::begin(rng), distance(rng) + i);
                 return next(ranges::begin(rng), i);
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename Rng, bool IsRandomAccess = RandomAccessRange<Rng>::value>
 #else
             template<typename Rng, bool IsRandomAccess = RandomAccessRange<Rng>()>
@@ -167,7 +167,7 @@ namespace ranges
                         is_infinite<Rng>{}) + count_;
                 }
                 template<typename BaseRng = Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
@@ -178,7 +178,7 @@ namespace ranges
                         is_infinite<Rng>{});
                 }
                 template<typename BaseRng = Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Range<BaseRng const>::value)>
 #else
                     CONCEPT_REQUIRES_(Range<BaseRng const>())>
@@ -207,7 +207,7 @@ namespace ranges
         /// \cond
         namespace end_detail
         {
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
             template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -244,7 +244,7 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), from, count};
                 }
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!View<Rng>::value && std::is_lvalue_reference<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!View<Rng>() && std::is_lvalue_reference<Rng>())>
@@ -258,7 +258,7 @@ namespace ranges
                 }
 
                 // Overloads for the pipe syntax: rng | view::slice(from,to)
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -268,7 +268,7 @@ namespace ranges
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
                 )
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -278,7 +278,7 @@ namespace ranges
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
                 )
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -288,7 +288,7 @@ namespace ranges
                 (
                     make_pipeable(std::bind(slice, std::placeholders::_1, from, to))
                 )
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -298,7 +298,7 @@ namespace ranges
                 (
                     make_pipeable(std::bind(ranges::view::drop, std::placeholders::_1, from))
                 )
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>::value)>
 #else
                 template<typename Int, CONCEPT_REQUIRES_(Integral<Int>())>
@@ -312,7 +312,7 @@ namespace ranges
             public:
                 // slice(rng, 2, 4)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(InputRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
@@ -330,7 +330,7 @@ namespace ranges
                 //  TODO Support Forward, non-Sized ranges by returning a range that
                 //       doesn't know it's size?
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(InputRange<Rng>::value && SizedRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(InputRange<Rng>() && SizedRange<Rng>())>
@@ -349,7 +349,7 @@ namespace ranges
                 }
                 // slice(rng, end-4, end-2)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_((InputRange<Rng>::value && SizedRange<Rng>::value) ||
                         ForwardRange<Rng>::value)>
 #else
@@ -371,7 +371,7 @@ namespace ranges
                 }
                 // slice(rng, 4, end)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(InputRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(InputRange<Rng>())>
@@ -384,7 +384,7 @@ namespace ranges
                 }
                 // slice(rng, end-4, end)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_((InputRange<Rng>::value && SizedRange<Rng>::value) ||
                         ForwardRange<Rng>::value)>
 #else
@@ -412,7 +412,7 @@ namespace ranges
 
                 // slice(rng, 2, 4)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!InputRange<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!InputRange<Rng>())>
@@ -424,7 +424,7 @@ namespace ranges
                 }
                 // slice(rng, 4, end-2)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!(InputRange<Rng>::value && SizedRange<Rng>::value))>
 #else
                     CONCEPT_REQUIRES_(!(InputRange<Rng>() && SizedRange<Rng>()))>
@@ -441,7 +441,7 @@ namespace ranges
                 }
                 // slice(rng, end-4, end-2)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!((InputRange<Rng>::value && SizedRange<Rng>::value) ||
                         ForwardRange<Rng>::value))>
 #else
@@ -460,7 +460,7 @@ namespace ranges
                 }
                 // slice(rng, 4, end)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!(InputRange<Rng>::value))>
 #else
                     CONCEPT_REQUIRES_(!(InputRange<Rng>()))>
@@ -472,7 +472,7 @@ namespace ranges
                 }
                 // slice(rng, end-4, end)
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!((InputRange<Rng>::value && SizedRange<Rng>::value) ||
                         ForwardRange<Rng>::value))>
 #else

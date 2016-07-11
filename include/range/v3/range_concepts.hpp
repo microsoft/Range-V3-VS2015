@@ -59,7 +59,7 @@ namespace ranges
             struct Range
             {
                 // Associated types
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
                 template<typename>
                 using iterator_t_helper_void_t = void;
                 template<typename, typename = void> struct iterator_t_helper {};
@@ -174,7 +174,7 @@ namespace ranges
             struct SizedRange
               : refines<Range>
             {
-#ifdef WORKAROUND_SFINAE_ALIAS_DECLTYPE
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
                 template<typename>
                 using size_t_helper_void_t = void;
                 template<typename, typename = void> struct size_t_helper {};
@@ -415,7 +415,7 @@ namespace ranges
             struct is_view_impl_
               : std::integral_constant<
                     bool,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     Range<T>::value && (!ContainerLike_<T>::value || DerivedFrom<T, view_base>::value)
 #else
                     Range<T>() && (!ContainerLike_<T>() || DerivedFrom<T, view_base>())
@@ -434,7 +434,7 @@ namespace ranges
             struct is_sized_range_impl_
               : std::integral_constant<
                     bool,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     (SizedRangeLike_<T>::value)
 #else
                     (SizedRangeLike_<T>())

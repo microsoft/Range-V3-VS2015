@@ -80,7 +80,7 @@ namespace ranges
 
             public:
                 template<typename I, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && Sortable<I, C, P>::value)>
 #else
                     CONCEPT_REQUIRES_(BidirectionalIterator<I>() && Sortable<I, C, P>())>
@@ -182,7 +182,7 @@ namespace ranges
             struct inplace_merge_no_buffer_fn
             {
                 template<typename I, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && Sortable<I, C, P>::value)>
 #else
                     CONCEPT_REQUIRES_(BidirectionalIterator<I>() && Sortable<I, C, P>())>
@@ -208,7 +208,7 @@ namespace ranges
         {
             // TODO reimplement to only need forward iterators
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalIterator<I>() && Sortable<I, C, P>())>
@@ -234,7 +234,7 @@ namespace ranges
 
             template<typename Rng, typename C = ordered_less, typename P = ident,
                 typename I = range_iterator_t<Rng>,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>::value && Sortable<I, C, P>::value)>
 #else
                 CONCEPT_REQUIRES_(BidirectionalRange<Rng>() && Sortable<I, C, P>())>

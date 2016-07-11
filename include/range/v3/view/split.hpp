@@ -118,7 +118,7 @@ namespace ranges
             {
                 return {fun_, ranges::begin(rng_), ranges::end(rng_)};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(Callable<Fun const, range_iterator_t<Rng>,
                 range_sentinel_t<Rng>>::value && Range<Rng const>::value)
 #else
@@ -174,7 +174,7 @@ namespace ranges
                     operator()(range_iterator_t<Rng> cur, range_sentinel_t<Rng> end) const
                     {
                         RANGES_ASSERT(cur != end);
-                        if(SizedIteratorRange<range_iterator_t<Rng>, range_sentinel_t<Rng>>() && 
+                        if(SizedIteratorRange<range_iterator_t<Rng>, range_sentinel_t<Rng>>() &&
                             distance(cur, end) < len_)
                             return {false, 0};
                         auto pat_cur = ranges::begin(sub_);
@@ -189,7 +189,7 @@ namespace ranges
                     }
                 };
             public:
-#ifdef WORKAROUND_209577
+#ifdef RANGES_WORKAROUND_MSVC_209577
                 template<typename T>
                 using void_t_helper1 = void;
                 template<typename Rng, typename Fun, typename = void>
@@ -218,7 +218,7 @@ namespace ranges
                     ForwardRange<Rng>,
                     Function<Fun, range_iterator_t<Rng>, range_sentinel_t<Rng>>,
                     ConvertibleTo<
-#ifdef WORKAROUND_209577
+#ifdef RANGES_WORKAROUND_MSVC_209577
                         typename helper1<Rng, Fun>::type,
 #else
                         concepts::Function::result_t<Fun, range_iterator_t<Rng>, range_sentinel_t<Rng>>,
@@ -234,14 +234,14 @@ namespace ranges
                 using SubRangeConcept = meta::and_<
                     ForwardRange<Rng>,
                     ForwardRange<Sub>,
-#ifdef WORKAROUND_209577
+#ifdef RANGES_WORKAROUND_MSVC_209577
                     EqualityComparable<range_value_t<Rng>, typename helper2<Sub>::type>>;
 #else
                     EqualityComparable<range_value_t<Rng>, range_value_t<Sub>>>;
 #endif
 
                 template<typename Rng, typename Fun,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(FunctionConcept<Rng, Fun>::value)>
 #else
                     CONCEPT_REQUIRES_(FunctionConcept<Rng, Fun>())>
@@ -251,7 +251,7 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), std::move(fun)};
                 }
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(ElementConcept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(ElementConcept<Rng>())>
@@ -261,7 +261,7 @@ namespace ranges
                     return {all(std::forward<Rng>(rng)), {std::move(val)}};
                 }
                 template<typename Rng, typename Sub,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(SubRangeConcept<Rng, Sub>::value)>
 #else
                     CONCEPT_REQUIRES_(SubRangeConcept<Rng, Sub>())>
@@ -273,7 +273,7 @@ namespace ranges
 
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename T,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!ConvertibleTo<T, range_value_t<Rng>>::value)>
 #else
                     CONCEPT_REQUIRES_(!ConvertibleTo<T, range_value_t<Rng>>())>

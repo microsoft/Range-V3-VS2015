@@ -38,7 +38,7 @@ namespace ranges
                     ForwardRange<Rng>,
                     EqualityComparable<range_value_t<Rng>>>;
 
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -49,7 +49,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng>())>

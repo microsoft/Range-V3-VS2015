@@ -60,7 +60,7 @@ namespace ranges
         public:
             delimit_view() = default;
             delimit_view(Rng rng, Val value)
-#ifdef WORKAROUND_207134
+#ifdef RANGES_WORKAROUND_MSVC_207134
               : delimit_view::view_adaptor(std::move(rng))
 #else
               : view_adaptor_t<delimit_view>{std::move(rng)}
@@ -88,7 +88,7 @@ namespace ranges
                     EqualityComparable<Val, range_common_reference_t<Rng>>>;
 
                 template<typename Rng, typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(Concept<Rng, Val>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rng, Val>())>
@@ -100,7 +100,7 @@ namespace ranges
                 }
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename Rng, typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(!Concept<Rng, Val>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rng, Val>())>
@@ -122,7 +122,7 @@ namespace ranges
                 using view<delimit_impl_fn>::operator();
 
                 template<typename I, typename Val,
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                     CONCEPT_REQUIRES_(InputIterator<I>::value)>
 #else
                     CONCEPT_REQUIRES_(InputIterator<I>())>

@@ -58,7 +58,7 @@ namespace ranges
           , private detail::cycle_end_<Rng>
         {
         private:
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_ASSERT(ForwardRange<Rng>::value);
 #else
             CONCEPT_ASSERT(ForwardRange<Rng>());
@@ -137,7 +137,7 @@ namespace ranges
                         it_ = ranges::begin(rng_->rng_);
                     }
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(BidirectionalRange<Rng>())
@@ -148,7 +148,7 @@ namespace ranges
                         it_ = this->get_end_(BoundedRange<Rng>());
                     --it_;
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -161,7 +161,7 @@ namespace ranges
                     auto const off = ((it_ - begin) + n) % d;
                     it_ = begin + (off < 0 ? off + d : off);
                 }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
 #else
                 CONCEPT_REQUIRES(RandomAccessRange<Rng>())
@@ -177,7 +177,7 @@ namespace ranges
             {
                 return cursor<false>{*this};
             }
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(BoundedRange<Rng const>::value)
 #else
             CONCEPT_REQUIRES(BoundedRange<Rng const>())
@@ -229,7 +229,7 @@ namespace ranges
 
             public:
                 /// \pre <tt>distance(rng) != 0</tt>
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(Concept<Rng>())>
@@ -240,7 +240,7 @@ namespace ranges
                 }
 
 #ifndef RANGES_DOXYGEN_INVOKED
-#ifdef WORKAROUND_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>::value)>
 #else
                 template<typename Rng, CONCEPT_REQUIRES_(!Concept<Rng>())>
