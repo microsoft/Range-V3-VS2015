@@ -282,7 +282,7 @@ namespace ranges
                 {
                     return its_ == pos.its_;
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                 CONCEPT_REQUIRES(meta::and_c<(bool)BidirectionalRange<Rngs>::value...>::value)
 #else
                 CONCEPT_REQUIRES(meta::and_c<(bool)BidirectionalRange<Rngs>()...>::value)
@@ -291,7 +291,7 @@ namespace ranges
                 {
                     its_.apply_i(prev_fun{this});
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
 #else
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
@@ -303,7 +303,7 @@ namespace ranges
                     else if(n < 0)
                         its_.apply_i(advance_rev_fun{this, n});
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
 #else
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
@@ -343,7 +343,7 @@ namespace ranges
             {
                 return {*this, begin_tag{}};
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             meta::if_<meta::and_c<(bool)BoundedRange<Rngs>::value...>, cursor<false>, sentinel<false>>
 #else
             meta::if_<meta::and_c<(bool)BoundedRange<Rngs>()...>, cursor<false>, sentinel<false>>
@@ -352,7 +352,7 @@ namespace ranges
             {
                 return {*this, end_tag{}};
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>()...>())
@@ -361,12 +361,12 @@ namespace ranges
             {
                 return {*this, begin_tag{}};
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool)Range<Rngs const>()...>())
 #endif
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             meta::if_<meta::and_c<(bool)BoundedRange<Rngs>::value...>, cursor<true>, sentinel<true>>
 #else
             meta::if_<meta::and_c<(bool)BoundedRange<Rngs>()...>, cursor<true>, sentinel<true>>
@@ -380,7 +380,7 @@ namespace ranges
             explicit concat_view(Rngs...rngs)
               : rngs_{std::move(rngs)...}
             {}
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES(meta::and_c<(bool)SizedRange<Rngs>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool)SizedRange<Rngs>()...>::value)

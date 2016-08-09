@@ -476,7 +476,7 @@ namespace ranges
                 range_access::advance(pos(), n);
                 return *this;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -487,7 +487,7 @@ namespace ranges
                 left += n;
                 return left;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -509,7 +509,7 @@ namespace ranges
                 range_access::advance(pos(), -n);
                 return *this;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -520,7 +520,7 @@ namespace ranges
                 left -= n;
                 return left;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -532,7 +532,7 @@ namespace ranges
                 return range_access::distance_to(right.pos(), left.pos());
             }
             // symmetric comparisons
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -542,7 +542,7 @@ namespace ranges
             {
                 return 0 < (right - left);
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -552,7 +552,7 @@ namespace ranges
             {
                 return 0 <= (right - left);
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -562,7 +562,7 @@ namespace ranges
             {
                 return (right - left) < 0;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -573,7 +573,7 @@ namespace ranges
                 return (right - left) <= 0;
             }
             // asymmetric comparisons
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -583,7 +583,7 @@ namespace ranges
             {
                 return !range_access::empty(left.pos(), right.end());
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -593,7 +593,7 @@ namespace ranges
             {
                 return true;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -603,7 +603,7 @@ namespace ranges
             {
                 return false;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -613,7 +613,7 @@ namespace ranges
             {
                 return range_access::empty(left.pos(), right.end());
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -623,7 +623,7 @@ namespace ranges
             {
                 return false;
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -633,7 +633,7 @@ namespace ranges
             {
                 return range_access::empty(right.pos(), left.end());
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
@@ -643,7 +643,7 @@ namespace ranges
             {
                 return !range_access::empty(right.pos(), left.end());
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
             CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
 #else
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())

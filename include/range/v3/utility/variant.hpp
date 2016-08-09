@@ -619,7 +619,7 @@ namespace ranges
         };
 
         template<typename...Ts, typename...Us,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>::value...>::value)>
 #else
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>()...>::value)>
@@ -633,7 +633,7 @@ namespace ranges
         }
 
         template<typename...Ts, typename...Us,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>::value...>::value)>
 #else
             CONCEPT_REQUIRES_(meta::and_c<(bool)EqualityComparable<Ts, Us>()...>::value)>

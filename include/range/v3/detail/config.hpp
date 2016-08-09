@@ -108,15 +108,22 @@
 #error Unsupported version of Visual C++
 #endif // _MSC_VER switch
 
-// mainly for T{} / T() where T is a type trait
+// constexpr (T{} / T() where T is a type trait)
 #define RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-// more complex constexpr
+// constexpr + unknown issue
+#define RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_UNKNOWN
+// constexpr + pack expansion
+#define RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
+// constexpr + RANGES_WORKAROUND_MSVC_159890
+#define RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+// constexpr + RANGES_WORKAROUND_MSVC_215598
+#define RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_215598
 #define RANGES_WORKAROUND_MSVC_SFINAE_PARAMETERPACK
 #define RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
 #define RANGES_WORKAROUND_MSVC_SFINAE_FUNCTION_DECLTYPE
 
 #ifndef RANGES_NOT_PERMISSIVE
-// Workarounds that are unnecessary with /d1permissive-
+// Workarounds that are unnecessary with /permissive-
 // alias template
 #define RANGES_WORKAROUND_MSVC_207134
 // Qualify names to avoid collisions with definitions in dependent base classes

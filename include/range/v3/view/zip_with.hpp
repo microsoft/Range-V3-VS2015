@@ -123,6 +123,8 @@ namespace ranges
         template<typename T>
         struct single_pass_helper {
             static const bool value = SinglePass<range_iterator_t<T>>::value;
+
+            constexpr operator bool() const { return value; }
         };
 #endif
 
@@ -182,14 +184,18 @@ namespace ranges
                     common_type_t<range_difference_t<Rngs>...>;
 
                 using single_pass =
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
 #ifdef RANGES_WORKAROUND_MSVC_215191
                     meta::or_c<single_pass_helper<Rngs>::value...>;
 #else
                     meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>::value...>;
 #endif
 #else
+#ifdef RANGES_WORKAROUND_MSVC_215191
+                    meta::or_c<single_pass_helper<Rngs>()...>;
+#else
                     meta::or_c<(bool) SinglePass<range_iterator_t<Rngs>>()...>;
+#endif
 #endif
                 using value_type =
                     detail::decay_t<decltype(fun_(copy_tag{}, range_iterator_t<Rngs>{}...))>;
@@ -217,7 +223,7 @@ namespace ranges
                         false,
                         [](bool a, bool b) { return a || b; });
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                 CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>::value...>::value)
 #else
                 CONCEPT_REQUIRES(meta::and_c<(bool) BidirectionalRange<Rngs>()...>::value)
@@ -226,7 +232,7 @@ namespace ranges
                 {
                     tuple_for_each(its_, detail::dec);
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
 #else
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
@@ -236,7 +242,7 @@ namespace ranges
                     using std::placeholders::_1;
                     tuple_for_each(its_, std::bind(detail::advance_, _1, n));
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
 #else
                 CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
@@ -281,7 +287,7 @@ namespace ranges
 
             using end_cursor_t =
                 meta::if_<
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
                     meta::and_c<
                         (bool) BoundedRange<Rngs>::value...,
 #ifdef RANGES_WORKAROUND_MSVC_215191
@@ -292,7 +298,11 @@ namespace ranges
 #else
                     meta::and_c<
                         (bool) BoundedRange<Rngs>()...,
+#ifdef RANGES_WORKAROUND_MSVC_215191
+                        !single_pass_helper<Rngs>()...>,
+#else
                         !SinglePass<range_iterator_t<Rngs>>()...>,
+#endif
 #endif
                     cursor,
                     sentinel>;
@@ -313,7 +323,7 @@ namespace ranges
                 return {fun_, tuple_transform(rngs_, end)};
 #endif
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
@@ -326,7 +336,7 @@ namespace ranges
                 return {fun_, tuple_transform(rngs_, begin)};
 #endif
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool) Range<Rngs const>()...>::value)
@@ -349,7 +359,7 @@ namespace ranges
               : fun_(as_function(std::move(fun)))
               , rngs_{std::move(rngs)...}
             {}
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
             CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>::value...>::value)
 #else
             CONCEPT_REQUIRES(meta::and_c<(bool) SizedRange<Rngs>()...>::value)
@@ -396,6 +406,8 @@ namespace ranges
                     Callable<Fun, range_iterator_t<Rngs>...>,
                     Callable<Fun, copy_tag, range_iterator_t<Rngs>...>,
                     Callable<Fun, move_tag, range_iterator_t<Rngs>...>>::value;
+
+                    constexpr operator bool() const { return value; }
                 };
 #else
                 template<typename Fun, typename ...Rngs>
@@ -463,6 +475,8 @@ namespace ranges
                     static const bool value = meta::and_<
                     InputRange<Rngs>...,
                     Callable<Fun, range_reference_t<Rngs> &&...>>::value;
+
+                    constexpr operator bool() const { return value; }
                 };
 #else
                 template<typename Fun, typename ...Rngs>

@@ -79,7 +79,7 @@ namespace ranges
                 template<int n = 0, CONCEPT_REQUIRES_FRIEND_(SizedIteratorRangeLike_<typename helper<I, n>::type, typename helper<S, n>::type>::value)>
 #else
                 template<typename I_ = I, typename S_ = S,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
                     CONCEPT_REQUIRES_FRIEND_(SizedIteratorRangeLike_<I_, S_>::value)>
 #else
                     CONCEPT_REQUIRES_(SizedIteratorRangeLike_<I_, S_>())>

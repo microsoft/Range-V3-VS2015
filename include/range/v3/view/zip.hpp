@@ -133,19 +133,21 @@ namespace ranges
         {
             struct zip_fn
             {
+#ifdef RANGES_WORKAROUND_MSVC_213933
+                template<typename ...Rngs>
+                struct Concept {
+                    static const bool value = meta::and_<InputRange<Rngs>...>::value;
+
+                    constexpr operator bool() const { return value; }
+                };
+#else
                 template<typename ...Rngs>
                 using Concept = meta::and_<InputRange<Rngs>...>;
-
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                template<typename ...Rngs>
-                struct Concept_helper {
-                    static const bool value = meta::and_<InputRange<Rngs>...>::value;
-                };
 #endif
 
                 template<typename...Rngs,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(Concept_helper<Rngs...>::value)>
+                    CONCEPT_REQUIRES_(Concept<Rngs...>::value)>
 #else
                     CONCEPT_REQUIRES_(Concept<Rngs...>())>
 #endif
@@ -158,7 +160,7 @@ namespace ranges
             #ifndef RANGES_DOXYGEN_INVOKED
                 template<typename...Rngs,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(!Concept_helper<Rngs...>::value)>
+                    CONCEPT_REQUIRES_(!Concept<Rngs...>::value)>
 #else
                     CONCEPT_REQUIRES_(!Concept<Rngs...>())>
 #endif
