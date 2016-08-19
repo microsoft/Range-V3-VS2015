@@ -70,33 +70,7 @@ elseif(MSVC)
 #   message(FATAL_ERROR "Unknown compiler. Good luck!")
 endif()
 
-#   range_v3_list_remove_glob(<list> <GLOB|GLOB_RECURSE> [globbing expressions]...)
-#
-# Generates a list of files matching the given glob expressions, and remove
-# the matched elements from the given <list>.
-#
-# Adapted from Boost.Hana: https://github.com/ldionne/hana/
-#
-macro(range_v3_list_remove_glob list glob)
-    file(${glob} _bhlrg10321023_avoid_macro_clash_matches ${ARGN})
-    list(REMOVE_ITEM ${list} ${_bhlrg10321023_avoid_macro_clash_matches})
-endmacro()
-
-# Test all headers
-if(NOT RANGE_V3_NO_HEADER_CHECK)
-  include(CheckIncludeFileCXX)
-  file(GLOB_RECURSE RANGE_V3_PUBLIC_HEADERS "${CMAKE_SOURCE_DIR}/include/*.hpp")
-
-  foreach(_header IN LISTS RANGE_V3_PUBLIC_HEADERS)
-    file(RELATIVE_PATH _relative "${CMAKE_SOURCE_DIR}/include" "${_header}")
-    check_include_file_cxx("${_relative}" ${_relative}_FOUND "-I${CMAKE_SOURCE_DIR}/include")
-    if(NOT ${_relative}_FOUND)
-      message(FATAL_ERROR "Compilation of header ${_relative} failed")
-    endif()
-  endforeach()
-endif()
-
-# add_subdirectory(doc)
+add_subdirectory(doc)
 add_subdirectory(test)
 add_subdirectory(example)
 add_subdirectory(perf)
