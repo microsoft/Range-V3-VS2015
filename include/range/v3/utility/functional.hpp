@@ -800,8 +800,19 @@ namespace ranges
             constexpr auto&& rref = static_const<rref_fn>::value;
         }
 
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        template <typename T>
+        using rref_t_void_t = void;
+        template <class T, class V = void> struct rref_t_helper {};
+        template <class T> struct rref_t_helper<T, rref_t_void_t<decltype(rref(std::declval<T>()))>> {
+            typedef decltype(rref(std::declval<T>())) type;
+        };
+        template<typename T>
+        using rref_t = typename rref_t_helper<T>::type;
+#else
         template<typename T>
         using rref_t = decltype(rref(std::declval<T>()));
+#endif
 
         struct unwrap_reference_fn : pipeable<unwrap_reference_fn>
         {
@@ -835,8 +846,19 @@ namespace ranges
             constexpr auto&& unwrap_reference = static_const<unwrap_reference_fn>::value;
         }
 
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        template <typename T>
+        using unwrap_reference_t_void_t = void;
+        template <class T, class V = void> struct unwrap_reference_t_helper {};
+        template <class T> struct unwrap_reference_t_helper<T, unwrap_reference_t_void_t<decltype(unwrap_reference(std::declval<T>()))>> {
+            typedef decltype(unwrap_reference(std::declval<T>())) type;
+        };
+        template<typename T>
+        using unwrap_reference_t = typename unwrap_reference_t_helper<T>::type;
+#else
         template<typename T>
         using unwrap_reference_t = decltype(unwrap_reference(std::declval<T>()));
+#endif
 
         /// \ingroup group-utility
         template<typename T>

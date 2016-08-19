@@ -100,7 +100,7 @@ namespace ranges
                 return {};
             }
         public:
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_UNKNOWN
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -110,7 +110,7 @@ namespace ranges
                 return {range_access::begin_cursor(derived(), 42)};
             }
             /// \overload
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_UNKNOWN
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -119,7 +119,7 @@ namespace ranges
             {
                 return {range_access::begin_cursor(derived(), 42)};
             }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_UNKNOWN
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
@@ -129,7 +129,7 @@ namespace ranges
                 return {range_access::end_cursor(derived(), 42)};
             }
             /// \overload
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_UNKNOWN
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>::value)>
 #else
             template<typename D = Derived, CONCEPT_REQUIRES_(Same<D, Derived>())>
