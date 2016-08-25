@@ -1,3 +1,0 @@
-RUNALL_CROSSLIST
-CFLAGS="/EHsc /WX"	# permissive+
-CFLAGS="/EHsc /WX /permissive- /DRANGES_NOT_PERMISSIVE"	# permissive-
