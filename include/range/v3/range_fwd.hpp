@@ -588,8 +588,20 @@ namespace ranges
             struct take_fn;
         }
 
+        /// \cond
+        namespace detail
+        {
+            template<typename Rng>
+            struct is_random_access_bounded_;
+
+            template<typename Rng,
+                bool IsRandomAccessBounded = is_random_access_bounded_<Rng>::value>
+            struct take_exactly_view_;
+        }
+        /// \endcond
+
         template<typename Rng>
-        struct take_exactly_view;
+        using take_exactly_view = detail::take_exactly_view_<Rng>;
 
         namespace view
         {

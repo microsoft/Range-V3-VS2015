@@ -34,14 +34,21 @@ namespace ranges
         /// \cond
         namespace detail
         {
-            template<typename Rng,
+            template<typename Rng>
+            struct is_random_access_bounded_
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                bool IsRandomAccessBounded = RandomAccessRange<Rng>::value && BoundedRange<Rng>::value>
+              : meta::bool_<RandomAccessRange<Rng>::value && BoundedRange<Rng>::value>
 #else
-                bool IsRandomAccessBounded = RandomAccessRange<Rng>() && BoundedRange<Rng>()>
+              : meta::bool_<(bool) RandomAccessRange<Rng>() && (bool) BoundedRange<Rng>()>
 #endif
+            {};
+
+            // BUGBUG Per the discussion in https://github.com/ericniebler/stl2/issues/63, it's
+            // unclear if we can infer anything from RandomAccessRange<Rng>() && BoundedRange<Rng>()
+            template<typename Rng,
+                bool IsRandomAccessBounded /*= is_random_access_bounded_<Rng>::value*/>
             struct take_exactly_view_
-              : view_facade<take_exactly_view<Rng>, finite>
+              : view_facade<take_exactly_view_<Rng, IsRandomAccessBounded>, finite>
             {
             private:
                 friend range_access;
@@ -90,7 +97,7 @@ namespace ranges
 
             template<typename Rng>
             struct take_exactly_view_<Rng, true>
-              : view_interface<take_exactly_view<Rng>, finite>
+              : view_interface<take_exactly_view_<Rng, true>, finite>
             {
             private:
                 using difference_type_ = range_difference_t<Rng>;
@@ -150,11 +157,7 @@ namespace ranges
         /// \addtogroup group-views
         /// @{
         template<typename Rng>
-        struct take_exactly_view
-          : detail::take_exactly_view_<Rng>
-        {
-            using detail::take_exactly_view_<Rng>::take_exactly_view_;
-        };
+        using take_exactly_view = detail::take_exactly_view_<Rng>;
 
         namespace view
         {
