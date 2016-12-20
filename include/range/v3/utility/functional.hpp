@@ -172,36 +172,17 @@ namespace ranges
         /// \addtogroup group-utility
         struct as_function_fn
         {
-        private:
-            template<typename R, typename...Args>
-            struct ptr_fn_
-            {
-            private:
-                R (*pfn_)(Args...);
-            public:
-                ptr_fn_() = default;
-                explicit ptr_fn_(R (*pfn)(Args...))
-                  : pfn_(pfn)
-                {}
-                R operator()(Args...args) const
-                {
-                    return (*pfn_)(std::forward<Args>(args)...);
-                }
-            };
-        public:
-            template<typename R, typename ...Args>
-            ptr_fn_<R, Args...> operator()(R (*p)(Args...)) const
-            {
-                return ptr_fn_<R, Args...>(p);
-            }
-            template<typename R, typename T>
-            auto operator()(R T::* p) const -> decltype(std::mem_fn(p))
-            {
-                return std::mem_fn(p);
-            }
-            template<typename T, typename U = detail::decay_t<T>>
-            auto operator()(T && t) const ->
-                meta::if_c<!std::is_pointer<U>::value && !std::is_member_pointer<U>::value, T>
+            template<typename T, typename U = detail::decay_t<T>,
+                CONCEPT_REQUIRES_(std::is_member_pointer<U>::value)>
+            auto operator()(T && t) const
+            RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+            (
+                std::mem_fn(t)
+            )
+            template<typename T, typename U = detail::decay_t<T>,
+                CONCEPT_REQUIRES_(!std::is_member_pointer<U>::value)>
+            T operator()(T && t) const
+                noexcept(std::is_nothrow_constructible<T, T>::value)
             {
                 return std::forward<T>(t);
             }
