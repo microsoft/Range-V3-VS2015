@@ -824,11 +824,24 @@ namespace meta
             struct on_
             {
             };
+#ifdef META_WORKAROUND_MSVC_214588
+            template <typename, typename, typename>
+            struct on_helper_;
+            template <typename F, typename... Gs, typename... Ts>
+            struct on_helper_<F, meta::list<Gs...>, meta::list<Ts...>>
+            {
+                using type = apply<F, apply<compose<Gs...>, Ts>...>;
+            };
+#endif
             template <typename F, typename... Gs>
             struct on_<F, Gs...>
             {
                 template <typename... Ts>
+#ifdef META_WORKAROUND_MSVC_214588
+                using apply = meta::_t<on_helper_<F, meta::list<Gs...>, meta::list<Ts...>>>;
+#else
                 using apply = apply<F, apply<compose<Gs...>, Ts>...>;
+#endif
             };
         }
 
@@ -909,7 +922,11 @@ namespace meta
 
             template <typename Bool, typename... Bools>
             struct _and_<Bool, Bools...>
+#if 1 // FIXME
+                : if_c<!meta::_t<Bool>::value, std::false_type, _and_<Bools...>>
+#else
                 : if_c<!Bool::type::value, std::false_type, _and_<Bools...>>
+#endif
             {
             };
 
@@ -968,7 +985,7 @@ namespace meta
 #ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <bool... Bools>
         using and_c = std::is_same<integer_sequence<bool, Bools...>,
-                                    integer_sequence<bool, and_c_helper<Bools>::value...>>;
+                                   integer_sequence<bool, and_c_helper<Bools>::value...>>;
 #else
         template <bool... Bools>
         using and_c = std::is_same<integer_sequence<bool, Bools...>,
