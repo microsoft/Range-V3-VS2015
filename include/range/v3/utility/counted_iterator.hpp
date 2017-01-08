@@ -236,6 +236,16 @@ namespace ranges
         {
             return 0;
         }
+
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+        template<typename I, CONCEPT_REQUIRES_(WeakInputIterator<I>::value)>
+#else
+        template<typename I, CONCEPT_REQUIRES_(WeakInputIterator<I>())>
+#endif
+        counted_iterator<I> make_counted_iterator(I i, iterator_difference_t<I> n)
+        {
+            return counted_iterator<I>{std::move(i), n};
+        }
         /// @}
     }
 }
