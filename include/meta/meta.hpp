@@ -36,6 +36,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
+#include <utility>
 #include <meta/meta_fwd.hpp>
 
 #if defined(__clang__)
@@ -167,7 +168,8 @@ namespace meta
         template <typename T>
         using _t = typename T::type;
 
-#if defined(__cpp_variable_templates) || defined(META_DOXYGEN_INVOKED)
+#if defined(__cpp_variable_templates) || defined(META_DOXYGEN_INVOKED) || \
+    (defined(_MSC_VER) && _MSC_VER >= 1900)
         /// Variable alias for \c T::type::value
         /// \note Requires C++14 or greater.
         /// \ingroup invocation
@@ -210,69 +212,167 @@ namespace meta
         template <char Ch>
         using char_ = std::integral_constant<char, Ch>;
 
-#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
-        template<typename T>
-        struct value_type_helper
-        {
-            using type = decltype(T::type::value);
-        };
-#endif
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Math operations
         /// An integral constant wrapper around the result of incrementing the wrapped integer \c
         /// T::type::value.
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T>
+            struct inc
+            {
+                using type = std::integral_constant<decltype(T::type::value + 1), T::type::value + 1>;
+            };
+        } // namespace math_detail
         template <typename T>
-        using inc = std::integral_constant<decltype(T::type::value), T::type::value + 1>;
+        using inc = _t<math_detail::inc<T>>;
+#else
+        template <typename T>
+        using inc = std::integral_constant<decltype(T::type::value + 1), T::type::value + 1>;
+#endif
 
         /// An integral constant wrapper around the result of decrementing the wrapped integer \c
         /// T::type::value.
-        template <typename T>
 #ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
-        using dec = std::integral_constant<_t<value_type_helper<T>>, T::type::value - 1>;
+        namespace math_detail
+        {
+            template <typename T>
+            struct dec
+            {
+                using type = std::integral_constant<decltype(T::type::value - 1), T::type::value - 1>;
+            };
+        } // namespace math_detail
+        template <typename T>
+        using dec = _t<math_detail::dec<T>>;
 #else
-        using dec = std::integral_constant<decltype(T::type::value), T::type::value - 1>;
+        template <typename T>
+        using dec = std::integral_constant<decltype(T::type::value - 1), T::type::value - 1>;
 #endif
 
         /// An integral constant wrapper around the result of adding the two wrapped integers
         /// \c T::type::value and \c U::type::value.
         /// \ingroup math
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T, typename U>
+            struct plus
+            {
+                using type = std::integral_constant<decltype(T::type::value + U::type::value),
+                                                    T::type::value + U::type::value>;
+            };
+        } // namespace math_detail
+        template <typename T, typename U>
+        using plus = _t<math_detail::plus<T, U>>;
+#else
         template <typename T, typename U>
         using plus = std::integral_constant<decltype(T::type::value + U::type::value),
                                             T::type::value + U::type::value>;
+#endif
 
         /// An integral constant wrapper around the result of subtracting the two wrapped integers
         /// \c T::type::value and \c U::type::value.
         /// \ingroup math
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T, typename U>
+            struct minus
+            {
+                using type = std::integral_constant<decltype(T::type::value - U::type::value),
+                                                    T::type::value - U::type::value>;
+            };
+        } // namespace math_detail
+        template <typename T, typename U>
+        using minus = _t<math_detail::minus<T, U>>;
+#else
         template <typename T, typename U>
         using minus = std::integral_constant<decltype(T::type::value - U::type::value),
                                              T::type::value - U::type::value>;
+#endif
 
         /// An integral constant wrapper around the result of multiplying the two wrapped integers
         /// \c T::type::value and \c U::type::value.
         /// \ingroup math
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T, typename U>
+            struct multiplies
+            {
+                using type = std::integral_constant<decltype(T::type::value * U::type::value),
+                                                    T::type::value * U::type::value>;
+            };
+        } // namespace math_detail
         template <typename T, typename U>
-        using multiplies = std::integral_constant<decltype(T::type::value *U::type::value),
+        using multiplies = _t<math_detail::multiplies<T, U>>;
+#else
+        template <typename T, typename U>
+        using multiplies = std::integral_constant<decltype(T::type::value * U::type::value),
                                                   T::type::value * U::type::value>;
+#endif
 
         /// An integral constant wrapper around the result of dividing the two wrapped integers \c
         /// T::type::value and \c U::type::value.
         /// \ingroup math
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T, typename U>
+            struct divides
+            {
+                using type = std::integral_constant<decltype(T::type::value / U::type::value),
+                                                T::type::value / U::type::value>;
+            };
+        } // namespace math_detail
+        template <typename T, typename U>
+        using divides = _t<math_detail::divides<T, U>>;
+#else
         template <typename T, typename U>
         using divides = std::integral_constant<decltype(T::type::value / U::type::value),
                                                T::type::value / U::type::value>;
+#endif
 
-        /// An integral constant wrapper around the remainder of dividing the two wrapped integers
-        /// \c T::type::value and \c U::type::value.
+        /// An integral constant wrapper around the result of negating the wrapped integer
+        /// \c T::type::value.
         /// \ingroup math
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T>
+            struct negate
+            {
+                using type = std::integral_constant<decltype(-T::type::value), -T::type::value>;
+            };
+        } // namespace math_detail
+        template <typename T>
+        using negate = _t<math_detail::negate<T>>;
+#else
         template <typename T>
         using negate = std::integral_constant<decltype(-T::type::value), -T::type::value>;
+#endif
 
         /// An integral constant wrapper around the remainder of dividing the two wrapped integers
         /// \c T::type::value and \c U::type::value.
         /// \ingroup math
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+        namespace math_detail
+        {
+            template <typename T, typename U>
+            struct modulus
+            {
+                using type = std::integral_constant<decltype(T::type::value % U::type::value),
+                                                    T::type::value % U::type::value>;
+            };
+        } // namespace math_detail
+        template <typename T, typename U>
+        using modulus = _t<math_detail::modulus<T, U>>;
+#else
         template <typename T, typename U>
         using modulus = std::integral_constant<decltype(T::type::value % U::type::value),
                                                T::type::value % U::type::value>;
+#endif
 
         /// A Boolean integral constant wrapper around the result of comparing \c T::type::value and
         /// \c U::type::value for equality.
@@ -314,7 +414,7 @@ namespace meta
         /// integers \c T::type::value and \c U::type::value.
         /// \ingroup math
         template <typename T, typename U>
-        using bit_and = std::integral_constant<decltype(T::type::value &U::type::value),
+        using bit_and = std::integral_constant<decltype(T::type::value & U::type::value),
                                                T::type::value & U::type::value>;
 
         /// An integral constant wrapper around the result of bitwise-or'ing the two wrapped
@@ -331,7 +431,7 @@ namespace meta
         using bit_xor = std::integral_constant<decltype(T::type::value ^ U::type::value),
                                                T::type::value ^ U::type::value>;
 
-        /// An integral constant wrapper around the result of bitwise-complimenting the wrapped
+        /// An integral constant wrapper around the result of bitwise-complementing the wrapped
         /// integer \c T::type::value.
         /// \ingroup math
         template <typename T>
@@ -922,11 +1022,7 @@ namespace meta
 
             template <typename Bool, typename... Bools>
             struct _and_<Bool, Bools...>
-#if 1 // FIXME
-                : if_c<!meta::_t<Bool>::value, std::false_type, _and_<Bools...>>
-#else
                 : if_c<!Bool::type::value, std::false_type, _and_<Bools...>>
-#endif
             {
             };
 
@@ -945,22 +1041,24 @@ namespace meta
         } // namespace detail
         /// \endcond
 
+#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
+        namespace detail
+        {
+            template <bool Bool>
+            struct not_c_helper
+            {
+                static const bool value = !Bool;
+            };
+        } // namespace detail
+        template <bool Bool>
+        using not_c = bool_<detail::not_c_helper<Bool>::value>;
+#else
         /// Logically negate the Boolean parameter
         /// \ingroup logical
-#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
-        template <bool Bool>
-        struct not_c_helper {
-            static const bool value = !Bool;
-        };
-        template <bool Bool>
-        using not_c = bool_<not_c_helper<Bool>::value>;
-#else
         template <bool Bool>
         using not_c = bool_<!Bool>;
 #endif
 
-        /// Logically negate the integral constant-wrapped Boolean parameter.
-        /// \ingroup logical
 #ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
         template <typename Bool>
         struct not_helper {
@@ -969,37 +1067,39 @@ namespace meta
         template <typename Bool>
         using not_ = _t<not_helper<Bool>>;
 #else
+        /// Logically negate the integral constant-wrapped Boolean parameter.
+        /// \ingroup logical
         template <typename Bool>
         using not_ = not_c<Bool::type::value>;
 #endif
 
-#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
-        template <bool Bool>
-        struct and_c_helper {
-            static const bool value = Bool || true;
-        };
-#endif
-
+#if defined(META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR) || \
+    ((__GNUC__ == 5) && (__GNUC_MINOR__ == 1) && !defined(__clang__))
+        // Alternative formulation of and_c to workaround
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66405
+        // and MSVC alias template bugs
+        template <bool... Bools>
+        using and_c = std::is_same<integer_sequence<bool, true, Bools...>,
+                                   integer_sequence<bool, Bools..., true>>;
+#else
         /// Logically and together all the Boolean parameters
         /// \ingroup logical
-#ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
-        template <bool... Bools>
-        using and_c = std::is_same<integer_sequence<bool, Bools...>,
-                                   integer_sequence<bool, and_c_helper<Bools>::value...>>;
-#else
         template <bool... Bools>
         using and_c = std::is_same<integer_sequence<bool, Bools...>,
                                    integer_sequence<bool, (Bools || true)...>>;
 #endif
 
 #ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
-        template <typename Bool>
-        struct fast_and_helper {
-            static const bool value = Bool::type::value;
-        };
-
+        namespace detail
+        {
+            template <typename Bool>
+            struct fast_and_helper
+            {
+                static const bool value = Bool::type::value;
+            };
+        }
         template <typename... Bools>
-        using fast_and = and_c<fast_and_helper<Bools>::value...>;
+        using fast_and = and_c<detail::fast_and_helper<Bools>::value...>;
 #else
         /// Logically and together all the integral constant-wrapped Boolean parameters, \e without
         /// doing short-circuiting.
@@ -1021,13 +1121,16 @@ namespace meta
                                        integer_sequence<bool, (Bools && false)...>>>;
 
 #ifdef META_WORKAROUND_MSVC_SFINAE_ALIAS_DEPENDENTEXPR
-        template <typename Bool>
-        struct fast_or_helper {
-            static const bool value = Bool::type::value;
-        };
-
+        namespace detail
+        {
+            template <typename Bool>
+            struct fast_or_helper
+            {
+                static const bool value = Bool::type::value;
+            };
+        } // namespace detail
         template <typename... Bools>
-        using fast_or = or_c<fast_or_helper<Bools>::value...>;
+        using fast_or = or_c<detail::fast_or_helper<Bools>::value...>;
 #else
         /// Logically or together all the integral constant-wrapped Boolean parameters, \e without
         /// doing short-circuiting.
@@ -1412,6 +1515,13 @@ namespace meta
 
                 template <typename... Ts>
                 static id<list<Ts...>> eval(VoidPtrs..., id<Ts> *...);
+            };
+
+            template <>
+            struct drop_impl_<list<>>
+            {
+                template <typename...Ts>
+                static id<list<Ts...>> eval(id<Ts> *...);
             };
 
             template <typename List, typename N>
@@ -2996,6 +3106,7 @@ namespace meta
         ///////////////////////////////////////////////////////////////////////////////////////////////
         // integer_sequence
 
+#if !(defined(__cpp_lib_integer_sequence) || (defined(_MSC_VER) && _MSC_VER >= 1900))
         /// A container for a sequence of compile-time integer constants.
         /// \ingroup integral
         template <typename T, T... Is>
@@ -3005,6 +3116,7 @@ namespace meta
             /// \return `sizeof...(Is)`
             static constexpr std::size_t size() noexcept { return sizeof...(Is); }
         };
+#endif
 
         /// \cond
         namespace detail
