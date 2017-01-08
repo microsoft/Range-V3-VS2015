@@ -181,11 +181,11 @@ namespace ranges
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I1>::value && IteratorRange<I1, S1>::value &&
                     ForwardIterator<I2>::value && IteratorRange<I2, S2>::value &&
-                    IndirectCallableRelation<R, Project<I1, P>, I2>::value)>
+                    IndirectCallableRelation<R, Projected<I1, P>, I2>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardIterator<I1>() && IteratorRange<I1, S1>() &&
                     ForwardIterator<I2>() && IteratorRange<I2, S2>() &&
-                    IndirectCallableRelation<R, Project<I1, P>, I2>())>
+                    IndirectCallableRelation<R, Projected<I1, P>, I2>())>
 #endif
             I1 operator()(I1 begin1, S1 end1, I2 begin2, S2 end2, R pred = R{}, P proj = P{}) const
             {
@@ -202,10 +202,10 @@ namespace ranges
                 typename I2 = range_iterator_t<Rng2>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>::value && ForwardRange<Rng2>::value &&
-                    IndirectCallableRelation<R, Project<I1, P>, I2>::value)>
+                    IndirectCallableRelation<R, Projected<I1, P>, I2>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardRange<Rng1>() && ForwardRange<Rng2>() &&
-                    IndirectCallableRelation<R, Project<I1, P>, I2>())>
+                    IndirectCallableRelation<R, Projected<I1, P>, I2>())>
 #endif
             range_safe_iterator_t<Rng1> operator()(Rng1 &&rng1, Rng2 &&rng2, R pred = R{}, P proj = P{}) const
             {

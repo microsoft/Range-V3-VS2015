@@ -34,10 +34,10 @@ namespace ranges
             template<typename I, typename S, typename R, typename P = ident,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
-                    IndirectCallablePredicate<R, Project<I, P> >::value)>
+                    IndirectCallablePredicate<R, Projected<I, P> >::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
-                    IndirectCallablePredicate<R, Project<I, P> >())>
+                    IndirectCallablePredicate<R, Projected<I, P> >())>
 #endif
             iterator_difference_t<I>
             operator()(I begin, S end, R pred_, P proj_ = P{}) const
@@ -54,9 +54,9 @@ namespace ranges
             template<typename Rng, typename R, typename P = ident,
                 typename I = range_iterator_t<Rng>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<R, Project<I, P> >::value)>
+                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<R, Projected<I, P> >::value)>
 #else
-                CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<R, Project<I, P> >())>
+                CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<R, Projected<I, P> >())>
 #endif
             iterator_difference_t<I>
             operator()(Rng &&rng, R pred, P proj = P{}) const

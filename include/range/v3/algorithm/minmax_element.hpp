@@ -39,10 +39,10 @@ namespace ranges
             template<typename I, typename S, typename C = ordered_less, typename P = ident,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value &&
-                    IndirectCallableRelation<C, Project<I, P>>::value)>
+                    IndirectCallableRelation<C, Projected<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardIterator<I>() && IteratorRange<I, S>() &&
-                    IndirectCallableRelation<C, Project<I, P>>())>
+                    IndirectCallableRelation<C, Projected<I, P>>())>
 #endif
             tagged_pair<tag::min(I), tag::max(I)>
             operator()(I begin, S end, C pred_ = C{}, P proj_ = P{}) const
@@ -92,10 +92,10 @@ namespace ranges
                 typename I = range_iterator_t<Rng>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng>::value &&
-                    IndirectCallableRelation<C, Project<I, P>>::value)>
+                    IndirectCallableRelation<C, Projected<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardRange<Rng>() &&
-                    IndirectCallableRelation<C, Project<I, P>>())>
+                    IndirectCallableRelation<C, Projected<I, P>>())>
 #endif
             meta::if_<std::is_lvalue_reference<Rng>,
                 tagged_pair<tag::min(I), tag::max(I)>,

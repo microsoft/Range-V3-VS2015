@@ -48,10 +48,10 @@ namespace ranges
                 typename R = tagged_pair<tag::min(V), tag::max(V)>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputRange<Rng>::value && Copyable<V>::value &&
-                    IndirectCallableRelation<C, Project<I, P>>::value)>
+                    IndirectCallableRelation<C, Projected<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(InputRange<Rng>() && Copyable<V>() &&
-                    IndirectCallableRelation<C, Project<I, P>>())>
+                    IndirectCallableRelation<C, Projected<I, P>>())>
 #endif
             RANGES_CXX14_CONSTEXPR R
             operator()(Rng &&rng, C pred_ = C{}, P proj_ = P{}) const
@@ -105,10 +105,10 @@ namespace ranges
             template<typename T, typename C = ordered_less, typename P = ident,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(
-                    IndirectCallableRelation<C, Project<const T *, P>>::value)>
+                    IndirectCallableRelation<C, Projected<const T *, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(
-                    IndirectCallableRelation<C, Project<const T *, P>>())>
+                    IndirectCallableRelation<C, Projected<const T *, P>>())>
 #endif
             constexpr const T& operator()(const T &a, const T &b, C pred = C{}, P proj = P{}) const
             {

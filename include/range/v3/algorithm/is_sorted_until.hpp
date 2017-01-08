@@ -44,10 +44,10 @@ namespace ranges
             template<typename I, typename S, typename R = ordered_less, typename P = ident,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardIterator<I>::value && IteratorRange<I, S>::value &&
-                    IndirectCallableRelation<R, Project<I, P>>::value)>
+                    IndirectCallableRelation<R, Projected<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardIterator<I>() && IteratorRange<I, S>() &&
-                    IndirectCallableRelation<R, Project<I, P>>())>
+                    IndirectCallableRelation<R, Projected<I, P>>())>
 #endif
             I operator()(I begin, S end, R pred_ = R{}, P proj_ = P{}) const
             {
@@ -70,10 +70,10 @@ namespace ranges
                 typename I = range_iterator_t<Rng>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(ForwardRange<Rng>::value &&
-                    IndirectCallableRelation<R, Project<I, P>>::value)>
+                    IndirectCallableRelation<R, Projected<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(ForwardRange<Rng>() &&
-                    IndirectCallableRelation<R, Project<I, P>>())>
+                    IndirectCallableRelation<R, Projected<I, P>>())>
 #endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, R pred = R{}, P proj = P{}) const
             {
