@@ -376,8 +376,10 @@ namespace ranges
         template<typename T>
         struct istream_range;
 
+    #if !RANGES_CXX_VARIABLE_TEMPLATES
         template<typename T>
         istream_range<T> istream(std::istream & sin);
+    #endif
 
         template<typename I, typename S = I>
         struct range;
