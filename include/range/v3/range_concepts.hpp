@@ -60,21 +60,28 @@ namespace ranges
             {
                 // Associated types
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+            private:
                 template<typename>
                 using iterator_t_helper_void_t = void;
                 template<typename, typename = void> struct iterator_t_helper {};
-                template<typename T> struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(std::declval<T&>()))>> {
+                template<typename T>
+                struct iterator_t_helper<T, iterator_t_helper_void_t<decltype(begin(std::declval<T&>()))>>
+                {
                     using type = decltype(begin(std::declval<T&>()));
                 };
-                template<typename T>
-                using iterator_t = meta::_t<iterator_t_helper<T>>;
 
                 template<typename>
                 using sentinel_t_helper_void_t = void;
                 template<typename, typename = void> struct sentinel_t_helper {};
-                template<typename T> struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(std::declval<T&>()))>> {
+                template<typename T>
+                struct sentinel_t_helper<T, sentinel_t_helper_void_t<decltype(end(std::declval<T&>()))>>
+                {
                     using type = decltype(end(std::declval<T&>()));
                 };
+            public:
+                template<typename T>
+                using iterator_t = meta::_t<iterator_t_helper<T>>;
+
                 template<typename T>
                 using sentinel_t = meta::_t<sentinel_t_helper<T>>;
 #else
