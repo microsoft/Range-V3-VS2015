@@ -194,13 +194,15 @@ namespace ranges
             template<typename Cur>
             using mixin_base = meta::_t<mixin_base_<Cur>>;
 
-            auto iter_cat(range_access::InputCursorConcept*) ->
+            auto iter_cat(range_access::WeakInputCursor*) ->
+                ranges::weak_input_iterator_tag;
+            auto iter_cat(range_access::InputCursor*) ->
                 ranges::input_iterator_tag;
-            auto iter_cat(range_access::ForwardCursorConcept*) ->
+            auto iter_cat(range_access::ForwardCursor*) ->
                 ranges::forward_iterator_tag;
-            auto iter_cat(range_access::BidirectionalCursorConcept*) ->
+            auto iter_cat(range_access::BidirectionalCursor*) ->
                 ranges::bidirectional_iterator_tag;
-            auto iter_cat(range_access::RandomAccessCursorConcept*) ->
+            auto iter_cat(range_access::RandomAccessCursor*) ->
                 ranges::random_access_iterator_tag;
         }
         /// \endcond
@@ -300,17 +302,24 @@ namespace ranges
             friend detail::mixin_base<Cur>;
             template<typename OtherCur, typename OtherS>
             friend struct basic_iterator;
+            // TODO support output iterators
+            //CONCEPT_ASSERT(detail::WeakCursor<Cur>());
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-            CONCEPT_ASSERT(detail::InputCursor<Cur>::value);
+            CONCEPT_ASSERT(detail::WeakInputCursor<Cur>::value);
 #else
-            CONCEPT_ASSERT(detail::InputCursor<Cur>());
+            CONCEPT_ASSERT(detail::WeakInputCursor<Cur>());
 #endif
             using single_pass = range_access::single_pass_t<Cur>;
+            using is_weak_t =
+                std::is_same<detail::cursor_concept_t<Cur>, range_access::WeakInputCursor>;
             using cursor_concept_t =
                 meta::if_<
-                    single_pass,
-                    range_access::InputCursorConcept,
-                    detail::cursor_concept_t<Cur>>;
+                    is_weak_t,
+                    range_access::WeakInputCursor,
+                    meta::if_<
+                        single_pass,
+                        range_access::InputCursor,
+                        detail::cursor_concept_t<Cur>>>;
 
 #ifdef RANGES_WORKAROUND_MSVC_214062
             template<typename T> struct helper {
@@ -329,30 +338,25 @@ namespace ranges
                 return this->detail::mixin_base<Cur>::get();
             }
 
-            // If Range models RangeFacade or if the cursor models
-            // ForwardCursor, then positions must be equality comparable.
-            // Otherwise, it's an InputCursor in an RangeFacade, so
-            // all cursors are trivially equal.
-            // BUGBUG this doesn't handle weak iterators.
-            constexpr bool equal2_(basic_iterator const&,
-                range_access::InputCursorConcept *) const
+            // If the cursor models ForwardCursor, then positions are equality comparable.
+            // Otherwise, make all cursors are trivially equal.
+            constexpr bool equal2_(basic_iterator const&, range_access::InputCursor *) const
             {
                 return true;
             }
-            constexpr bool equal2_(basic_iterator const &that,
-                range_access::ForwardCursorConcept *) const
+            constexpr bool equal2_(basic_iterator const &that, range_access::ForwardCursor *) const
             {
                 return range_access::equal(pos(), that.pos());
             }
-            constexpr bool equal_(basic_iterator const &that,
-                std::false_type *) const
+            // For Bounded ranges:
+            constexpr bool equal_(basic_iterator const &that, std::true_type *) const
+            {
+                return range_access::equal(pos(), that.pos());
+            }
+            // For non-Bounded ranges:
+            constexpr bool equal_(basic_iterator const &that, std::false_type *) const
             {
                 return basic_iterator::equal2_(that, _nullptr_v<cursor_concept_t>());
-            }
-            constexpr bool equal_(basic_iterator const &that,
-                std::true_type *) const
-            {
-                return range_access::equal(pos(), that.pos());
             }
         public:
             using reference =
@@ -404,32 +408,61 @@ namespace ranges
                 ++*this;
                 return tmp;
             }
-            // BUGBUG this doesn't handle weak iterators.
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+#else
+            CONCEPT_REQUIRES(!is_weak_t())
+#endif
             friend constexpr bool operator==(basic_iterator const &left,
                 basic_iterator const &right)
             {
                 return left.equal_(right, _nullptr_v<std::is_same<Cur, S>>());
             }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+#else
+            CONCEPT_REQUIRES(!is_weak_t())
+#endif
             friend constexpr bool operator!=(basic_iterator const &left,
                 basic_iterator const &right)
             {
                 return !(left == right);
             }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+#else
+            CONCEPT_REQUIRES(!is_weak_t())
+#endif
             friend constexpr bool operator==(basic_iterator const &left,
                 basic_sentinel<S> const &right)
             {
                 return range_access::empty(left.pos(), right.end());
             }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+#else
+            CONCEPT_REQUIRES(!is_weak_t())
+#endif
             friend constexpr bool operator!=(basic_iterator const &left,
                 basic_sentinel<S> const &right)
             {
                 return !(left == right);
             }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+#else
+            CONCEPT_REQUIRES(!is_weak_t())
+#endif
             friend constexpr bool operator==(basic_sentinel<S> const & left,
                 basic_iterator const &right)
             {
                 return range_access::empty(right.pos(), left.end());
             }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+#else
+            CONCEPT_REQUIRES(!is_weak_t())
+#endif
             friend constexpr bool operator!=(basic_sentinel<S> const &left,
                 basic_iterator const &right)
             {
