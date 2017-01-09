@@ -44,7 +44,6 @@ namespace ranges
             private:
                 mutable value_type value_;
             public:
-                RANGES_CXX14_CONSTEXPR
                 postfix_increment_proxy() = default;
                 RANGES_CXX14_CONSTEXPR
                 explicit postfix_increment_proxy(I const& x)
@@ -75,7 +74,6 @@ namespace ranges
                 mutable value_type value_;
                 I it_;
             public:
-                RANGES_CXX14_CONSTEXPR
                 writable_postfix_increment_proxy() = default;
                 RANGES_CXX14_CONSTEXPR
                 explicit writable_postfix_increment_proxy(I x)
@@ -174,17 +172,12 @@ namespace ranges
             template<typename I, typename Val, typename Ref, typename Cat>
             using postfix_increment_result =
                 meta::if_<
-                    meta::and_<
-                        // A proxy is only needed for readable iterators
-                        std::is_convertible<Ref, Val const &>,
-                        // No forward iterator can have values that disappear
-                        // before positions can be re-visited
-                        meta::not_<DerivedFrom<Cat, ranges::forward_iterator_tag>>>,
+                    DerivedFrom<Cat, ranges::forward_iterator_tag>,
+                    I,
                     meta::if_<
                         is_non_proxy_reference<Ref, Val>,
                         postfix_increment_proxy<I>,
-                        writable_postfix_increment_proxy<I>>,
-                    I>;
+                        writable_postfix_increment_proxy<I>>>;
 
             template<typename Cur, typename Enable = void>
             struct mixin_base_
@@ -278,7 +271,7 @@ namespace ranges
             using detail::mixin_base<S>::get;
 #endif
         public:
-            RANGES_CXX14_CONSTEXPR basic_sentinel() = default;
+            basic_sentinel() = default;
             RANGES_CXX14_CONSTEXPR basic_sentinel(S end)
               : detail::mixin_base<S>(std::move(end))
             {}
