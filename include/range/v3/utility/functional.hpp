@@ -213,56 +213,35 @@ namespace ranges
         struct logical_negate
         {
         private:
-            Pred pred_;
+            using fn_t = meta::_t<std::decay<function_type<Pred>>>;
+            fn_t pred_;
         public:
             logical_negate() = default;
 
             explicit constexpr logical_negate(Pred pred)
-              : pred_((Pred &&) pred)
+              : pred_(as_function((Pred &&) pred))
             {}
 
-            template<typename T,
+            template<typename ...Args,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred, T>::value)>
+                CONCEPT_REQUIRES_(Predicate<fn_t&, Args...>::value)>
 #else
-                CONCEPT_REQUIRES_(Predicate<Pred, T>())>
+                CONCEPT_REQUIRES_(Predicate<fn_t&, Args...>())>
 #endif
-            bool operator()(T && t)
+            bool operator()(Args &&...args)
             {
-                return !pred_((T &&) t);
+                return !pred_(((Args &&) args)...);
             }
             /// \overload
-            template<typename T,
+            template<typename ...Args,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred const, T>::value)>
+                CONCEPT_REQUIRES_(Predicate<fn_t const&, Args...>::value)>
 #else
-                CONCEPT_REQUIRES_(Predicate<Pred const, T>())>
+                CONCEPT_REQUIRES_(Predicate<fn_t const&, Args...>())>
 #endif
-            constexpr bool operator()(T && t) const
+            constexpr bool operator()(Args &&...args) const
             {
-                return !pred_((T &&) t);
-            }
-            /// \overload
-            template<typename T, typename U,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred, T, U>::value)>
-#else
-                CONCEPT_REQUIRES_(Predicate<Pred, T, U>())>
-#endif
-            bool operator()(T && t, U && u)
-            {
-                return !pred_((T &&) t, (U &&) u);
-            }
-            /// \overload
-            template<typename T, typename U,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred const, T, U>::value)>
-#else
-                CONCEPT_REQUIRES_(Predicate<Pred const, T, U>())>
-#endif
-            constexpr bool operator()(T && t, U && u) const
-            {
-                return !pred_((T &&) t, (U &&) u);
+                return !pred_(((Args &&) args)...);
             }
         };
 
