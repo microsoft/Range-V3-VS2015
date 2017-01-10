@@ -18,6 +18,8 @@
 #include <meta/meta.hpp>
 #include <range/v3/range_fwd.hpp>
 #include <range/v3/range_access.hpp>
+#include <range/v3/utility/box.hpp>
+#include <range/v3/utility/move.hpp>
 #include <range/v3/utility/concepts.hpp>
 #include <range/v3/utility/nullptr_v.hpp>
 #include <range/v3/utility/static_const.hpp>
@@ -179,20 +181,289 @@ namespace ranges
                         postfix_increment_proxy<I>,
                         writable_postfix_increment_proxy<I>>>;
 
-            template<typename Cur, typename Enable = void>
-            struct mixin_base_
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+            template<typename>
+            using cursor_reference_t_void_t = void;
+            template<typename, typename = void>
+            struct cursor_reference_t_helper {};
+            template<typename Cur>
+            struct cursor_reference_t_helper<Cur,
+                cursor_reference_t_void_t<decltype(range_access::get(std::declval<Cur const &>()))>>
             {
-                using type = basic_mixin<Cur>;
+                using type = decltype(range_access::get(std::declval<Cur const &>()));
+            };
+            template<typename Cur>
+            using cursor_reference_t = meta::_t<cursor_reference_t_helper<Cur>>;
+#else
+            template<typename Cur>
+            using cursor_reference_t =
+                decltype(range_access::get(std::declval<Cur const &>()));
+#endif
+
+            // Compute the rvalue reference type of a cursor
+            template<typename Cur>
+            auto cursor_move(Cur const &cur, int) ->
+                decltype(range_access::move(cur));
+            template<typename Cur>
+            auto cursor_move(Cur const &cur, long) ->
+                aux::move_t<cursor_reference_t<Cur>>;
+
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_ALIAS_DECLTYPE
+            template<typename>
+            using cursor_rvalue_reference_t_void_t = void;
+            template<typename, typename = void>
+            struct cursor_rvalue_reference_t_helper {};
+            template<typename Cur>
+            struct cursor_rvalue_reference_t_helper<Cur,
+                cursor_rvalue_reference_t_void_t<decltype(detail::cursor_move(std::declval<Cur const &>(), 42))>>
+            {
+                using type = decltype(detail::cursor_move(std::declval<Cur const &>(), 42));
+            };
+            template<typename Cur>
+            using cursor_rvalue_reference_t = meta::_t<cursor_rvalue_reference_t_helper<Cur>>;
+#else
+            template<typename Cur>
+            using cursor_rvalue_reference_t =
+                decltype(detail::cursor_move(std::declval<Cur const &>(), 42));
+#endif
+
+            // Define conversion operators from the proxy reference type
+            // to the common reference types, so that basic_iterator can model Readable
+            // even with getters/setters.
+            template<typename Derived, typename Head>
+            struct proxy_reference_conversion
+            {
+                operator Head() const
+                    noexcept(noexcept(Head(Head(std::declval<Derived const &>().get_()))))
+                {
+                    return Head(static_cast<Derived const *>(this)->get_());
+                }
+            };
+
+            // Collect the reference types associated with cursors
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+            template<typename Cur, bool Readable = (bool) ReadableCursor<Cur>::value>
+#else
+            template<typename Cur, bool Readable = (bool) ReadableCursor<Cur>()>
+#endif
+            struct cursor_traits
+            {
+            private:
+                struct private_ {};
+            public:
+                using value_t_ = private_;
+                using reference_t_ = private_;
+                using rvalue_reference_t_ = private_;
+                using common_refs = meta::list<>;
             };
 
             template<typename Cur>
-            struct mixin_base_<Cur, meta::void_<typename Cur::mixin>>
+            struct cursor_traits<Cur, true>
             {
-                using type = typename Cur::mixin;
+                using value_t_ = range_access::cursor_value_t<Cur>;
+                using reference_t_ = cursor_reference_t<Cur>;
+                using rvalue_reference_t_ = cursor_rvalue_reference_t<Cur>;
+            private:
+                using R1 = reference_t_;
+                using R2 = common_reference_t<reference_t_ &&, value_t_ &>;
+                using R3 = common_reference_t<reference_t_ &&, rvalue_reference_t_ &&>;
+                using tmp1 = meta::list<value_t_, R1>;
+                using tmp2 =
+                    meta::if_<meta::in<tmp1, uncvref_t<R2>>, tmp1, meta::push_back<tmp1, R2>>;
+                using tmp3 =
+                    meta::if_<meta::in<tmp2, uncvref_t<R3>>, tmp2, meta::push_back<tmp2, R3>>;
+            public:
+                using common_refs = meta::unique<meta::pop_front<tmp3>>;
             };
 
-            template<typename Cur>
-            using mixin_base = meta::_t<mixin_base_<Cur>>;
+            // The One Proxy Reference type to rule them all. basic_iterator uses this
+            // as the return type of operator* when the cursor type has a set() member
+            // function of the correct signature (i.e., if it can accept a value_type&&).
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+            template<typename Cur, bool Readable = (bool) ReadableCursor<Cur>::value>
+#else
+            template<typename Cur, bool Readable = (bool) ReadableCursor<Cur>()>
+#endif
+            struct basic_proxy_reference
+              : cursor_traits<Cur>
+                // The following adds conversion operators to the common reference
+                // types, so that basic_proxy_reference can model Readable
+              , meta::inherit<
+                    meta::transform<
+                        typename cursor_traits<Cur>::common_refs,
+                        meta::bind_front<
+                            meta::quote<proxy_reference_conversion>,
+                            basic_proxy_reference<Cur>>>>
+            {
+            private:
+                Cur *cur_;
+                template<typename OtherCur, bool OtherReadable>
+                friend struct basic_proxy_reference;
+                template<typename, typename>
+                friend struct proxy_reference_conversion;
+                using typename cursor_traits<Cur>::value_t_;
+                using typename cursor_traits<Cur>::reference_t_;
+                using typename cursor_traits<Cur>::rvalue_reference_t_;
+                CONCEPT_ASSERT_MSG(CommonReference<value_t_ &, reference_t_ &&>(),
+                    "Your readable and writable cursor must have a value type and a reference "
+                    "type that share a common reference type. See the ranges::common_reference "
+                    "type trait.");
+                RANGES_CXX14_CONSTEXPR
+                reference_t_ get_() const
+                    noexcept(noexcept(reference_t_(range_access::get(std::declval<Cur const &>()))))
+                {
+                    return range_access::get(*cur_);
+                }
+                template<typename T>
+                RANGES_CXX14_CONSTEXPR
+                void set_(T &&t)
+                {
+                    range_access::set(*cur_, (T &&) t);
+                }
+            public:
+                basic_proxy_reference() = default;
+                basic_proxy_reference(basic_proxy_reference const &) = default;
+                template<typename OtherCur,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ConvertibleTo<OtherCur*, Cur*>::value)>
+#else
+                    CONCEPT_REQUIRES_(ConvertibleTo<OtherCur*, Cur*>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                basic_proxy_reference(basic_proxy_reference<OtherCur> const &that) noexcept
+                  : cur_(that.cur_)
+                {}
+                RANGES_CXX14_CONSTEXPR
+                explicit basic_proxy_reference(Cur &cur) noexcept
+                  : cur_(&cur)
+                {}
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(ReadableCursor<Cur>::value)
+#else
+                CONCEPT_REQUIRES(ReadableCursor<Cur>())
+#endif
+                RANGES_CXX14_CONSTEXPR
+                basic_proxy_reference &operator=(basic_proxy_reference &&that)
+                {
+                    return *this = that;
+                }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES(ReadableCursor<Cur>::value)
+#else
+                CONCEPT_REQUIRES(ReadableCursor<Cur>())
+#endif
+                RANGES_CXX14_CONSTEXPR
+                basic_proxy_reference &operator=(basic_proxy_reference const &that)
+                {
+                    this->set_(that.get_());
+                    return *this;
+                }
+                template<typename OtherCur,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ReadableCursor<OtherCur>::value &&
+                        WritableCursor<Cur, cursor_reference_t<OtherCur>>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<OtherCur>() &&
+                        WritableCursor<Cur, cursor_reference_t<OtherCur>>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                basic_proxy_reference &operator=(basic_proxy_reference<OtherCur> &&that)
+                {
+                    return *this = that;
+                }
+                template<typename OtherCur,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(ReadableCursor<OtherCur>::value &&
+                        WritableCursor<Cur, cursor_reference_t<OtherCur>>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<OtherCur>() &&
+                        WritableCursor<Cur, cursor_reference_t<OtherCur>>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                basic_proxy_reference &operator=(basic_proxy_reference<OtherCur> const &that)
+                {
+                    this->set_(that.get_());
+                    return *this;
+                }
+                template<typename T,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                    CONCEPT_REQUIRES_(WritableCursor<Cur, T &&>::value)>
+#else
+                    CONCEPT_REQUIRES_(WritableCursor<Cur, T &&>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                basic_proxy_reference &operator=(T &&t)
+                {
+                    this->set_((T &&) t);
+                    return *this;
+                }
+                template<typename V = value_t_,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+                    CONCEPT_REQUIRES_FRIEND_(ReadableCursor<Cur>::value && EqualityComparable<V>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<Cur>() && EqualityComparable<V>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                friend bool operator==(basic_proxy_reference const &x, value_t_ const &y)
+                {
+                    return x.get_() == y;
+                }
+                template<typename V = value_t_,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+                    CONCEPT_REQUIRES_FRIEND_(ReadableCursor<Cur>::value && EqualityComparable<V>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<Cur>() && EqualityComparable<V>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                friend bool operator!=(basic_proxy_reference const &x, value_t_ const &y)
+                {
+                    return !(x == y);
+                }
+                template<typename V = value_t_,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+                    CONCEPT_REQUIRES_FRIEND_(ReadableCursor<Cur>::value && EqualityComparable<V>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<Cur>() && EqualityComparable<V>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                friend bool operator==(value_t_ const &x, basic_proxy_reference const &y)
+                {
+                    return x == y.get_();
+                }
+                template<typename V = value_t_,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+                    CONCEPT_REQUIRES_FRIEND_(ReadableCursor<Cur>::value && EqualityComparable<V>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<Cur>() && EqualityComparable<V>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                friend bool operator!=(value_t_ const &x, basic_proxy_reference const &y)
+                {
+                    return !(x == y);
+                }
+                template<typename V = value_t_,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+                    CONCEPT_REQUIRES_FRIEND_(ReadableCursor<Cur>::value && EqualityComparable<V>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<Cur>() && EqualityComparable<V>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                friend bool operator==(basic_proxy_reference const &x, basic_proxy_reference const &y)
+                {
+                    return x.get_() == y.get_();
+                }
+                template<typename V = value_t_,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+                    CONCEPT_REQUIRES_FRIEND_(ReadableCursor<Cur>::value && EqualityComparable<V>::value)>
+#else
+                    CONCEPT_REQUIRES_(ReadableCursor<Cur>() && EqualityComparable<V>())>
+#endif
+                RANGES_CXX14_CONSTEXPR
+                friend bool operator!=(basic_proxy_reference const &x, basic_proxy_reference const &y)
+                {
+                    return !(x == y);
+                }
+            };
 
             auto iter_cat(range_access::WeakInputCursor*) ->
                 ranges::weak_input_iterator_tag;
@@ -204,6 +475,57 @@ namespace ranges
                 ranges::bidirectional_iterator_tag;
             auto iter_cat(range_access::RandomAccessCursor*) ->
                 ranges::random_access_iterator_tag;
+
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            template<typename Cur, typename S, bool Readable = (bool) ReadableCursor<Cur>::value>
+#else
+            template<typename Cur, typename S, bool Readable = (bool) ReadableCursor<Cur>()>
+#endif
+            struct iterator_associated_types_base
+            {
+            private:
+                friend basic_iterator<Cur, S>;
+                using postfix_increment_result_t = basic_iterator<Cur, S>;
+                using reference_t = basic_proxy_reference<Cur>;
+                using const_reference_t = basic_proxy_reference<Cur const>;
+                using cursor_concept_t =
+                    meta::if_<
+                        Cursor<Cur>,
+                        range_access::OutputCursor,
+                        range_access::WeakOutputCursor>;
+            public:
+                using reference = void;
+                using difference_type = range_access::cursor_difference_t<Cur>;
+            };
+
+            template<typename Cur, typename S>
+            struct iterator_associated_types_base<Cur, S, true>
+              : iterator_associated_types_base<Cur, S, false>
+            {
+            private:
+                friend basic_iterator<Cur, S>;
+                using cursor_concept_t = detail::cursor_concept_t<Cur>;
+                using reference_t =
+                    meta::if_<
+                        is_writable_cursor<Cur const>,
+                        basic_proxy_reference<Cur const>,
+                        meta::if_<
+                            is_writable_cursor<Cur>,
+                            basic_proxy_reference<Cur>,
+                            cursor_reference_t<Cur>>>;
+                using const_reference_t = reference_t;
+            public:
+                using value_type = range_access::cursor_value_t<Cur>;
+                using reference = reference_t;
+                using iterator_category =
+                    decltype(detail::iter_cat(_nullptr_v<cursor_concept_t>()));
+                using pointer = meta::_t<std::add_pointer<reference>>;
+                using common_reference = common_reference_t<reference &&, value_type &>;
+            private:
+                using postfix_increment_result_t =
+                    postfix_increment_result<
+                        basic_iterator<Cur, S>, value_type, reference, iterator_category>;
+            };
         }
         /// \endcond
 
@@ -211,10 +533,8 @@ namespace ranges
         /// @{
         ///
         template<typename T>
-        struct basic_mixin
+        struct basic_mixin : private box<T>
         {
-        private:
-            T t_;
         public:
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(DefaultConstructible<T>::value)
@@ -222,27 +542,28 @@ namespace ranges
             CONCEPT_REQUIRES(DefaultConstructible<T>())
 #endif
             constexpr basic_mixin()
-              : t_{}
+              : box<T>{}
             {}
             RANGES_CXX14_CONSTEXPR
             basic_mixin(T t)
-              : t_(std::move(t))
+              : box<T>(std::move(t))
             {}
+        protected:
             RANGES_CXX14_CONSTEXPR
             T &get() noexcept
             {
-                return t_;
+                return ranges::get<T>(*this);
             }
             /// \overload
             RANGES_CXX14_CONSTEXPR
             T const &get() const noexcept
             {
-                return t_;
+                return ranges::get<T>(*this);
             }
         };
 
         template<typename S>
-        struct basic_sentinel : detail::mixin_base<S>
+        struct basic_sentinel : range_access::mixin_base_t<S>
         {
             // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=60799
 #ifdef RANGES_WORKAROUND_MSVC_213536
@@ -257,85 +578,117 @@ namespace ranges
             RANGES_CXX14_CONSTEXPR
             S &end() noexcept
             {
-                return this->detail::mixin_base<S>::get();
+#ifdef RANGES_WORKAROUND_MSVC_214062
+                using M = range_access::mixin_base_t<S>;
+                return this->M::get();
+#else
+                return this->range_access::mixin_base_t<S>::get();
+#endif
             }
             constexpr S const &end() const noexcept
             {
-                return this->detail::mixin_base<S>::get();
-            }
-        private:
 #ifdef RANGES_WORKAROUND_MSVC_214062
-            template<typename T> struct helper {
-                typedef detail::mixin_base<T> type;
-            };
-            using helper<S>::type::get;
+                using M = range_access::mixin_base_t<S>;
+                return this->M::get();
 #else
-            using detail::mixin_base<S>::get;
+                return this->range_access::mixin_base_t<S>::get();
 #endif
-        public:
+            }
             basic_sentinel() = default;
             RANGES_CXX14_CONSTEXPR basic_sentinel(S end)
-              : detail::mixin_base<S>(std::move(end))
+              : range_access::mixin_base_t<S>(std::move(end))
             {}
-#ifdef RANGES_WORKAROUND_MSVC_214062
-            typedef detail::mixin_base<S> my_base;
-            using my_base::my_base;
+#ifdef RANGES_WORKAROUND_MSVC_206729
+        private:
+            using base_t = range_access::mixin_base_t<S>;
+        public:
+            using base_t::base_t;
 #else
-            using detail::mixin_base<S>::mixin_base;
+            using range_access::mixin_base_t<Cur>::mixin_base_t;
 #endif
-            constexpr bool operator==(basic_sentinel<S> const &) const
+            constexpr bool operator==(basic_sentinel<S> const &) const noexcept
             {
                 return true;
             }
-            constexpr bool operator!=(basic_sentinel<S> const &) const
+            constexpr bool operator!=(basic_sentinel<S> const &) const noexcept
             {
                 return false;
             }
+            constexpr bool operator<(basic_sentinel<S> const &) const noexcept
+            {
+                return false;
+            }
+            constexpr bool operator<=(basic_sentinel<S> const &) const noexcept
+            {
+                return true;
+            }
+            constexpr bool operator>(basic_sentinel<S> const &) const noexcept
+            {
+                return false;
+            }
+            constexpr bool operator>=(basic_sentinel<S> const &) const noexcept
+            {
+                return true;
+            }
+            constexpr std::ptrdiff_t operator-(basic_sentinel<S> const &) const noexcept
+            {
+                return 0;
+            }
+        };
+
+        struct default_end_cursor
+        {
+            template<typename Cur>
+            static constexpr bool equal(Cur const &pos)
+            {
+                return range_access::done(pos);
+            }
+            template<typename Cur>
+            static constexpr auto distance_from(Cur const &pos)
+            RANGES_DECLTYPE_AUTO_RETURN
+            (
+                range_access::distance_remaining(pos)
+            )
         };
 
         template<typename Cur, typename S>
         struct basic_iterator
-          : detail::mixin_base<Cur>
+          : range_access::mixin_base_t<Cur>
+          , detail::iterator_associated_types_base<Cur, S>
         {
         private:
             friend range_access;
-            friend detail::mixin_base<Cur>;
+            friend range_access::mixin_base_t<Cur>;
+            friend struct get_cursor_fn;
             template<typename OtherCur, typename OtherS>
             friend struct basic_iterator;
-            // TODO support output iterators
-            //CONCEPT_ASSERT(detail::WeakCursor<Cur>());
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-            CONCEPT_ASSERT(detail::WeakInputCursor<Cur>::value);
+            CONCEPT_ASSERT(detail::WeakCursor<Cur>::value);
 #else
-            CONCEPT_ASSERT(detail::WeakInputCursor<Cur>());
+            CONCEPT_ASSERT(detail::WeakCursor<Cur>());
 #endif
-            using single_pass = range_access::single_pass_t<Cur>;
-            using is_weak_t =
-                std::is_same<detail::cursor_concept_t<Cur>, range_access::WeakInputCursor>;
-            using cursor_concept_t =
-                meta::if_<
-                    is_weak_t,
-                    range_access::WeakInputCursor,
-                    meta::if_<
-                        single_pass,
-                        range_access::InputCursor,
-                        detail::cursor_concept_t<Cur>>>;
-
-#ifdef RANGES_WORKAROUND_MSVC_214062
-            template<typename T> struct helper {
-                typedef detail::mixin_base<T> type;
-            };
-            using helper<Cur>::type::get;
-#else
-            using detail::mixin_base<Cur>::get;
-#endif
+            using assoc_types_ = detail::iterator_associated_types_base<Cur, S>;
+            using typename assoc_types_::postfix_increment_result_t;
+            using typename assoc_types_::cursor_concept_t;
+            using typename assoc_types_::reference_t;
+            using typename assoc_types_::const_reference_t;
             RANGES_CXX14_CONSTEXPR Cur &pos() noexcept
             {
-                return this->detail::mixin_base<Cur>::get();
+#ifdef RANGES_WORKAROUND_MSVC_214062
+                using M = range_access::mixin_base_t<Cur>;
+                return this->M::get();
+#else
+                return this->range_access::mixin_base_t<Cur>::get();
+#endif
             }
             constexpr Cur const &pos() const noexcept
             {
-                return this->detail::mixin_base<Cur>::get();
+#ifdef RANGES_WORKAROUND_MSVC_214062
+                using M = range_access::mixin_base_t<Cur>;
+                return this->M::get();
+#else
+                return this->range_access::mixin_base_t<Cur>::get();
+#endif
             }
 
             // If the cursor models ForwardCursor, then positions are equality comparable.
@@ -359,21 +712,10 @@ namespace ranges
                 return basic_iterator::equal2_(that, _nullptr_v<cursor_concept_t>());
             }
         public:
-            using reference =
-                decltype(range_access::current(std::declval<Cur const &>()));
-            using value_type = range_access::cursor_value_t<Cur>;
-            using iterator_category = decltype(detail::iter_cat(_nullptr_v<cursor_concept_t>()));
-            using difference_type = range_access::cursor_difference_t<Cur>;
-            using pointer = meta::_t<std::add_pointer<reference>>;
-            using common_reference = common_reference_t<reference &&, value_type &>;
-        private:
-            using postfix_increment_result_t =
-                detail::postfix_increment_result<
-                    basic_iterator, value_type, reference, iterator_category>;
-        public:
+            using typename assoc_types_::difference_type;
             constexpr basic_iterator() = default;
             RANGES_CXX14_CONSTEXPR basic_iterator(Cur pos)
-              : detail::mixin_base<Cur>{std::move(pos)}
+              : range_access::mixin_base_t<Cur>{std::move(pos)}
             {}
             template<typename OtherCur, typename OtherS,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -382,19 +724,49 @@ namespace ranges
                 CONCEPT_REQUIRES_(ConvertibleTo<OtherCur, Cur>())>
 #endif
             basic_iterator(basic_iterator<OtherCur, OtherS> that)
-              : detail::mixin_base<Cur>{std::move(that.pos())}
+              : range_access::mixin_base_t<Cur>{std::move(that.pos())}
             {}
             // Mix in any additional constructors defined and exported by the cursor
-#ifdef RANGES_WORKAROUND_MSVC_214062
-            typedef detail::mixin_base<Cur> my_base;
-            using my_base::my_base;
+#ifdef RANGES_WORKAROUND_MSVC_206729
+        private:
+            using base_t = range_access::mixin_base_t<Cur>;
+        public:
+            using base_t::base_t;
 #else
-            using detail::mixin_base<Cur>::mixin_base;
+            using range_access::mixin_base_t<Cur>::mixin_base_t;
 #endif
-            RANGES_CXX14_CONSTEXPR reference operator*() const
-                noexcept(noexcept(range_access::current(std::declval<basic_iterator const &>().pos())))
+
+        private:
+            RANGES_CXX14_CONSTEXPR
+            reference_t dereference_(std::true_type) noexcept
             {
-                return range_access::current(pos());
+                return reference_t{pos()};
+            }
+            RANGES_CXX14_CONSTEXPR
+            const_reference_t dereference_(std::true_type) const noexcept
+            {
+                return const_reference_t{pos()};
+            }
+            RANGES_CXX14_CONSTEXPR
+            const_reference_t dereference_(std::false_type) const
+                noexcept(noexcept(range_access::get(std::declval<Cur const &>())))
+            {
+                return range_access::get(pos());
+            }
+        public:
+            RANGES_CXX14_CONSTEXPR
+            reference_t operator*()
+                noexcept(noexcept(std::declval<basic_iterator &>().
+                    dereference_(detail::is_writable_cursor<Cur>{})))
+            {
+                return this->dereference_(detail::is_writable_cursor<Cur>{});
+            }
+            RANGES_CXX14_CONSTEXPR
+            const_reference_t operator*() const
+                noexcept(noexcept(std::declval<basic_iterator const &>().
+                    dereference_(detail::is_writable_cursor<Cur>{})))
+            {
+                return this->dereference_(detail::is_writable_cursor<Cur>{});
             }
             RANGES_CXX14_CONSTEXPR
             basic_iterator& operator++()
@@ -409,9 +781,9 @@ namespace ranges
                 return tmp;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+            CONCEPT_REQUIRES_FRIEND(detail::Cursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(!is_weak_t())
+            CONCEPT_REQUIRES(detail::Cursor<Cur>())
 #endif
             friend constexpr bool operator==(basic_iterator const &left,
                 basic_iterator const &right)
@@ -419,9 +791,9 @@ namespace ranges
                 return left.equal_(right, _nullptr_v<std::is_same<Cur, S>>());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+            CONCEPT_REQUIRES_FRIEND(detail::Cursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(!is_weak_t())
+            CONCEPT_REQUIRES(detail::Cursor<Cur>())
 #endif
             friend constexpr bool operator!=(basic_iterator const &left,
                 basic_iterator const &right)
@@ -429,9 +801,9 @@ namespace ranges
                 return !(left == right);
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+            CONCEPT_REQUIRES_FRIEND(detail::Cursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(!is_weak_t())
+            CONCEPT_REQUIRES(detail::Cursor<Cur>())
 #endif
             friend constexpr bool operator==(basic_iterator const &left,
                 basic_sentinel<S> const &right)
@@ -439,9 +811,9 @@ namespace ranges
                 return range_access::empty(left.pos(), right.end());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+            CONCEPT_REQUIRES_FRIEND(detail::Cursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(!is_weak_t())
+            CONCEPT_REQUIRES(detail::Cursor<Cur>())
 #endif
             friend constexpr bool operator!=(basic_iterator const &left,
                 basic_sentinel<S> const &right)
@@ -449,9 +821,9 @@ namespace ranges
                 return !(left == right);
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+            CONCEPT_REQUIRES_FRIEND(detail::Cursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(!is_weak_t())
+            CONCEPT_REQUIRES(detail::Cursor<Cur>())
 #endif
             friend constexpr bool operator==(basic_sentinel<S> const & left,
                 basic_iterator const &right)
@@ -459,9 +831,9 @@ namespace ranges
                 return range_access::empty(right.pos(), left.end());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(!is_weak_t::value)
+            CONCEPT_REQUIRES_FRIEND(detail::Cursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(!is_weak_t())
+            CONCEPT_REQUIRES(detail::Cursor<Cur>())
 #endif
             friend constexpr bool operator!=(basic_sentinel<S> const &left,
                 basic_iterator const &right)
@@ -547,9 +919,9 @@ namespace ranges
                 return left;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
             friend difference_type operator-(basic_iterator const &left,
@@ -557,11 +929,33 @@ namespace ranges
             {
                 return range_access::distance_to(right.pos(), left.pos());
             }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursorRange<Cur, S>::value)
+#else
+            CONCEPT_REQUIRES(detail::SizedCursorRange<Cur, S>())
+#endif
+            RANGES_CXX14_CONSTEXPR
+            friend difference_type operator-(basic_sentinel<S> const &left,
+                basic_iterator const& right)
+            {
+                return range_access::distance_to(right.pos(), left.end());
+            }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursorRange<Cur, S>::value)
+#else
+            CONCEPT_REQUIRES(detail::SizedCursorRange<Cur, S>())
+#endif
+            RANGES_CXX14_CONSTEXPR
+            friend difference_type operator-(basic_iterator const &left,
+                basic_sentinel<S> const& right)
+            {
+                return -range_access::distance_to(left.pos(), right.end());
+            }
             // symmetric comparisons
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator<(basic_iterator const &left, basic_iterator const &right)
@@ -569,9 +963,9 @@ namespace ranges
                 return 0 < (right - left);
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator<=(basic_iterator const &left, basic_iterator const &right)
@@ -579,9 +973,9 @@ namespace ranges
                 return 0 <= (right - left);
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator>(basic_iterator const &left, basic_iterator const &right)
@@ -589,9 +983,9 @@ namespace ranges
                 return (right - left) < 0;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
             friend bool operator>=(basic_iterator const &left, basic_iterator const &right)
@@ -600,9 +994,9 @@ namespace ranges
             }
             // asymmetric comparisons
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator<(basic_iterator const &left,
                 basic_sentinel<S> const &right)
@@ -610,9 +1004,9 @@ namespace ranges
                 return !range_access::empty(left.pos(), right.end());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator<=(basic_iterator const &left,
                 basic_sentinel<S> const &right)
@@ -620,9 +1014,9 @@ namespace ranges
                 return true;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator>(basic_iterator const &left,
                 basic_sentinel<S> const &right)
@@ -630,9 +1024,9 @@ namespace ranges
                 return false;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator>=(basic_iterator const &left,
                 basic_sentinel<S> const &right)
@@ -640,9 +1034,9 @@ namespace ranges
                 return range_access::empty(left.pos(), right.end());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator<(basic_sentinel<S> const &left,
                 basic_iterator const &right)
@@ -650,9 +1044,9 @@ namespace ranges
                 return false;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator<=(basic_sentinel<S> const &left,
                 basic_iterator const &right)
@@ -660,9 +1054,9 @@ namespace ranges
                 return range_access::empty(right.pos(), left.end());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator>(basic_sentinel<S> const &left,
                 basic_iterator const &right)
@@ -670,9 +1064,9 @@ namespace ranges
                 return !range_access::empty(right.pos(), left.end());
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_FRIEND
-            CONCEPT_REQUIRES_FRIEND(detail::RandomAccessCursor<Cur>::value)
+            CONCEPT_REQUIRES_FRIEND(detail::SizedCursor<Cur>::value)
 #else
-            CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
+            CONCEPT_REQUIRES(detail::SizedCursor<Cur>())
 #endif
             friend constexpr bool operator>=(basic_sentinel<S> const &left,
                 basic_iterator const &right)
@@ -685,7 +1079,7 @@ namespace ranges
             CONCEPT_REQUIRES(detail::RandomAccessCursor<Cur>())
 #endif
             RANGES_CXX14_CONSTEXPR
-            reference operator[](difference_type n) const
+            const_reference_t operator[](difference_type n) const
             {
                 return *(*this + n);
             }
@@ -698,23 +1092,20 @@ namespace ranges
             RANGES_CXX14_CONSTEXPR
             Cur &operator()(basic_iterator<Cur, Sent> &it) const noexcept
             {
-                detail::mixin_base<Cur> &mix = it;
-                return mix.get();
+                return it.pos();
             }
             template<typename Cur, typename Sent>
             RANGES_CXX14_CONSTEXPR
             Cur const &operator()(basic_iterator<Cur, Sent> const &it) const noexcept
             {
-                detail::mixin_base<Cur> const &mix = it;
-                return mix.get();
+                return it.pos();
             }
             template<typename Cur, typename Sent>
             RANGES_CXX14_CONSTEXPR
             Cur operator()(basic_iterator<Cur, Sent> &&it) const
                 noexcept(std::is_nothrow_copy_constructible<Cur>::value)
             {
-                detail::mixin_base<Cur> &mix = it;
-                return std::move(mix.get());
+                return std::move(it.pos());
             }
         };
 
@@ -725,6 +1116,26 @@ namespace ranges
             constexpr auto &&get_cursor = static_const<get_cursor_fn>::value;
         }
         /// @}
+
+        /// \cond
+        namespace detail
+        {
+            // Optionally support hooking iter_move when the cursor sports a
+            // move() member function.
+            template<typename C, typename S,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(WeakInputCursor<C>::value)>
+#else
+                CONCEPT_REQUIRES_(WeakInputCursor<C>())>
+#endif
+            RANGES_CXX14_CONSTEXPR
+            auto indirect_move(basic_iterator<C, S> const &it)
+            RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+            (
+                range_access::move(get_cursor(it))
+            )
+        }
+        /// \endcond
 
         /// \cond
         // This is so that writable postfix proxy objects satisfy Readability
@@ -742,6 +1153,40 @@ namespace ranges
 }
 
 /// \cond
+namespace ranges
+{
+    inline namespace v3
+    {
+        // common_reference specializations for basic_proxy_reference
+        template<typename Cur, typename U, typename TQual, typename UQual>
+        struct basic_common_reference<detail::basic_proxy_reference<Cur, true>, U, TQual, UQual>
+          : basic_common_reference<detail::cursor_reference_t<Cur>, U, TQual, UQual>
+        {};
+        template<typename T, typename Cur, typename TQual, typename UQual>
+        struct basic_common_reference<T, detail::basic_proxy_reference<Cur, true>, TQual, UQual>
+          : basic_common_reference<T, detail::cursor_reference_t<Cur>, TQual, UQual>
+        {};
+        template<typename Cur1, typename Cur2, typename TQual, typename UQual>
+        struct basic_common_reference<detail::basic_proxy_reference<Cur1, true>, detail::basic_proxy_reference<Cur2, true>, TQual, UQual>
+          : basic_common_reference<detail::cursor_reference_t<Cur1>, detail::cursor_reference_t<Cur2>, TQual, UQual>
+        {};
+
+        // common_type specializations for basic_proxy_reference
+        template<typename Cur, typename U>
+        struct common_type<detail::basic_proxy_reference<Cur, true>, U>
+          : common_type<range_access::cursor_value_t<Cur>, U>
+        {};
+        template<typename T, typename Cur>
+        struct common_type<T, detail::basic_proxy_reference<Cur, true>>
+          : common_type<T, range_access::cursor_value_t<Cur>>
+        {};
+        template<typename Cur1, typename Cur2>
+        struct common_type<detail::basic_proxy_reference<Cur1, true>, detail::basic_proxy_reference<Cur2, true>>
+          : common_type<range_access::cursor_value_t<Cur1>, range_access::cursor_value_t<Cur2>>
+        {};
+    }
+}
+
 namespace std
 {
     template<typename Cur, typename S>

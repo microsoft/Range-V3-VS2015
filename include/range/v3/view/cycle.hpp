@@ -81,16 +81,17 @@ namespace ranges
                 using constify_if = meta::apply<meta::add_const_if_c<IsConst>, T>;
                 using cycled_view_t = constify_if<cycled_view>;
                 using difference_type_ = range_difference_t<Rng>;
+                using iterator = range_iterator_t<constify_if<Rng>>;
 
                 cycled_view_t *rng_;
-                range_iterator_t<constify_if<Rng>> it_;
+                iterator it_;
 
-                range_iterator_t<constify_if<Rng>> get_end_(std::true_type, bool = false) const
+                iterator get_end_(std::true_type, bool = false) const
                 {
                     return ranges::end(rng_->rng_);
                 }
                 template<bool CanBeEmpty = false>
-                range_iterator_t<constify_if<Rng>> get_end_(std::false_type, meta::bool_<CanBeEmpty> = {}) const
+                iterator get_end_(std::false_type, meta::bool_<CanBeEmpty> = {}) const
                 {
                     auto &end_ = ranges::get<end_tag>(*rng_);
                     RANGES_ASSERT(CanBeEmpty || end_);
@@ -117,7 +118,7 @@ namespace ranges
                 {
                     return false;
                 }
-                auto current() const
+                auto get() const
                 RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
                 (
                     *it_
@@ -162,9 +163,9 @@ namespace ranges
                     it_ = begin + (off < 0 ? off + d : off);
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+                CONCEPT_REQUIRES(SizedIteratorRange<iterator, iterator>::value)
 #else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+                CONCEPT_REQUIRES(SizedIteratorRange<iterator, iterator>())
 #endif
                 difference_type_ distance_to(cursor const &that) const
                 {

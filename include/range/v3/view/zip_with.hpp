@@ -159,13 +159,6 @@ namespace ranges
                 fun_ref_ fun_;
 
                 std::tuple<range_iterator_t<Rngs>...> its_;
-
-                template<std::size_t...Is>
-                auto indirect_move_(meta::index_sequence<Is...>) const
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    fun_(move_tag{}, std::get<Is>(its_)...)
-                )
                 template<typename Sent>
                 friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
 #ifdef RANGES_WORKAROUND_MSVC_NOEXCEPT_DEPENDENT
@@ -204,7 +197,7 @@ namespace ranges
                 cursor(fun_ref_ fun, std::tuple<range_iterator_t<Rngs>...> its)
                   : fun_(std::move(fun)), its_(std::move(its))
                 {}
-                auto current() const
+                auto get() const
                 RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
                 (
                     tuple_apply(fun_, its_)
@@ -243,9 +236,13 @@ namespace ranges
                     tuple_for_each(its_, std::bind(detail::advance_, _1, n));
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+                CONCEPT_REQUIRES(meta::and_c<
+                    SizedIteratorRange<range_iterator_t<Rngs>,
+                        range_iterator_t<Rngs>>::value...>::value)
 #else
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+                CONCEPT_REQUIRES(meta::and_c<(bool)
+                    SizedIteratorRange<range_iterator_t<Rngs>,
+                        range_iterator_t<Rngs>>()...>::value)
 #endif
                 difference_type distance_to(cursor const &that) const
                 {
@@ -262,6 +259,12 @@ namespace ranges
                             (std::numeric_limits<difference_type>::min)(),
                             detail::max_);
                 }
+                template<std::size_t...Is>
+                auto indirect_move_(meta::index_sequence<Is...>) const
+                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                (
+                    fun_(move_tag{}, std::get<Is>(its_)...)
+                )
             };
 
             struct sentinel

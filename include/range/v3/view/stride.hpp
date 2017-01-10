@@ -120,9 +120,9 @@ namespace ranges
                     RANGES_ASSERT(0 == offset());
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+                CONCEPT_REQUIRES(SizedIteratorRange<iterator, iterator>::value)
 #else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+                CONCEPT_REQUIRES(SizedIteratorRange<iterator, iterator>())
 #endif
                 difference_type_ distance_to(iterator here, iterator there, adaptor const &that) const
                 {

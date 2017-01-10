@@ -17,6 +17,7 @@
 #include <meta/meta.hpp>
 #include <range/v3/range_fwd.hpp>
 #include <range/v3/view_facade.hpp>
+#include <range/v3/utility/basic_iterator.hpp>
 #include <range/v3/utility/concepts.hpp>
 #include <range/v3/utility/variant.hpp>
 
@@ -48,7 +49,7 @@ namespace ranges
             private:
                 static_assert(!std::is_same<I, S>::value,
                               "Error: iterator and sentinel types are the same");
-                tagged_variant<I, S> data_;
+                variant<I, S> data_;
                 bool is_sentinel() const
                 {
                     RANGES_ASSERT(data_.is_valid());
@@ -88,7 +89,7 @@ namespace ranges
                 friend iterator_difference_t<I>
                 operator-(common_iterator<I, S> const &end, common_iterator<I, S> const &begin)
                 {
-                    common_cursor const &this_ = begin.mixin::get(), &that = end.mixin::get();
+                    common_cursor const &this_ = get_cursor(begin), &that = get_cursor(end);
                     return that.is_sentinel() ?
                         (this_.is_sentinel() ? 0 : that.se() - this_.it()) :
                         (this_.is_sentinel() ?
@@ -99,10 +100,10 @@ namespace ranges
             public:
                 common_cursor() = default;
                 explicit common_cursor(I it)
-                  : data_(meta::size_t<0>{}, std::move(it))
+                  : data_(emplaced_index<0>, std::move(it))
                 {}
                 explicit common_cursor(S se)
-                  : data_(meta::size_t<1>{}, std::move(se))
+                  : data_(emplaced_index<1>, std::move(se))
                 {}
                 template<typename I2, typename S2,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -118,7 +119,7 @@ namespace ranges
                         common_cursor<I2, S2>{S2{se()}} :
                         common_cursor<I2, S2>{I2{it()}};
                 }
-                auto current() const -> decltype(*std::declval<I const &>())
+                auto get() const -> decltype(*std::declval<I const &>())
                 {
                     return *it();
                 }

@@ -69,8 +69,7 @@ namespace ranges
             void indirect_move();
 
             // Default indirect_move overload.
-            template<typename I,
-                typename R = decltype(*std::declval<I const &>())>
+            template<typename I, typename R = reference_t<I const>>
             auto indirect_move(I const &i)
             RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
             (

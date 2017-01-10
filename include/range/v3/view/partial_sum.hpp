@@ -69,7 +69,7 @@ namespace ranges
                 adaptor(partial_sum_view_t &rng, range_value_t<Rng> sum)
                   : sum_(std::move(sum)), rng_(&rng)
                 {}
-                range_value_t<Rng> current(range_iterator_t<Rng> it) const
+                range_value_t<Rng> get(range_iterator_t<Rng> it) const
                 {
                     return *sum_;
                 }
@@ -169,8 +169,8 @@ namespace ranges
             {
             private:
                 friend view_access;
-                template<typename Fun>
-                static auto bind(partial_sum_fn partial_sum, Fun fun)
+                template<typename Fun = plus>
+                static auto bind(partial_sum_fn partial_sum, Fun fun = {})
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(partial_sum, std::placeholders::_1,

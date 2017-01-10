@@ -25,6 +25,7 @@
 #include <range/v3/utility/iterator_traits.hpp>
 #include <range/v3/utility/iterator_concepts.hpp>
 #include <range/v3/utility/static_const.hpp>
+#include <range/v3/utility/basic_iterator.hpp>
 
 namespace ranges
 {
@@ -223,8 +224,7 @@ namespace ranges
             RANGES_CXX14_CONSTEXPR
             I operator()(I it) const
             {
-                ++it;
-                return it;
+                return ++it;
             }
             template<typename I,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -495,41 +495,43 @@ namespace ranges
             constexpr auto&& iter_move = static_const<iter_move_fn>::value;
         }
 
-        template<typename Cont>
-        struct back_insert_iterator
+        namespace detail
         {
-        private:
-            Cont *cont_;
-            struct proxy
+            template<typename Cont>
+            struct back_insert_cursor
             {
+            private:
+                friend range_access;
                 Cont *cont_;
-                proxy &operator=(typename Cont::value_type v)
+                void next() const
+                {}
+                void set(typename Cont::value_type const &v) const
+                {
+                    cont_->push_back(v);
+                }
+                void set(typename Cont::value_type &&v) const
                 {
                     cont_->push_back(std::move(v));
-                    return *this;
                 }
+                explicit back_insert_cursor(Cont &cont) noexcept
+                  : cont_(&cont)
+                {}
+            public:
+                struct mixin : basic_mixin<back_insert_cursor>
+                {
+                    mixin() = default;
+                    explicit mixin(Cont &cont) noexcept
+                      : basic_mixin<back_insert_cursor>{back_insert_cursor{cont}}
+                    {}
+                };
+                constexpr back_insert_cursor()
+                  : cont_{}
+                {}
             };
-        public:
-            using difference_type = std::ptrdiff_t;
-            constexpr back_insert_iterator()
-              : cont_{}
-            {}
-            explicit back_insert_iterator(Cont &cont) noexcept
-              : cont_(&cont)
-            {}
-            proxy operator*() const
-            {
-                return {cont_};
-            }
-            back_insert_iterator &operator++()
-            {
-                return *this;
-            }
-            back_insert_iterator &operator++(int)
-            {
-                return *this;
-            }
-        };
+        }
+
+        template<typename Cont>
+        using back_insert_iterator = basic_iterator<detail::back_insert_cursor<Cont>>;
 
         struct back_inserter_fn
         {
@@ -545,6 +547,115 @@ namespace ranges
         namespace
         {
             constexpr auto&& back_inserter = static_const<back_inserter_fn>::value;
+        }
+
+        namespace detail
+        {
+            template<typename Cont>
+            struct front_insert_cursor
+            {
+            private:
+                friend range_access;
+                Cont *cont_;
+                void next() const
+                {}
+                void set(typename Cont::value_type const &v) const
+                {
+                    cont_->push_front(v);
+                }
+                void set(typename Cont::value_type &&v) const
+                {
+                    cont_->push_front(std::move(v));
+                }
+                explicit front_insert_cursor(Cont &cont) noexcept
+                  : cont_(&cont)
+                {}
+            public:
+                struct mixin : basic_mixin<front_insert_cursor>
+                {
+                    mixin() = default;
+                    explicit mixin(Cont &cont) noexcept
+                      : basic_mixin<front_insert_cursor>{front_insert_cursor{cont}}
+                    {}
+                };
+                constexpr front_insert_cursor()
+                  : cont_{}
+                {}
+            };
+        }
+
+        template<typename Cont>
+        using front_insert_iterator = basic_iterator<detail::front_insert_cursor<Cont>>;
+
+        struct front_inserter_fn
+        {
+            template<typename Cont>
+            front_insert_iterator<Cont> operator()(Cont &cont) const
+            {
+                return front_insert_iterator<Cont>{cont};
+            }
+        };
+
+        /// \ingroup group-utility
+        /// \sa `front_inserter_fn`
+        namespace
+        {
+            constexpr auto&& front_inserter = static_const<front_inserter_fn>::value;
+        }
+
+        namespace detail
+        {
+            template<typename Cont>
+            struct insert_cursor
+            {
+            private:
+                friend range_access;
+                Cont *cont_;
+                typename Cont::iterator where_;
+                void next() const
+                {}
+                void set(typename Cont::value_type const &v)
+                {
+                    where_ = ranges::next(cont_->insert(where_, v));
+                }
+                void set(typename Cont::value_type &&v)
+                {
+                    where_ = ranges::next(cont_->insert(where_, std::move(v)));
+                }
+                explicit insert_cursor(Cont &cont, typename Cont::iterator where) noexcept
+                  : cont_(&cont), where_(where)
+                {}
+            public:
+                struct mixin : basic_mixin<insert_cursor>
+                {
+                    mixin() = default;
+                    explicit mixin(Cont &cont, typename Cont::iterator where) noexcept
+                      : basic_mixin<insert_cursor>{insert_cursor{cont, std::move(where)}}
+                    {}
+                };
+                constexpr insert_cursor()
+                  : cont_{}, where_{}
+                {}
+            };
+        }
+
+        template<typename Cont>
+        using insert_iterator = basic_iterator<detail::insert_cursor<Cont>>;
+
+        struct inserter_fn
+        {
+            template<typename Cont>
+            insert_iterator<Cont> operator()(Cont &cont, typename Cont::iterator where) const
+            {
+                return insert_iterator<Cont>{cont, std::move(where)};
+            }
+        };
+
+        /// \ingroup group-utility
+        /// \sa `inserter_fn`
+        namespace
+        {
+            constexpr auto&& inserter = static_const<inserter_fn>::value;
         }
 
         template<typename T = void, typename Char = char, typename Traits = std::char_traits<Char>>
@@ -581,16 +692,17 @@ namespace ranges
             {
                 return {sout_, delim_};
             }
-            ostream_iterator<T> &operator++()
+            ostream_iterator &operator++()
             {
                 return *this;
             }
-            ostream_iterator<T> &operator++(int)
+            ostream_iterator operator++(int)
             {
                 return *this;
             }
         };
 
+        /// \cond
         namespace detail
         {
             template<typename I>
@@ -636,7 +748,7 @@ namespace ranges
                 {}
 
                 RANGES_CXX14_CONSTEXPR
-                auto current() const ->
+                auto get() const ->
                     decltype(*it_)
                 {
                     I tmp(it_);
@@ -673,9 +785,9 @@ namespace ranges
                     it_ -= n;
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
+                CONCEPT_REQUIRES(SizedIteratorRange<I, I>::value)
 #else
-                CONCEPT_REQUIRES(RandomAccessIterator<I>())
+                CONCEPT_REQUIRES(SizedIteratorRange<I, I>())
 #endif
                 RANGES_CXX14_CONSTEXPR
                 iterator_difference_t<I>
@@ -685,6 +797,7 @@ namespace ranges
                 }
             };
         }  // namespace detail
+        /// \endcond
 
         template<typename I>
         RANGES_CXX14_CONSTEXPR

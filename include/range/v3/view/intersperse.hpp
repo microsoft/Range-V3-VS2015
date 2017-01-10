@@ -60,7 +60,7 @@ namespace ranges
                 cursor_adaptor(range_value_t<Rng> val, bool at_end)
                   : toggl_(!at_end), val_(std::move(val))
                 {}
-                range_value_t<Rng> current(range_iterator_t<Rng> it) const
+                range_value_t<Rng> get(range_iterator_t<Rng> it) const
                 {
                     return toggl_ ? *it : val_;
                 }
@@ -87,9 +87,11 @@ namespace ranges
                         --it;
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+                CONCEPT_REQUIRES(
+                    SizedIteratorRange<range_iterator_t<Rng>, range_iterator_t<Rng>>::value)
 #else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+                CONCEPT_REQUIRES(
+                    SizedIteratorRange<range_iterator_t<Rng>, range_iterator_t<Rng>>())
 #endif
                 range_difference_t<Rng> distance_to(range_iterator_t<Rng> it,
                     range_iterator_t<Rng> other_it, cursor_adaptor const &other) const

@@ -127,9 +127,11 @@ namespace ranges
                         this->prev(it), ranges::advance(it, -n - 1);
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+                CONCEPT_REQUIRES(
+                    SizedIteratorRange<range_iterator_t<Rng>, range_iterator_t<Rng>>::value)
 #else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+                CONCEPT_REQUIRES(
+                    SizedIteratorRange<range_iterator_t<Rng>, range_iterator_t<Rng>>())
 #endif
                 range_difference_t<Rng>
                 distance_to(range_iterator_t<Rng> const &here, range_iterator_t<Rng> const &there,

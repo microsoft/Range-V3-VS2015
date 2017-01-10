@@ -122,6 +122,9 @@
 /// \defgroup lazy_list lazy
 /// \ingroup list
 
+/// \defgroup lazy_datatype lazy
+/// \ingroup datatype
+
 /// \defgroup lazy_math lazy
 /// \ingroup math
 
@@ -918,6 +921,7 @@ namespace meta
             using flip = defer<flip, F>;
         }
 
+        /// \cond
         namespace detail
         {
             template <typename...>
@@ -944,6 +948,7 @@ namespace meta
 #endif
             };
         }
+        /// \endcond
 
         /// Use as `on<F, Gs...>`. Creates an Alias Class that applies Alias Class \c F to the
         /// result of applying Alias Class `compose<Gs...>` to all the arguments.
@@ -2338,6 +2343,25 @@ namespace meta
         /// \endcond
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // transpose
+        /// Given a list of lists of types \p ListOfLists, transpose the elements from the lists.
+        /// \par Complexity
+        /// \f$ O(N \times M) \f$, where \f$ N \f$ is the size of the outer list, and
+        /// \f$ M \f$ is the size of the inner lists.
+        /// \ingroup transformation
+        template <typename ListOfLists>
+        using transpose = fold<ListOfLists, repeat_n<size<front<ListOfLists>>, list<>>,
+                               bind_back<quote<transform>, quote<push_back>>>;
+
+        namespace lazy
+        {
+            /// \sa 'meta::transpose'
+            /// \ingroup lazy_transformation
+            template <typename ListOfLists>
+            using transpose = defer<transpose, ListOfLists>;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // zip_with
         /// Given a list of lists of types \p ListOfLists and a Alias Class \p Fun, construct
         /// a new list by calling \p Fun with the elements from the lists pairwise.
@@ -2346,9 +2370,7 @@ namespace meta
         /// \f$ M \f$ is the size of the inner lists.
         /// \ingroup transformation
         template <typename Fun, typename ListOfLists>
-        using zip_with = transform<fold<ListOfLists, repeat_n<size<front<ListOfLists>>, Fun>,
-                                        bind_back<quote<transform>, quote<bind_front>>>,
-                                   quote<apply>>;
+        using zip_with = transform<transpose<ListOfLists>, uncurry<Fun>>;
 
         namespace lazy
         {
@@ -2367,7 +2389,7 @@ namespace meta
         /// is the size of the inner lists.
         /// \ingroup transformation
         template <typename ListOfLists>
-        using zip = zip_with<quote<list>, ListOfLists>;
+        using zip = transpose<ListOfLists>;
 
         namespace lazy
         {
@@ -2511,26 +2533,51 @@ namespace meta
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // inherit
+        /// \cond
+        namespace detail
+        {
+            template<typename List>
+            struct inherit_
+            {
+            };
+
+            template<typename ...List>
+            struct inherit_<list<List...>> : List...
+            {
+                using type = inherit_;
+            };
+        }
+        /// \endcond
+
+        /// A type that inherits from all the types in the list
+        /// \pre The types in the list must be unique
+        /// \pre All the types in the list must be non-final class types
+        /// \ingroup datatype
+        template <typename List>
+        using inherit = meta::_t<detail::inherit_<List>>;
+
+        namespace lazy
+        {
+            /// \sa 'meta::inherit'
+            /// \ingroup lazy_datatype
+            template <typename List>
+            using inherit = defer<inherit, List>;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // set
         // Used to improve the performance of \c meta::unique.
         /// \cond
         namespace detail
         {
-            template <typename... Nodes>
-            struct root_ : Nodes...
-            {
-            };
-
-            template <typename... Ts>
-            using set_ = root_<id<Ts>...>;
-
             template <typename Set, typename T>
             struct in_
             {
             };
 
             template <typename... Set, typename T>
-            struct in_<list<Set...>, T> : std::is_base_of<id<T>, set_<Set...>>
+            struct in_<list<Set...>, T> : std::is_base_of<id<T>, inherit<list<id<Set>...>>>
             {
             };
 

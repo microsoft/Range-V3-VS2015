@@ -99,7 +99,7 @@ namespace ranges
             adaptor(range_difference_t<Rng> n, range_sentinel_t<Rng> end)
               : box<offset_t>{0}, n_(n), end_(end)
             {}
-            auto current(range_iterator_t<Rng> it) const ->
+            auto get(range_iterator_t<Rng> it) const ->
                 decltype(view::take(make_range(std::move(it), end_), n_))
             {
                 RANGES_ASSERT(it != end_);
@@ -123,9 +123,11 @@ namespace ranges
                 offset() = 0;
             }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(RandomAccessRange<Rng>::value)
+            CONCEPT_REQUIRES(
+                SizedIteratorRange<range_iterator_t<Rng>, range_iterator_t<Rng>>::value)
 #else
-            CONCEPT_REQUIRES(RandomAccessRange<Rng>())
+            CONCEPT_REQUIRES(
+                SizedIteratorRange<range_iterator_t<Rng>, range_iterator_t<Rng>>())
 #endif
             range_difference_t<Rng> distance_to(range_iterator_t<Rng> const &here,
                 range_iterator_t<Rng> const &there, adaptor const &that) const

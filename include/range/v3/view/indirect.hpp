@@ -22,6 +22,7 @@
 #include <range/v3/range_traits.hpp>
 #include <range/v3/begin_end.hpp>
 #include <range/v3/view_adaptor.hpp>
+#include <range/v3/utility/move.hpp>
 #include <range/v3/utility/functional.hpp>
 #include <range/v3/utility/static_const.hpp>
 #include <range/v3/view/view.hpp>
@@ -41,12 +42,12 @@ namespace ranges
             struct adaptor
               : adaptor_base
             {
-                auto current(range_iterator_t<Rng> it) const ->
+                auto get(range_iterator_t<Rng> const &it) const ->
                     decltype(**it)
                 {
                     return **it;
                 }
-                auto indirect_move(range_iterator_t<Rng> it) const ->
+                auto indirect_move(range_iterator_t<Rng> const &it) const ->
                     decltype(ranges::indirect_move(*it))
                 {
                     return ranges::indirect_move(*it);

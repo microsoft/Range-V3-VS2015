@@ -87,6 +87,7 @@ namespace ranges
                     do --it; while(pred(*it));
                 }
                 void advance() = delete;
+                void distance_to() = delete;
             };
             adaptor begin_adaptor()
             {

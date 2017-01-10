@@ -51,7 +51,7 @@ private:
         {
             ++it;
         }
-        ranges::range_reference_t<BidiRange> current(base_iterator_t it) const
+        ranges::range_reference_t<BidiRange> get(base_iterator_t it) const
         {
             return *ranges::prev(it);
         }
@@ -65,9 +65,9 @@ private:
             it -= n;
         }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-        CONCEPT_REQUIRES(ranges::RandomAccessRange<BidiRange>::value)
+        CONCEPT_REQUIRES(ranges::SizedIteratorRange<base_iterator_t, base_iterator_t>::value)
 #else
-        CONCEPT_REQUIRES(ranges::RandomAccessRange<BidiRange>())
+        CONCEPT_REQUIRES(ranges::SizedIteratorRange<base_iterator_t, base_iterator_t>())
 #endif
         ranges::range_difference_t<BidiRange>
         distance_to(base_iterator_t const &here, base_iterator_t const &there)
