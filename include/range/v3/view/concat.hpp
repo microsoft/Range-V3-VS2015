@@ -92,7 +92,7 @@ namespace ranges
                 using constify_if = meta::apply<meta::add_const_if_c<IsConst>, T>;
                 using concat_view_t = constify_if<concat_view>;
                 concat_view_t *rng_;
-                tagged_variant<range_iterator_t<constify_if<Rngs>>...> its_;
+                variant<range_iterator_t<constify_if<Rngs>>...> its_;
 
                 template<std::size_t N>
                 void satisfy(meta::size_t<N>)
@@ -105,9 +105,9 @@ namespace ranges
 #endif
                     {
 #ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
-                        ranges::set<N + 1>(its_, ranges::begin(std::get<N + 1>(rng_->rngs_)));
+                        ranges::emplace<N + 1>(its_, ranges::begin(std::get<N + 1>(rng_->rngs_)));
 #else
-                        ranges::set<N + 1>(its_, begin(std::get<N + 1>(rng_->rngs_)));
+                        ranges::emplace<N + 1>(its_, begin(std::get<N + 1>(rng_->rngs_)));
 #endif
                         this->satisfy(meta::size_t<N + 1>{});
                     }
@@ -149,7 +149,7 @@ namespace ranges
 #endif
                         {
                             auto &&rng = std::get<N - 1>(pos->rng_->rngs_);
-                            ranges::set<N - 1>(pos->its_,
+                            ranges::emplace<N - 1>(pos->its_,
                                 ranges::next(ranges::begin(rng), ranges::end(rng)));
                             (*this)(ranges::get<N - 1>(pos->its_), meta::size_t<N - 1>{});
                         }
@@ -163,11 +163,15 @@ namespace ranges
                     difference_type n;
                     template<typename Iterator>
                     void operator()(Iterator &it, meta::size_t<cranges - 1>) const
+                    //template<typename Iterator>
+                    //void operator()(indexed<Iterator &, cranges - 1> it) const
                     {
                         ranges::advance(it, n);
                     }
                     template<typename Iterator, std::size_t N>
                     void operator()(Iterator &it, meta::size_t<N> which) const
+                    //template<typename Iterator, std::size_t N>
+                    //void operator()(indexed<Iterator &, N> it) const
                     {
                         auto end = ranges::end(std::get<N>(pos->rng_->rngs_));
                         // BUGBUG If distance(it, end) > n, then using bounded advance
@@ -196,7 +200,7 @@ namespace ranges
                         if(it == begin)
                         {
                             auto &&rng = std::get<N - 1>(pos->rng_->rngs_);
-                            ranges::set<N - 1>(pos->its_,
+                            ranges::emplace<N - 1>(pos->its_,
                                 ranges::next(ranges::begin(rng), ranges::end(rng)));
                             (*this)(ranges::get<N - 1>(pos->its_), meta::size_t<N - 1>{});
                         }
@@ -252,24 +256,22 @@ namespace ranges
 #endif
                 cursor() = default;
                 cursor(concat_view_t &rng, begin_tag)
-                  : rng_(&rng)
 #ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
-                  , its_{meta::size_t<0>{}, ranges::begin(std::get<0>(rng.rngs_))}
+                  : rng_(&rng), its_{emplaced_index<0>, ranges::begin(std::get<0>(rng.rngs_))}
 #else
-                  , its_{meta::size_t<0>{}, begin(std::get<0>(rng.rngs_))}
+                  : rng_(&rng), its_{emplaced_index<0>, begin(std::get<0>(rng.rngs_))}
 #endif
                 {
                     this->satisfy(meta::size_t<0>{});
                 }
                 cursor(concat_view_t &rng, end_tag)
-                  : rng_(&rng)
 #ifdef RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
-                  , its_{meta::size_t<cranges-1>{}, ranges::end(std::get<cranges-1>(rng.rngs_))}
+                  : rng_(&rng), its_{emplaced_index<cranges-1>, ranges::end(std::get<cranges-1>(rng.rngs_))}
 #else
-                  , its_{meta::size_t<cranges-1>{}, end(std::get<cranges-1>(rng.rngs_))}
+                  : rng_(&rng), its_{emplaced_index<cranges-1>, end(std::get<cranges-1>(rng.rngs_))}
 #endif
                 {}
-                reference current() const
+                reference get() const
                 {
                     // Kind of a dumb implementation. Surely there's a better way.
                     return ranges::get<0>(unique_variant(its_.apply(detail::deref_fun<reference>{})));
@@ -304,9 +306,13 @@ namespace ranges
                         its_.apply_i(advance_rev_fun{this, n});
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR_PACKEXPANSION
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>::value...>::value)
+                CONCEPT_REQUIRES(meta::and_c<
+                    SizedIteratorRange<range_iterator_t<Rngs>,
+                        range_iterator_t<Rngs>>::value...>::value)
 #else
-                CONCEPT_REQUIRES(meta::and_c<(bool)RandomAccessRange<Rngs>()...>::value)
+                CONCEPT_REQUIRES(meta::and_c<(bool)
+                    SizedIteratorRange<range_iterator_t<Rngs>,
+                        range_iterator_t<Rngs>>()...>::value)
 #endif
                 difference_type distance_to(cursor const &that) const
                 {

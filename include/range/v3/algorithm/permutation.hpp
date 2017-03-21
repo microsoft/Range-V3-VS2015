@@ -60,7 +60,7 @@ namespace ranges
                 auto &&pred = as_function(pred_);
                 auto &&proj1 = as_function(proj1_);
                 auto &&proj2 = as_function(proj2_);
-                // shorten sequences as much as possible by lopping of any equal parts
+                // shorten sequences as much as possible by lopping off any equal parts
                 for(; begin1 != end1 && begin2 != end2; ++begin1, ++begin2)
                     if(!pred(proj1(*begin1), proj2(*begin2)))
                         goto not_done;
@@ -82,7 +82,7 @@ namespace ranges
                             goto next_iter;
                     {
                         // Count number of *i in [f2, l2)
-                        iterator_difference_t<I1> c2 = 0;
+                        iterator_difference_t<I2> c2 = 0;
                         for(I2 j = begin2; j != end2; ++j)
                             if(pred(proj1(*i), proj2(*j)))
                                 ++c2;
@@ -115,7 +115,7 @@ namespace ranges
                 auto &&pred = as_function(pred_);
                 auto &&proj1 = as_function(proj1_);
                 auto &&proj2 = as_function(proj2_);
-                // shorten sequences as much as possible by lopping of any equal parts
+                // shorten sequences as much as possible by lopping off any equal parts
                 for(; begin1 != end1; ++begin1, ++begin2)
                     if(!pred(proj1(*begin1), proj2(*begin2)))
                         goto not_done;
@@ -136,7 +136,7 @@ namespace ranges
                             goto next_iter;
                     {
                         // Count number of *i in [f2, l2)
-                        iterator_difference_t<I1> c2 = 0;
+                        iterator_difference_t<I2> c2 = 0;
                         for(I2 j = begin2; j != end2; ++j)
                             if(pred(proj1(*i), proj2(*j)))
                                 ++c2;

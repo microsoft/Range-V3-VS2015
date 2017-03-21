@@ -126,7 +126,7 @@ namespace ranges
                     ++it_;
                     satisfy(it);
                 }
-                auto current(range_iterator_t<Rng> const &) const ->
+                auto get(range_iterator_t<Rng> const &) const ->
                     decltype(*it_)
                 {
                     return *it_;
@@ -150,11 +150,7 @@ namespace ranges
         public:
             join_view() = default;
             explicit join_view(Rng rng)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : join_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<join_view>{std::move(rng)}
-#endif
               , cur_{}
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -266,7 +262,7 @@ namespace ranges
                     toggl_ ? (void)++it_ : (void)++val_it_;
                     satisfy(it);
                 }
-                auto current(range_iterator_t<Rng> const &) const ->
+                auto get(range_iterator_t<Rng> const &) const ->
                     common_reference_t<
                         range_reference_t<range_value_t<Rng>>,
                         range_reference_t<ValRng>>
@@ -298,11 +294,7 @@ namespace ranges
         public:
             join_view() = default;
             join_view(Rng rng, ValRng val)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : join_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<join_view>{std::move(rng)}
-#endif
               , cur_{}, val_(std::move(val))
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR

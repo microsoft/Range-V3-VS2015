@@ -99,17 +99,28 @@ namespace ranges
             /// Access the size of the range, if it can be determined:
             template<typename D = Derived,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Same<D, Derived>::value && (Cardinality >= 0 ||
-                    SizedIteratorRange<range_iterator_t<D>, range_sentinel_t<D>>::value))>
+                CONCEPT_REQUIRES_(Same<D, Derived>::value && Cardinality >= 0)>
 #else
-                CONCEPT_REQUIRES_(Same<D, Derived>() && (Cardinality >= 0 ||
-                    SizedIteratorRange<range_iterator_t<D>, range_sentinel_t<D>>()))>
+                CONCEPT_REQUIRES_(Same<D, Derived>() && Cardinality >= 0)>
 #endif
             constexpr range_size_t<D> size() const
             {
-                return Cardinality >= 0 ?
-                    (range_size_t<D>)Cardinality :
-                    iter_size(derived().begin(), derived().end());
+                return (range_size_t<D>)Cardinality;
+            }
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+            template<typename D = Derived,
+                CONCEPT_REQUIRES_(Same<D, Derived>::value && Cardinality < 0 &&
+                    SizedIteratorRange<range_iterator_t<const D>,
+                        range_sentinel_t<const D>>::value)>
+#else
+            template<typename D = Derived,
+                CONCEPT_REQUIRES_(Same<D, Derived>() && Cardinality < 0 &&
+                    SizedIteratorRange<range_iterator_t<const D>,
+                        range_sentinel_t<const D>>())>
+#endif
+            constexpr range_size_t<D> size() const
+            {
+                return iter_size(derived().begin(), derived().end());
             }
             /// Access the first element in a range:
             template<typename D = Derived,
@@ -343,7 +354,8 @@ namespace ranges
                 sout << '[' << *it;
                 while(++it != e)
                     sout << ',' << *it;
-                return sout << ']';
+                sout << ']';
+                return sout;
             }
             /// \overload
             template<bool B = true, typename Stream = meta::if_c<B, std::ostream>,
@@ -357,17 +369,22 @@ namespace ranges
                 auto it = ranges::begin(rng);
                 auto const e = ranges::end(rng);
                 if(it == e)
-                    return sout << "[]";
+                {
+                    sout << "[]";
+                    return sout;
+                }
                 sout << '[' << *it;
                 while(++it != e)
                     sout << ',' << *it;
-                return sout << ']';
+                sout << ']';
+                return sout;
             }
             /// \overload
             template<bool B = true, typename Stream = meta::if_c<B, std::ostream>>
             friend Stream &operator<<(Stream &sout, Derived &&rng)
             {
-                return sout << rng;
+                sout << rng;
+                return sout;
             }
         };
         /// @}

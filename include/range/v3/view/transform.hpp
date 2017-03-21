@@ -49,6 +49,19 @@ namespace ranges
                             unknown :
                             infinite;
             }
+
+            // indirect_move is put here instead of in iter_transform2_view::cursor to
+            // work around gcc friend name injection bug.
+            template<typename Cursor>
+            struct transform2_cursor_move
+            {
+                template<typename Sent>
+                friend auto indirect_move(basic_iterator<Cursor, Sent> const &it)
+                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                (
+                    get_cursor(it).indirect_move_()
+                )
+            };
         }
         /// \endcond
 
@@ -77,7 +90,7 @@ namespace ranges
                 adaptor(fun_ref_ fun)
                   : fun_(std::move(fun))
                 {}
-                auto current(range_iterator_t<Rng> it) const
+                auto get(range_iterator_t<Rng> it) const
                 RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
                 (
                     fun_(it)
@@ -118,11 +131,7 @@ namespace ranges
         public:
             iter_transform_view() = default;
             iter_transform_view(Rng rng, Fun fun)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : iter_transform_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<iter_transform_view>{std::move(rng)}
-#endif
               , fun_(as_function(std::move(fun)))
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -182,6 +191,7 @@ namespace ranges
 
             struct sentinel;
             struct cursor
+              : detail::transform2_cursor_move<cursor>
             {
             private:
                 friend sentinel;
@@ -190,12 +200,6 @@ namespace ranges
                 range_iterator_t<Rng1> it1_;
                 range_iterator_t<Rng2> it2_;
 
-                template<typename Sent>
-                friend auto indirect_move(basic_iterator<cursor, Sent> const &it)
-                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-                (
-                    get_cursor(it).fun_(move_tag{}, get_cursor(it).it1_, get_cursor(it).it2_)
-                )
             public:
                 using difference_type = difference_type_;
                 using single_pass = meta::or_c<
@@ -214,7 +218,7 @@ namespace ranges
                 cursor(fun_ref_ fun, range_iterator_t<Rng2> it1, range_iterator_t<Rng2> it2)
                   : fun_(std::move(fun)), it1_(std::move(it1)), it2_(std::move(it2))
                 {}
-                auto current() const
+                auto get() const
                 RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
                 (
                     fun_(it1_, it2_)
@@ -252,9 +256,13 @@ namespace ranges
                     ranges::advance(it2_, n);
                 }
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessRange<Rng1>::value && RandomAccessRange<Rng2>::value)
+                CONCEPT_REQUIRES(
+                    SizedIteratorRange<range_iterator_t<Rng1>, range_iterator_t<Rng1>>::value &&
+                    SizedIteratorRange<range_iterator_t<Rng2>, range_iterator_t<Rng2>>::value)
 #else
-                CONCEPT_REQUIRES(RandomAccessRange<Rng1>() && RandomAccessRange<Rng2>())
+                CONCEPT_REQUIRES(
+                    SizedIteratorRange<range_iterator_t<Rng1>, range_iterator_t<Rng1>>() &&
+                    SizedIteratorRange<range_iterator_t<Rng2>, range_iterator_t<Rng2>>())
 #endif
                 difference_type distance_to(cursor const &that) const
                 {
@@ -263,6 +271,11 @@ namespace ranges
                     difference_type d1 = that.it1_ - it1_, d2 = that.it2_ - it2_;
                     return 0 < d1 ? std::min(d1, d2) : std::max(d1, d2);
                 }
+                auto indirect_move_() const
+                RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
+                (
+                    fun_(move_tag{}, it1_, it2_)
+                )
             };
 
             struct sentinel

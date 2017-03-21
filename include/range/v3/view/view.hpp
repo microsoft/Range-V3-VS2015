@@ -27,6 +27,7 @@ namespace ranges
 {
     inline namespace v3
     {
+        /// \cond
         namespace detail
         {
             struct null_pipe
@@ -36,6 +37,7 @@ namespace ranges
                 {}
             };
         }
+        /// \endcond
 
         namespace view
         {
@@ -137,12 +139,12 @@ namespace ranges
                     view_(std::forward<Rng>(rng), std::forward<Rest>(rest)...)
                 )
                 // Currying overload.
-                template<typename T, typename...Rest, typename V = View>
-                auto operator()(T && t, Rest &&... rest) const
+                template<typename...Ts, typename V = View>
+                auto operator()(Ts &&... ts) const
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
-                    make_view(view_access::impl<V>::bind(view_, std::forward<T>(t),
-                        std::forward<Rest>(rest)...))
+                    make_view(view_access::impl<V>::bind(view_,
+                        std::forward<Ts>(ts)...))
                 )
             };
             /// \endcond

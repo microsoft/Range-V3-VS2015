@@ -69,7 +69,7 @@ namespace ranges
                 adaptor(partial_sum_view_t &rng, range_value_t<Rng> sum)
                   : sum_(std::move(sum)), rng_(&rng)
                 {}
-                range_value_t<Rng> current(range_iterator_t<Rng> it) const
+                range_value_t<Rng> get(range_iterator_t<Rng> it) const
                 {
                     return *sum_;
                 }
@@ -145,11 +145,7 @@ namespace ranges
         public:
             partial_sum_view() = default;
             partial_sum_view(Rng rng, Fun fun)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : partial_sum_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<partial_sum_view>{std::move(rng)}
-#endif
               , fun_(as_function(std::move(fun)))
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -169,8 +165,8 @@ namespace ranges
             {
             private:
                 friend view_access;
-                template<typename Fun>
-                static auto bind(partial_sum_fn partial_sum, Fun fun)
+                template<typename Fun = plus>
+                static auto bind(partial_sum_fn partial_sum, Fun fun = {})
                 RANGES_DECLTYPE_AUTO_RETURN
                 (
                     make_pipeable(std::bind(partial_sum, std::placeholders::_1,

@@ -35,10 +35,10 @@ namespace ranges
             template<typename I, typename S, typename F, typename P = ident,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
-                    IndirectCallablePredicate<F, Project<I, P> >::value)>
+                    IndirectCallablePredicate<F, Projected<I, P> >::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
-                    IndirectCallablePredicate<F, Project<I, P> >())>
+                    IndirectCallablePredicate<F, Projected<I, P> >())>
 #endif
             bool
             operator()(I first, S last, F pred, P proj = P{}) const
@@ -54,9 +54,9 @@ namespace ranges
             template<typename Rng, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<F, Project<I, P> >::value)>
+                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallablePredicate<F, Projected<I, P> >::value)>
 #else
-                CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<F, Project<I, P> >())>
+                CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallablePredicate<F, Projected<I, P> >())>
 #endif
             bool
             operator()(Rng &&rng, F pred, P proj = P{}) const

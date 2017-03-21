@@ -101,12 +101,6 @@ namespace ranges
             /// \cond
             namespace detail
             {
-                template<typename C, typename I, typename S>
-                using ReserveConcept =
-                    meta::fast_and<
-                        RandomAccessReservable<C>,
-                        SizedIteratorRange<I, S>>;
-
                 template<typename Cont, typename P, typename I, typename S,
                     typename C = common_iterator<I, S>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -123,11 +117,11 @@ namespace ranges
                 template<typename Cont, typename P, typename I, typename S,
                     typename C = common_iterator<I, S>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && IteratorRange<I, S>::value &&
-                                      ReserveConcept<Cont, I, S>::value)>
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<P>::value && SizedIteratorRange<I, S>::value &&
+                                      RandomAccessReservable<Cont>::value)>
 #else
-                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && IteratorRange<I, S>() &&
-                                      ReserveConcept<Cont, I, S>())>
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<P>() && SizedIteratorRange<I, S>() &&
+                                      RandomAccessReservable<Cont>())>
 #endif
                 auto insert_impl(Cont && cont, P p, I i, S j, std::true_type) ->
                     decltype(unwrap_reference(cont).insert(begin(unwrap_reference(cont)), C{i}, C{j}))
@@ -154,11 +148,11 @@ namespace ranges
                 template<typename Cont, typename I, typename Rng,
                     typename C = range_common_iterator_t<Rng>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && Range<Rng>::value &&
-                                      ReserveConcept<Cont, range_iterator_t<Rng>, range_sentinel_t<Rng>>::value)>
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>::value && Iterator<I>::value && SizedRange<Rng>::value &&
+                                      RandomAccessReservable<Cont>::value)>
 #else
-                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && Range<Rng>() &&
-                                      ReserveConcept<Cont, range_iterator_t<Rng>, range_sentinel_t<Rng>>())>
+                    CONCEPT_REQUIRES_(LvalueContainerLike<Cont>() && Iterator<I>() && SizedRange<Rng>() &&
+                                      RandomAccessReservable<Cont>())>
 #endif
                 auto insert_impl(Cont && cont, I p, Rng && rng, std::true_type) ->
                     decltype(unwrap_reference(cont).insert(begin(unwrap_reference(cont)), C{begin(rng)}, C{end(rng)}))
@@ -181,7 +175,7 @@ namespace ranges
             RANGES_DECLTYPE_AUTO_RETURN
             (
                 detail::insert_impl(std::forward<Cont>(cont), std::move(p), std::move(i), std::move(j),
-                                    detail::ReserveConcept<Cont, I, S>())
+                                    meta::fast_and<RandomAccessReservable<Cont>, SizedIteratorRange<I, S>>{})
             )
 
             template<typename Cont, typename I, typename Rng,
@@ -195,7 +189,7 @@ namespace ranges
             RANGES_DECLTYPE_AUTO_RETURN
             (
                 detail::insert_impl(std::forward<Cont>(cont), std::move(p), std::forward<Rng>(rng),
-                                    detail::ReserveConcept<Cont, range_iterator_t<Rng>, range_sentinel_t<Rng>>())
+                                    meta::fast_and<RandomAccessReservable<Cont>, SizedRange<Rng>>{})
             )
 
             struct insert_fn

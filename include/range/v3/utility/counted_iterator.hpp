@@ -87,7 +87,6 @@ namespace ranges
                     }
                 };
             private:
-                friend struct counted_sentinel;
                 template<typename OtherI, typename OtherD>
                 friend struct counted_cursor;
                 using iterator_concept_ =
@@ -132,9 +131,13 @@ namespace ranges
                 counted_cursor(counted_cursor<OtherI, OtherD> that)
                   : it_(std::move(that.it_)), n_(std::move(that.n_))
                 {}
-                auto current() const -> decltype(*it_)
+                auto get() const -> decltype(*it_)
                 {
                     return *it_;
+                }
+                bool done() const
+                {
+                    return 0 == n_;
                 }
                 void next()
                 {
@@ -170,15 +173,13 @@ namespace ranges
                     it_ += n;
                     n_ -= n;
                 }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES(RandomAccessIterator<I>::value)
-#else
-                CONCEPT_REQUIRES(RandomAccessIterator<I>())
-#endif
-                iterator_difference_t<I>
-                distance_to(counted_cursor<I> const &that) const
+                D distance_to(counted_cursor<I> const &that) const
                 {
                     return n_ - that.n_;
+                }
+                D distance_remaining() const
+                {
+                    return n_;
                 }
                 I base() const
                 {
@@ -189,52 +190,20 @@ namespace ranges
                     return n_;
                 }
             };
-
-            struct counted_sentinel
-            {
-                template<typename I, typename D>
-                bool equal(counted_cursor<I, D> const &that) const
-                {
-                    return that.n_ == 0;
-                }
-            };
         }
         /// \endcond
 
         /// \addtogroup group-utility
         /// @{
 
-        // For RandomAccessIterator, operator- will be defined by basic_iterator
-        template<typename I0, typename D0, typename I1, typename D1,
-            typename CI = detail::UnambiguouslyConvertibleType<I0, I1>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES_(detail::UnambiguouslyConvertible<I0, I1>::value &&
-                !RandomAccessIterator<CI>::value)>
+        template<typename I, CONCEPT_REQUIRES_(WeakInputIterator<I>::value)>
 #else
-            CONCEPT_REQUIRES_(detail::UnambiguouslyConvertible<I0, I1>() &&
-                !RandomAccessIterator<CI>())>
+        template<typename I, CONCEPT_REQUIRES_(WeakInputIterator<I>())>
 #endif
-        iterator_difference_t<CI>
-        operator-(counted_iterator<I0, D0> const &end, counted_iterator<I1, D1> const &begin)
+        counted_iterator<I> make_counted_iterator(I i, iterator_difference_t<I> n)
         {
-            return begin.count() - end.count();
-        }
-
-        template<typename I, typename D>
-        iterator_difference_t<I> operator-(counted_sentinel const &end, counted_iterator<I, D> const &begin)
-        {
-            return begin.count();
-        }
-
-        template<typename I, typename D>
-        iterator_difference_t<I> operator-(counted_iterator<I, D> const &begin, counted_sentinel const &end)
-        {
-            return -begin.count();
-        }
-
-        inline std::ptrdiff_t operator-(counted_sentinel const &, counted_sentinel const &)
-        {
-            return 0;
+            return counted_iterator<I>{std::move(i), n};
         }
         /// @}
     }

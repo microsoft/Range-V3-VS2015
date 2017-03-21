@@ -70,10 +70,6 @@ namespace ranges
                 {
                     return {ranges::begin(rng_), n_};
                 }
-                counted_sentinel end_cursor() const
-                {
-                    return {};
-                }
             public:
                 take_exactly_view_() = default;
                 take_exactly_view_(Rng rng, difference_type_ n)

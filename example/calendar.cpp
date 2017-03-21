@@ -173,11 +173,7 @@ class chunk_view : public view_adaptor<chunk_view<Rng>, Rng> {
 public:
     chunk_view() = default;
     chunk_view(Rng rng, std::size_t n)
-#ifdef RANGES_WORKAROUND_MSVC_207134
       : chunk_view::view_adaptor(std::move(rng))
-#else
-      : view_adaptor_t<chunk_view>(std::move(rng))
-#endif
       , n_(n)
     {}
 };
@@ -191,13 +187,14 @@ public:
     adaptor(std::size_t n, range_sentinel_t<Rng> end)
       : n_(n), end_(end)
     {}
-    auto current(range_iterator_t<Rng> it) const {
+    auto get(range_iterator_t<Rng> it) const {
         return view::take(make_range(std::move(it), end_), n_);
     }
     void next(range_iterator_t<Rng> &it) {
         ranges::advance(it, n_, end_);
     }
     void prev() = delete;
+    void distance_to() = delete;
 };
 
 // In:  Range<T>
@@ -233,7 +230,7 @@ struct interleave_view<Rngs>::cursor  {
     std::size_t n_;
     std::vector<range_value_t<Rngs>> *rngs_;
     std::vector<range_iterator_t<range_value_t<Rngs>>> its_;
-    decltype(auto) current() const {
+    decltype(auto) get() const {
         return *its_[n_];
     }
     void next() {

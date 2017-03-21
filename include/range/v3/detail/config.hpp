@@ -122,13 +122,13 @@
 
 #ifndef RANGES_NOT_PERMISSIVE
 // Workarounds that are unnecessary with /permissive-
-// alias template
-#define RANGES_WORKAROUND_MSVC_207134
 // Qualify names to avoid collisions with definitions in dependent base classes
 #define RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
 // "hidden" friend functions are not hidden. Relocate classes that declare hidden friends
 // that would interfere with a customization point into nested namespaces.
 #define RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
+// ~T() is valid - but does nothing - for array type T
+#define RANGES_WORKAROUND_MSVC_ARRAY_PSEUDO_DESTRUCTOR
 #endif
 
 // Enable the subset of the RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND changes that
@@ -139,6 +139,10 @@
 #define RANGES_WORKAROUND_MSVC_140392
 // friend with different nested template parameter level
 #define RANGES_WORKAROUND_MSVC_159890
+// constexpr + delegating constructors fail
+#define RANGES_WORKAROUND_MSVC_194815
+// using declaration w/ alias template: e.g. using foo::bar<T>::bar;
+#define RANGES_WORKAROUND_MSVC_206729
 // name lookup
 #define RANGES_WORKAROUND_MSVC_207089
 // alias template + parser error
@@ -175,6 +179,10 @@
 #define RANGES_WORKAROUND_MSVC_TEMPLATE_STATIC_INITIALIZER
 // nested alias template
 #define RANGES_WORKAROUND_MSVC_PACK_EXPANSION
+// variable template with deduced type
+#define RANGES_WORKAROUND_MSVC_AUTO_VARIABLE_TEMPLATE
+// class with operator() that privately inherits class with conversion to function pointer
+#define RANGES_WORKAROUND_MSVC_OPERATOR_ACCESS
 
 // Temporarily disable failing tests that still need workarounds.
 #define RANGES_DISABLE_MSVC_TEST_FAILURES

@@ -18,6 +18,7 @@
 #include <range/v3/range_fwd.hpp>
 #include <range/v3/view_facade.hpp>
 #include <range/v3/utility/semiregular.hpp>
+#include <range/v3/utility/static_const.hpp>
 
 namespace ranges
 {
@@ -46,7 +47,7 @@ namespace ranges
                 {
                     rng_->next();
                 }
-                Val const &current() const
+                Val const &get() const
                 {
                     return rng_->cached();
                 }
@@ -63,10 +64,17 @@ namespace ranges
             {
                 return cursor{*this};
             }
+
+            istream_range(std::istream &sin, Val *)
+              : sin_(&sin), obj_{}
+            {}
+            istream_range(std::istream &sin, semiregular<Val> *)
+              : sin_(&sin), obj_{in_place}
+            {}
         public:
             istream_range() = default;
             istream_range(std::istream &sin)
-              : sin_(&sin), obj_{}
+              : istream_range(sin, _nullptr_v<semiregular_t<Val>>())
             {
                 next(); // prime the pump
             }
@@ -76,13 +84,39 @@ namespace ranges
             }
         };
 
-        /// TODO use a variable template here when they're available
+    #if !RANGES_CXX_VARIABLE_TEMPLATES
         template<typename Val>
         istream_range<Val> istream(std::istream & sin)
         {
+            CONCEPT_ASSERT_MSG(DefaultConstructible<Val>(),
+               "Only DefaultConstructible types are extractable from streams.");
             return istream_range<Val>{sin};
         }
+    #else
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+        template<typename Val, CONCEPT_REQUIRES_(DefaultConstructible<Val>::value)>
+#else
+        template<typename Val, CONCEPT_REQUIRES_(DefaultConstructible<Val>())>
+#endif
+        struct istream_fn
+        {
+            istream_range<Val> operator()(std::istream & sin) const
+            {
+                return istream_range<Val>{sin};
+            }
+        };
 
+        namespace
+        {
+            template<typename Val>
+#if defined(_MSC_VER) && !defined(__clang__) && _MSC_VER < 1910
+            // Unspecified VS14 bug that is fixed in VS15.
+            constexpr const istream_fn<Val> &istream = static_const<istream_fn<Val>>::value;
+#else
+            constexpr auto && istream = static_const<istream_fn<Val>>::value;
+#endif
+        }
+    #endif
         /// @}
     }
 }

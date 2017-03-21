@@ -43,6 +43,7 @@ namespace ranges
             {
                 return (T &&) t == (U &&) u;
             }
+            using is_transparent = void;
         };
 
         struct less
@@ -57,6 +58,7 @@ namespace ranges
             {
                 return (T &&) t < (U &&) u;
             }
+            using is_transparent = void;
         };
 
         struct ordered_less
@@ -71,6 +73,7 @@ namespace ranges
             {
                 return (T &&) t < (U &&) u;
             }
+            using is_transparent = void;
         };
 
         struct ident
@@ -80,6 +83,7 @@ namespace ranges
             {
                 return (T &&) t;
             }
+            using is_transparent = void;
         };
 
         struct plus
@@ -90,6 +94,7 @@ namespace ranges
             {
                 return (T &&) t + (U &&) u;
             }
+            using is_transparent = void;
         };
 
         struct minus
@@ -100,6 +105,7 @@ namespace ranges
             {
                 return (T &&) t - (U &&) u;
             }
+            using is_transparent = void;
         };
 
         struct multiplies
@@ -110,6 +116,7 @@ namespace ranges
             {
                 return (T &&) t * (U &&) u;
             }
+            using is_transparent = void;
         };
 
         struct bitwise_or
@@ -120,6 +127,7 @@ namespace ranges
             {
                 return (T &&) t | (U &&) u;
             }
+            using is_transparent = void;
         };
 
         template<typename T>
@@ -172,19 +180,38 @@ namespace ranges
         /// \addtogroup group-utility
         struct as_function_fn
         {
-            template<typename T, typename U = detail::decay_t<T>,
-                CONCEPT_REQUIRES_(std::is_member_pointer<U>::value)>
-            auto operator()(T && t) const
-            RANGES_DECLTYPE_AUTO_RETURN_NOEXCEPT
-            (
-                std::mem_fn(t)
-            )
-            template<typename T, typename U = detail::decay_t<T>,
-                CONCEPT_REQUIRES_(!std::is_member_pointer<U>::value)>
-            T operator()(T && t) const
-                noexcept(std::is_nothrow_constructible<T, T>::value)
+        private:
+            template<typename R, typename...Args>
+            struct ptr_fn_
             {
-                return std::forward<T>(t);
+            private:
+                R (*pfn_)(Args...);
+            public:
+                ptr_fn_() = default;
+                constexpr explicit ptr_fn_(R (*pfn)(Args...))
+                  : pfn_(pfn)
+                {}
+                R operator()(Args...args) const
+                {
+                    return (*pfn_)(std::forward<Args>(args)...);
+                }
+            };
+        public:
+            template<typename R, typename ...Args>
+            constexpr ptr_fn_<R, Args...> operator()(R (*p)(Args...)) const
+            {
+                return ptr_fn_<R, Args...>(p);
+            }
+            template<typename R, typename T>
+            auto operator()(R T::* p) const -> decltype(std::mem_fn(p))
+            {
+                return std::mem_fn(p);
+            }
+            template<typename T, typename U = detail::decay_t<T>>
+            constexpr auto operator()(T && t) const ->
+                meta::if_c<!std::is_pointer<U>::value && !std::is_member_pointer<U>::value, T>
+            {
+                return detail::forward<T>(t);
             }
         };
 
@@ -213,56 +240,35 @@ namespace ranges
         struct logical_negate
         {
         private:
-            Pred pred_;
+            using fn_t = meta::_t<std::decay<function_type<Pred>>>;
+            fn_t pred_;
         public:
             logical_negate() = default;
 
             explicit constexpr logical_negate(Pred pred)
-              : pred_((Pred &&) pred)
+              : pred_(as_function((Pred &&) pred))
             {}
 
-            template<typename T,
+            template<typename ...Args,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred, T>::value)>
+                CONCEPT_REQUIRES_(Predicate<fn_t&, Args...>::value)>
 #else
-                CONCEPT_REQUIRES_(Predicate<Pred, T>())>
+                CONCEPT_REQUIRES_(Predicate<fn_t&, Args...>())>
 #endif
-            bool operator()(T && t)
+            bool operator()(Args &&...args)
             {
-                return !pred_((T &&) t);
+                return !pred_(((Args &&) args)...);
             }
             /// \overload
-            template<typename T,
+            template<typename ...Args,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred const, T>::value)>
+                CONCEPT_REQUIRES_(Predicate<fn_t const&, Args...>::value)>
 #else
-                CONCEPT_REQUIRES_(Predicate<Pred const, T>())>
+                CONCEPT_REQUIRES_(Predicate<fn_t const&, Args...>())>
 #endif
-            constexpr bool operator()(T && t) const
+            constexpr bool operator()(Args &&...args) const
             {
-                return !pred_((T &&) t);
-            }
-            /// \overload
-            template<typename T, typename U,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred, T, U>::value)>
-#else
-                CONCEPT_REQUIRES_(Predicate<Pred, T, U>())>
-#endif
-            bool operator()(T && t, U && u)
-            {
-                return !pred_((T &&) t, (U &&) u);
-            }
-            /// \overload
-            template<typename T, typename U,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Predicate<Pred const, T, U>::value)>
-#else
-                CONCEPT_REQUIRES_(Predicate<Pred const, T, U>())>
-#endif
-            constexpr bool operator()(T && t, U && u) const
-            {
-                return !pred_((T &&) t, (U &&) u);
+                return !pred_(((Args &&) args)...);
             }
         };
 
@@ -429,6 +435,57 @@ namespace ranges
         namespace
         {
             constexpr auto&& indirect = static_const<indirect_fn>::value;
+        }
+
+        template<typename Fn1, typename Fn2>
+        struct transformed
+          : private function_type<Fn1>
+          , private function_type<Fn2>
+        {
+        private:
+            using BaseFn1 = function_type<Fn1>;
+            using BaseFn2 = function_type<Fn2>;
+
+            BaseFn1 & fn1()              { return *this; }
+            BaseFn1 const & fn1() const  { return *this; }
+            BaseFn2 & fn2()              { return *this; }
+            BaseFn2 const & fn2() const  { return *this; }
+        public:
+            transformed() = default;
+            constexpr transformed(Fn1 fn1, Fn2 fn2)
+              : BaseFn1(as_function(detail::move(fn1)))
+              , BaseFn2(as_function(detail::move(fn2)))
+            {}
+            template<typename ...Args>
+            auto operator()(Args &&... args)
+              noexcept(noexcept(std::declval<BaseFn1 &>()(std::declval<BaseFn2 &>()(std::forward<Args>(args))...))) ->
+              decltype(std::declval<BaseFn1 &>()(std::declval<BaseFn2 &>()(std::forward<Args>(args))...))
+            {
+                return fn1()(fn2()(std::forward<Args>(args)...));
+            }
+            template<typename ...Args>
+            auto operator()(Args &&... args) const
+              noexcept(noexcept(std::declval<BaseFn1 const &>()(std::declval<BaseFn2 const &>()(std::forward<Args>(args))...))) ->
+              decltype(std::declval<BaseFn1 const &>()(std::declval<BaseFn2 const &>()(std::forward<Args>(args))...))
+            {
+                return fn1()(fn2()(std::forward<Args>(args)...));
+            }
+        };
+
+        struct on_fn
+        {
+            template<typename Fn1, typename Fn2>
+            constexpr transformed<Fn1, Fn2> operator()(Fn1 fn1, Fn2 fn2) const
+            {
+                return transformed<Fn1, Fn2>{detail::move(fn1), detail::move(fn2)};
+            }
+        };
+
+        /// \ingroup group-utility
+        /// \sa `on_fn`
+        namespace
+        {
+            constexpr auto&& on = static_const<on_fn>::value;
         }
 
         /// \cond

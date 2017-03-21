@@ -33,10 +33,10 @@ namespace ranges
             template<typename I, typename S, typename F, typename P = ident,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
                 CONCEPT_REQUIRES_(InputIterator<I>::value && IteratorRange<I, S>::value &&
-                    IndirectCallable<F, Project<I, P>>::value)>
+                    IndirectCallable<F, Projected<I, P>>::value)>
 #else
                 CONCEPT_REQUIRES_(InputIterator<I>() && IteratorRange<I, S>() &&
-                    IndirectCallable<F, Project<I, P>>())>
+                    IndirectCallable<F, Projected<I, P>>())>
 #endif
             I operator()(I begin, S end, F fun_, P proj_ = P{}) const
             {
@@ -52,9 +52,9 @@ namespace ranges
             template<typename Rng, typename F, typename P = ident,
                 typename I = range_iterator_t<Rng>,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallable<F, Project<I, P>>::value)>
+                CONCEPT_REQUIRES_(InputRange<Rng>::value && IndirectCallable<F, Projected<I, P>>::value)>
 #else
-                CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallable<F, Project<I, P>>())>
+                CONCEPT_REQUIRES_(InputRange<Rng>() && IndirectCallable<F, Projected<I, P>>())>
 #endif
             range_safe_iterator_t<Rng> operator()(Rng &&rng, F fun, P proj = P{}) const
             {

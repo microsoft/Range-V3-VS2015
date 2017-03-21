@@ -49,7 +49,7 @@ namespace ranges
             struct adaptor
               : adaptor_base
             {
-                reference_ current(range_iterator_t<Rng> it) const
+                reference_ get(range_iterator_t<Rng> it) const
                 {
                     return *it;
                 }
@@ -69,11 +69,7 @@ namespace ranges
         public:
             const_view() = default;
             explicit const_view(Rng rng)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : const_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<const_view>{std::move(rng)}
-#endif
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)

@@ -16,6 +16,7 @@
 
 #include <meta/meta.hpp>
 #include <range/v3/range_fwd.hpp>
+#include <range/v3/utility/static_const.hpp>
 #include <range/v3/utility/variant.hpp>
 
 namespace ranges
@@ -23,15 +24,29 @@ namespace ranges
     inline namespace v3
     {
         /// \ingroup group-utility
+        struct in_place_t {};
+        namespace
+        {
+            constexpr auto &in_place = static_const<in_place_t>::value;
+        }
+
         template<typename T>
         struct optional
         {
         private:
-            tagged_variant<meta::nil_, T> data_;
+            variant<meta::nil_, T> data_;
         public:
             optional() = default;
             optional(T t)
-              : data_(meta::size_t<1>{}, std::move(t))
+              : data_(emplaced_index<1>, std::move(t))
+            {}
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+            template <typename...Args, CONCEPT_REQUIRES_(Constructible<T, Args...>::value)>
+#else
+            template <typename...Args, CONCEPT_REQUIRES_(Constructible<T, Args...>())>
+#endif
+            explicit optional(in_place_t, Args &&...args)
+              : data_(emplaced_index<1>, std::forward<Args>(args)...)
             {}
             explicit operator bool() const
             {
@@ -49,17 +64,17 @@ namespace ranges
             }
             optional &operator=(T const &t)
             {
-                ranges::set<1>(data_, t);
+                ranges::emplace<1>(data_, t);
                 return *this;
             }
             optional &operator=(T &&t)
             {
-                ranges::set<1>(data_, std::move(t));
+                ranges::emplace<1>(data_, std::move(t));
                 return *this;
             }
             void reset()
             {
-                ranges::set<0>(data_);
+                ranges::emplace<0>(data_);
             }
         };
     }
