@@ -179,11 +179,7 @@ namespace ranges
         public:
             stride_view() = default;
             stride_view(Rng rng, difference_type_ stride)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : stride_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<stride_view>{std::move(rng)}
-#endif
               , stride_(stride)
             {
                 RANGES_ASSERT(0 < stride_);

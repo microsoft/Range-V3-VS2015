@@ -145,11 +145,7 @@ namespace ranges
         public:
             partial_sum_view() = default;
             partial_sum_view(Rng rng, Fun fun)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : partial_sum_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<partial_sum_view>{std::move(rng)}
-#endif
               , fun_(as_function(std::move(fun)))
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR

@@ -148,11 +148,7 @@ namespace ranges
         public:
             intersperse_view() = default;
             intersperse_view(Rng rng, range_value_t<Rng> val)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : intersperse_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<intersperse_view>{std::move(rng)}
-#endif
               , val_(std::move(val))
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR

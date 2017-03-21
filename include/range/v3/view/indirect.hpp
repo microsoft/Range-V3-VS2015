@@ -64,11 +64,7 @@ namespace ranges
         public:
             indirect_view() = default;
             explicit indirect_view(Rng rng)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : indirect_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<indirect_view>{std::move(rng)}
-#endif
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
             CONCEPT_REQUIRES(SizedRange<Rng>::value)

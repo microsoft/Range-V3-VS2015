@@ -131,11 +131,7 @@ namespace ranges
         public:
             iter_transform_view() = default;
             iter_transform_view(Rng rng, Fun fun)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : iter_transform_view::view_adaptor{std::move(rng)}
-#else
-              : view_adaptor_t<iter_transform_view>{std::move(rng)}
-#endif
               , fun_(as_function(std::move(fun)))
             {}
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR

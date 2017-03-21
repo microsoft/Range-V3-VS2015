@@ -92,7 +92,7 @@ struct my_delimited_range
         my_delimited_range,
         ranges::delimit_view<ranges::istream_range<int>, int>>
 {
-    using view_adaptor_t::view_adaptor_t;
+    using my_delimited_range::view_adaptor::view_adaptor;
 };
 
 int main()

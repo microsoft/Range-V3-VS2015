@@ -60,11 +60,7 @@ namespace ranges
         public:
             delimit_view() = default;
             delimit_view(Rng rng, Val value)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : delimit_view::view_adaptor(std::move(rng))
-#else
-              : view_adaptor_t<delimit_view>{std::move(rng)}
-#endif
               , value_(std::move(value))
             {}
         };

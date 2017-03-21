@@ -185,38 +185,26 @@ namespace ranges
         public:
             reverse_view() = default;
             reverse_view(reverse_view &&that)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : reverse_view::view_adaptor(std::move(that))
-#else
-              : view_adaptor_t<reverse_view>{std::move(that)}
-#endif
               , detail::reverse_end_<Rng>{}
             {}
             reverse_view(reverse_view const &that)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : reverse_view::view_adaptor(that)
-#else
-              : view_adaptor_t<reverse_view>{that}
-#endif
               , detail::reverse_end_<Rng>{}
             {}
             explicit reverse_view(Rng rng)
-#ifdef RANGES_WORKAROUND_MSVC_207134
               : reverse_view::view_adaptor(std::move(rng))
-#else
-              : view_adaptor_t<reverse_view>{std::move(rng)}
-#endif
               , detail::reverse_end_<Rng>{}
             {}
             reverse_view& operator=(reverse_view &&that)
             {
-                this->view_adaptor_t<reverse_view>::operator=(std::move(that));
+                this->reverse_view::view_adaptor::operator=(std::move(that));
                 this->dirty_(BoundedRange<Rng>{});
                 return *this;
             }
             reverse_view& operator=(reverse_view const &that)
             {
-                this->view_adaptor_t<reverse_view>::operator=(that);
+                this->reverse_view::view_adaptor::operator=(that);
                 this->dirty_(BoundedRange<Rng>{});
                 return *this;
             }
