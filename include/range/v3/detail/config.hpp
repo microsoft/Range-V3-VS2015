@@ -122,8 +122,6 @@
 
 #ifndef RANGES_NOT_PERMISSIVE
 // Workarounds that are unnecessary with /permissive-
-// alias template
-#define RANGES_WORKAROUND_MSVC_207134
 // Qualify names to avoid collisions with definitions in dependent base classes
 #define RANGES_WORKAROUND_MSVC_PERMISSIVE_DEPENDENT_BASE
 // "hidden" friend functions are not hidden. Relocate classes that declare hidden friends
