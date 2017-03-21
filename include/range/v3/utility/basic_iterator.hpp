@@ -604,7 +604,7 @@ namespace ranges
         public:
             using base_t::base_t;
 #else
-            using range_access::mixin_base_t<Cur>::mixin_base_t;
+            using range_access::mixin_base_t<S>::mixin_base_t;
 #endif
             constexpr bool operator==(basic_sentinel<S> const &) const noexcept
             {
