@@ -150,20 +150,18 @@ namespace
     benchmark(Computation &&c, Sizes &&sizes, double target_deviation = 0.25,
               std::size_t max_iters = 100, std::size_t min_iters = 5) {
 
+      RANGES_ASSERT(0 < min_iters && min_iters <= max_iters);
       RANGES_FOR(auto size, sizes) {
         std::vector<duration_t> durations;
-        duration_t deviation;
-        duration_t mean_duration;
-        std::size_t iter;
+        duration_t deviation{};
+        duration_t mean_duration{};
+        std::size_t iter = 0;
 
-        for (iter = 0; iter < max_iters; ++iter) {
+        while (iter < max_iters) {
           c.init(size);
           durations.emplace_back(duration(c));
           mean_duration = compute_mean(durations);
-          if (++iter == max_iters) {
-            break;
-          }
-          if (iter >= min_iters) {
+          if (++iter >= min_iters) {
             deviation = compute_stddev(durations);
             if (deviation < target_deviation * mean_duration)
               break;
