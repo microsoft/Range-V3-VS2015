@@ -517,7 +517,11 @@ namespace ranges
             struct Destructible
             {
                 template<typename T,
+#ifdef RANGES_WORKAROUND_MSVC_ARRAY_PSEUDO_DESTRUCTOR
+                    meta::if_c<std::is_object<T>::value && !std::is_array<T>::value, int> = 0>
+#else  // RANGES_WORKAROUND_MSVC_ARRAY_PSEUDO_DESTRUCTOR
                     meta::if_<std::is_object<T>, int> = 0>
+#endif // RANGES_WORKAROUND_MSVC_ARRAY_PSEUDO_DESTRUCTOR
                 auto requires_(T && t, T* const p = nullptr) -> decltype(
                     concepts::valid_expr(
                         (t.~T(), 42),

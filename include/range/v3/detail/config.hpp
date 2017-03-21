@@ -127,6 +127,8 @@
 // "hidden" friend functions are not hidden. Relocate classes that declare hidden friends
 // that would interfere with a customization point into nested namespaces.
 #define RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND
+// ~T() is valid - but does nothing - for array type T
+#define RANGES_WORKAROUND_MSVC_ARRAY_PSEUDO_DESTRUCTOR
 #endif
 
 // Enable the subset of the RANGES_WORKAROUND_MSVC_PERMISSIVE_HIDDEN_FRIEND changes that
