@@ -570,7 +570,11 @@ namespace meta
         /// An alias for `void`.
         /// \ingroup trait
         template <typename... Ts>
+#ifdef RANGES_WORKAROUND_MSVC_HATES_ALWAYS
+        using void_ = void;
+#else  // RANGES_WORKAROUND_MSVC_HATES_ALWAYS
         using void_ = apply<always<void>, Ts...>;
+#endif // RANGES_WORKAROUND_MSVC_HATES_ALWAYS
 
         namespace lazy
         {
