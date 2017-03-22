@@ -10,6 +10,9 @@ add_test(test.container_conversion container_conversion)
 add_executable(constexpr_core constexpr_core.cpp)
 add_test(test.constexpr_core constexpr_core)
 
+add_executable(iterator_range iterator_range.cpp)
+add_test(test.iterator_range iterator_range)
+
 add_executable(view_facade view_facade.cpp)
 add_test(test.view_facade view_facade)
 

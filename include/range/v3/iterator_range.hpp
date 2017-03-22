@@ -11,236 +11,78 @@
 // Project home: https://github.com/ericniebler/range-v3
 //
 
-#ifndef RANGES_V3_RANGE_HPP
-#define RANGES_V3_RANGE_HPP
+#ifndef RANGES_V3_ITERATOR_RANGE_HPP
+#define RANGES_V3_ITERATOR_RANGE_HPP
 
 #include <utility>
 #include <type_traits>
 #include <meta/meta.hpp>
 #include <range/v3/range_fwd.hpp>
+#include <range/v3/distance.hpp>
 #include <range/v3/view_interface.hpp>
+#include <range/v3/utility/compressed_pair.hpp>
 #include <range/v3/utility/concepts.hpp>
 #include <range/v3/utility/iterator.hpp>
-#include <range/v3/utility/compressed_pair.hpp>
 #include <range/v3/utility/iterator_concepts.hpp>
 #include <range/v3/utility/static_const.hpp>
+#include <range/v3/algorithm/tagspec.hpp>
 
 namespace ranges
 {
     inline namespace v3
     {
-        /// \cond
-        namespace detail
-        {
-            template<typename T, typename U = meta::_t<std::remove_const<T>>>
-            constexpr U && unsafe_move(T &t)
-            {
-                return static_cast<U &&>(const_cast<U &>(t));
-            }
-        }
-        /// \endcond
-
         /// \addtogroup group-core
         /// @{
         template<typename I, typename S /*= I*/>
-        struct RANGES_BROKEN_EBO iterator_range
-          : private compressed_pair<I, S>
+        struct RANGES_MSVC_EMPTY_BASES iterator_range
+          : tagged_compressed_tuple<tag::begin(I), tag::end(S)>
           , view_interface<iterator_range<I, S>>
         {
-            using iterator = I;
-            using sentinel = S;
-        #ifndef RANGES_DOXYGEN_INVOKED
-            using const_iterator = I; // Mostly to avoid spurious errors in Boost.Range
-        #endif
-            using compressed_pair<I, S>::first;
-            using compressed_pair<I, S>::second;
-
-            iterator_range() = default;
-            constexpr iterator_range(iterator begin, sentinel end)
-              : compressed_pair<I, S>{detail::move(begin), detail::move(end)}
-            {}
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>::value && ConvertibleTo<Y, sentinel>::value)>
-#else
-                CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>() && ConvertibleTo<Y, sentinel>())>
-#endif
-            constexpr iterator_range(iterator_range<X, Y> rng)
-              : compressed_pair<I, S>{detail::move(rng.first), detail::move(rng.second)}
-            {}
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>::value && ConvertibleTo<Y, sentinel>::value)>
-#else
-                CONCEPT_REQUIRES_(ConvertibleTo<X, iterator>() && ConvertibleTo<Y, sentinel>())>
-#endif
-            constexpr iterator_range(std::pair<X, Y> rng)
-              : compressed_pair<I, S>{detail::move(rng.first), detail::move(rng.second)}
-            {}
-            iterator begin() const
-            {
-                return first;
-            }
-            sentinel end() const
-            {
-                return second;
-            }
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
-#else
-                CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
-#endif
-            constexpr operator std::pair<X, Y>() const
-            {
-                return {first, second};
-            }
-            void pop_front()
-            {
-                ++first;
-            }
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-            CONCEPT_REQUIRES(BidirectionalIterator<sentinel>::value)
-#else
-            CONCEPT_REQUIRES(BidirectionalIterator<sentinel>())
-#endif
-            void pop_back()
-            {
-                --second;
-            }
-        };
-
-        // Like iterator_range, but with a known size. As with iterator_range and std::pair,
-        // first and second are public members (for compatibility with old code using
-        // pair to store iterator ranges), but for sized_iterator_range, the members are
-        // const to prevent inadvertent violations of the class invariant.
-        //
-        // Class invariant:
-        //   distance(first, second) == third
-        //
-        template<typename I, typename S /* = I */>
-        struct RANGES_BROKEN_EBO sized_iterator_range
-          : private compressed_pair<I const, S const>
-          , view_interface<sized_iterator_range<I, S>>
-        {
         private:
-            template<typename X, typename Y>
-            friend struct sized_iterator_range;
-            I && move_first()
-            {
-                return detail::unsafe_move(this->first);
-            }
-            S && move_second()
-            {
-                return detail::unsafe_move(this->second);
-            }
-            template<typename J = I,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ForwardIterator<J>::value && IteratorRange<J, S>::value)>
-#else
-                CONCEPT_REQUIRES_(ForwardIterator<J>() && IteratorRange<J, S>())>
-#endif
-            void check() const
-            {
-                RANGES_ASSERT(static_cast<iterator_size_t<I>>(iter_distance(first, second)) == third);
-            }
-            template<typename J = I,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(!ForwardIterator<J>::value || !IteratorRange<J, S>::value)>
-#else
-                CONCEPT_REQUIRES_(!ForwardIterator<J>() || !IteratorRange<J, S>())>
-#endif
-            void check() const
-            {}
+            using base_t = tagged_compressed_tuple<tag::begin(I), tag::end(S)>;
         public:
             using iterator = I;
             using sentinel = S;
         #ifndef RANGES_DOXYGEN_INVOKED
             using const_iterator = I; // Mostly to avoid spurious errors in Boost.Range
         #endif
-            using compressed_pair<I const, S const>::first;
-            using compressed_pair<I const, S const>::second;
-            iterator_size_t<I> const third;
 
-            constexpr sized_iterator_range()
-              : compressed_pair<I const, S const>{}, third{}
+            using base_t::begin;
+            using base_t::end;
+
+            iterator_range() = default;
+            constexpr iterator_range(I begin, S end)
+              : base_t{detail::move(begin), detail::move(end)}
             {}
-            sized_iterator_range(I begin, S end, iterator_size_t<I> size)
-              : compressed_pair<I const, S const>{std::move(begin), std::move(end)}, third(size)
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<I, X>::value && Constructible<S, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Constructible<I, X>() && Constructible<S, Y>())>
+#endif
+            constexpr iterator_range(iterator_range<X, Y> rng)
+              : base_t{detail::move(rng.begin()), detail::move(rng.end())}
+            {}
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<I, X>::value && Constructible<S, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Constructible<I, X>() && Constructible<S, Y>())>
+#endif
+            explicit constexpr iterator_range(std::pair<X, Y> rng)
+              : base_t{detail::move(rng.first), detail::move(rng.second)}
+            {}
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Assignable<I &, X>::value && Assignable<S &, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Assignable<I &, X>() && Assignable<S &, Y>())>
+#endif
+            iterator_range &operator=(iterator_range<X, Y> rng)
             {
-                check();
-            }
-            sized_iterator_range(sized_iterator_range<I, S> const &rng)
-              : compressed_pair<I const, S const>{rng.first, rng.second}, third(rng.third)
-            {}
-            sized_iterator_range(sized_iterator_range<I, S> &&rng)
-              : compressed_pair<I const, S const>{rng.move_first(), rng.move_second()}, third(rng.third)
-            {}
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
-#else
-                CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
-#endif
-            sized_iterator_range(std::pair<X, Y> rng, iterator_size_t<I> size)
-              : sized_iterator_range{std::move(rng).first, std::move(rng).second, size}
-            {}
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
-#else
-                CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
-#endif
-            sized_iterator_range(iterator_range<X, Y> rng, iterator_size_t<I> size)
-              : sized_iterator_range{std::move(rng).first, std::move(rng).second, size}
-            {}
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(ConvertibleTo<X, I>::value && ConvertibleTo<Y, S>::value)>
-#else
-                CONCEPT_REQUIRES_(ConvertibleTo<X, I>() && ConvertibleTo<Y, S>())>
-#endif
-            sized_iterator_range(sized_iterator_range<X, Y> rng)
-              : sized_iterator_range{rng.move_first(), rng.move_second(), rng.third}
-            {}
-            sized_iterator_range &operator=(sized_iterator_range<I, S> const &rng)
-            {
-                const_cast<I &>(first) = rng.first;
-                const_cast<S &>(second) = rng.second;
-                const_cast<iterator_size_t<I> &>(third) = rng.third;
+                begin() = detail::move(rng).begin();
+                end() = detail::move(rng).end();
                 return *this;
-            }
-            sized_iterator_range &operator=(sized_iterator_range<I, S> &&rng)
-            {
-                const_cast<I &>(first) = rng.move_first();
-                const_cast<S &>(second) = rng.move_second();
-                const_cast<iterator_size_t<I> &>(third) = rng.third;
-                return *this;
-            }
-            template<typename X, typename Y,
-#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
-                CONCEPT_REQUIRES_(Assignable<I&, X &&>::value && Assignable<S&, Y &&>::value)>
-#else
-                CONCEPT_REQUIRES_(Assignable<I&, X &&>() && Assignable<S&, Y &&>())>
-#endif
-            sized_iterator_range &operator=(sized_iterator_range<X, Y> rng)
-            {
-                const_cast<I &>(first) = rng.move_first();
-                const_cast<S &>(second) = rng.move_second();
-                const_cast<iterator_size_t<I> &>(third) = rng.third;
-                return *this;
-            }
-            iterator begin() const
-            {
-                return first;
-            }
-            sentinel end() const
-            {
-                return second;
-            }
-            iterator_size_t<I> size() const
-            {
-                return third;
             }
             template<typename X, typename Y,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -250,7 +92,101 @@ namespace ranges
 #endif
             constexpr operator std::pair<X, Y>() const
             {
-                return {first, second};
+                return {begin(), end()};
+            }
+        };
+
+        // Like iterator_range, but with a known size. The first and second members
+        // are private to prevent inadvertent violations of the class invariant.
+        //
+        // Class invariant:
+        //   distance(begin(), end()) == size()
+        //
+        template<typename I, typename S /* = I */>
+        struct sized_iterator_range
+          : view_interface<sized_iterator_range<I, S>>
+        {
+        private:
+            template<typename X, typename Y>
+            friend struct sized_iterator_range;
+            iterator_range<I, S> rng_;
+            size_type_t<I> size_;
+        public:
+            using iterator = I;
+            using sentinel = S;
+        #ifndef RANGES_DOXYGEN_INVOKED
+            using const_iterator = I; // Mostly to avoid spurious errors in Boost.Range
+        #endif
+
+            sized_iterator_range() = default;
+            RANGES_NDEBUG_CONSTEXPR sized_iterator_range(I begin, S end, size_type_t<I> size)
+              : rng_{detail::move(begin), detail::move(end)}, size_(size)
+            {
+            #ifndef NDEBUG
+                RANGES_ASSERT(!ForwardIterator<I>() ||
+                    static_cast<size_type_t<I>>(ranges::distance(rng_)) == size_);
+            #endif
+            }
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<I, X>::value && Constructible<S, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Constructible<I, X>() && Constructible<S, Y>())>
+#endif
+            RANGES_NDEBUG_CONSTEXPR sized_iterator_range(std::pair<X, Y> rng, size_type_t<I> size)
+              : sized_iterator_range{detail::move(rng).first, detail::move(rng).second, size}
+            {}
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<I, X>::value && Constructible<S, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Constructible<I, X>() && Constructible<S, Y>())>
+#endif
+            RANGES_NDEBUG_CONSTEXPR sized_iterator_range(iterator_range<X, Y> rng, size_type_t<I> size)
+              : sized_iterator_range{detail::move(rng).first(), detail::move(rng).second, size}
+            {}
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Constructible<I, X>::value && Constructible<S, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Constructible<I, X>() && Constructible<S, Y>())>
+#endif
+            RANGES_NDEBUG_CONSTEXPR sized_iterator_range(sized_iterator_range<X, Y> rng)
+              : sized_iterator_range{detail::move(rng).rng_.first(), detail::move(rng).rng_.second, rng.size_}
+            {}
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Assignable<I &, X>::value && Assignable<S &, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(Assignable<I &, X>() && Assignable<S &, Y>())>
+#endif
+            sized_iterator_range &operator=(sized_iterator_range<X, Y> rng)
+            {
+                rng_ = detail::move(rng).rng_;
+                size_ = rng.size_;
+                return *this;
+            }
+            I begin() const
+            {
+                return rng_.begin();
+            }
+            S end() const
+            {
+                return rng_.end();
+            }
+            size_type_t<I> size() const
+            {
+                return size_;
+            }
+            template<typename X, typename Y,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(ConvertibleTo<I, X>::value && ConvertibleTo<S, Y>::value)>
+#else
+                CONCEPT_REQUIRES_(ConvertibleTo<I, X>() && ConvertibleTo<S, Y>())>
+#endif
+            constexpr operator std::pair<X, Y>() const
+            {
+                return rng_;
             }
             template<typename X, typename Y,
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -260,145 +196,64 @@ namespace ranges
 #endif
             constexpr operator iterator_range<X, Y>() const
             {
-                return {first, second};
+                return rng_;
+            }
+            constexpr operator iterator_range<I, S> const &() const & noexcept
+            {
+                return rng_;
             }
         };
 
-        struct make_range_fn
+        struct make_iterator_range_fn
         {
             /// \return `{begin, end}`
-            template<typename I, typename S>
-            iterator_range<I, S> operator()(I begin, S end) const
+            template<typename I, typename S,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Sentinel<S, I>::value)>
+#else
+                CONCEPT_REQUIRES_(Sentinel<S, I>())>
+#endif
+            constexpr iterator_range<I, S> operator()(I begin, S end) const
             {
-                CONCEPT_ASSERT(IteratorRange<I, S>());
-                return {std::move(begin), std::move(end)};
+                CONCEPT_ASSERT(Sentinel<S, I>());
+                return {detail::move(begin), detail::move(end)};
             }
 
             /// \return `{begin, end, size}`
-            template<typename I, typename S>
-            sized_iterator_range<I, S> operator()(I begin, S end, iterator_size_t<I> size) const
+            template<typename I, typename S,
+#ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
+                CONCEPT_REQUIRES_(Sentinel<S, I>::value)>
+#else
+                CONCEPT_REQUIRES_(Sentinel<S, I>())>
+#endif
+            constexpr sized_iterator_range<I, S> operator()(I begin, S end, size_type_t<I> size) const
             {
-                CONCEPT_ASSERT(IteratorRange<I, S>());
-                return {std::move(begin), std::move(end), size};
+                CONCEPT_ASSERT(Sentinel<S, I>());
+                return {detail::move(begin), detail::move(end), size};
             }
         };
 
         /// \ingroup group-core
-        /// \sa `make_range_fn`
-        namespace
-        {
-            constexpr auto&& make_range = static_const<make_range_fn>::value;
-        }
-
-        /// Tuple-like access for `iterator_range`
-        // TODO Switch to variable template when available
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 0)>
-        constexpr auto get(iterator_range<I, S> & p) ->
-            decltype((p.first))
-        {
-            return p.first;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 0)>
-        constexpr auto get(iterator_range<I, S> const & p) ->
-            decltype((p.first))
-        {
-            return p.first;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 0)>
-        constexpr auto get(iterator_range<I, S> && p) ->
-            decltype((detail::move(p).first))
-        {
-            return detail::move(p).first;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 1)>
-        constexpr auto get(iterator_range<I, S> & p) ->
-            decltype((p.second))
-        {
-            return p.second;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 1)>
-        constexpr auto get(iterator_range<I, S> const & p) ->
-            decltype((p.second))
-        {
-            return p.second;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 1)>
-        constexpr auto get(iterator_range<I, S> && p) ->
-            decltype((detail::move(p).second))
-        {
-            return detail::move(p).second;
-        }
+        /// \sa `make_iterator_range_fn`
+        RANGES_INLINE_VARIABLE(make_iterator_range_fn, make_iterator_range)
 
         /// Tuple-like access for `sized_iterator_range`
-        // TODO Switch to variable template when available
         template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 0)>
-        constexpr auto get(sized_iterator_range<I, S> & p) ->
-            decltype((p.first))
-        {
-            return p.first;
-        }
+            CONCEPT_REQUIRES_(N < 2)>
+        constexpr auto get(sized_iterator_range<I, S> const &p)
+        RANGES_DECLTYPE_AUTO_RETURN
+        (
+            ranges::get<N>(static_cast<iterator_range<I, S> const &>(p))
+        )
 
         /// \overload
         template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 0)>
-        constexpr auto get(sized_iterator_range<I, S> const & p) ->
-            decltype((p.first))
+            CONCEPT_REQUIRES_(N == 2)>
+        constexpr size_type_t<I> get(sized_iterator_range<I, S> const &p)
         {
-            return p.first;
+            return p.size();
         }
 
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 0)>
-        constexpr auto get(sized_iterator_range<I, S> && p) ->
-            decltype((detail::move(p).first))
-        {
-            return detail::move(p).first;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 1)>
-        constexpr auto get(sized_iterator_range<I, S> & p) ->
-            decltype((p.second))
-        {
-            return p.second;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 1)>
-        constexpr auto get(sized_iterator_range<I, S> const & p) ->
-            decltype((p.second))
-        {
-            return p.second;
-        }
-
-        /// \overload
-        template<std::size_t N, typename I, typename S,
-            CONCEPT_REQUIRES_(N == 1)>
-        constexpr auto get(sized_iterator_range<I, S> && p) ->
-            decltype((detail::move(p).second))
-        {
-            return detail::move(p).second;
-        }
 
         // TODO add specialization of range_cardinality for when we can determine the range is infinite
 
@@ -414,38 +269,44 @@ RANGES_DIAGNOSTIC_IGNORE_MISMATCHED_TAGS
 /// \cond
 namespace std
 {
-    template<typename First, typename Second>
-    struct tuple_size< ::ranges::v3::iterator_range<First, Second>>
+    template<typename I, typename S>
+    struct tuple_size< ::ranges::v3::iterator_range<I, S>>
       : std::integral_constant<size_t, 2>
     {};
 
-    template<typename First, typename Second>
-    struct tuple_element<0, ::ranges::v3::iterator_range<First, Second>>
+    template<typename I, typename S>
+    struct tuple_element<0, ::ranges::v3::iterator_range<I, S>>
     {
-        using type = First;
+        using type = I;
     };
 
-    template<typename First, typename Second>
-    struct tuple_element<1, ::ranges::v3::iterator_range<First, Second>>
+    template<typename I, typename S>
+    struct tuple_element<1, ::ranges::v3::iterator_range<I, S>>
     {
-        using type = Second;
+        using type = S;
     };
 
-    template<typename First, typename Second>
-    struct tuple_size< ::ranges::v3::sized_iterator_range<First, Second>>
-      : std::integral_constant<size_t, 2>
+    template<typename I, typename S>
+    struct tuple_size< ::ranges::v3::sized_iterator_range<I, S>>
+      : std::integral_constant<size_t, 3>
     {};
 
-    template<typename First, typename Second>
-    struct tuple_element<0, ::ranges::v3::sized_iterator_range<First, Second>>
+    template<typename I, typename S>
+    struct tuple_element<0, ::ranges::v3::sized_iterator_range<I, S>>
     {
-        using type = First;
+        using type = I;
     };
 
-    template<typename First, typename Second>
-    struct tuple_element<1, ::ranges::v3::sized_iterator_range<First, Second>>
+    template<typename I, typename S>
+    struct tuple_element<1, ::ranges::v3::sized_iterator_range<I, S>>
     {
-        using type = Second;
+        using type = S;
+    };
+
+    template<typename I, typename S>
+    struct tuple_element<2, ::ranges::v3::sized_iterator_range<I, S>>
+    {
+        using type = ::ranges::v3::size_type_t<I>;
     };
 }
 /// \endcond

@@ -12,6 +12,7 @@
 #include <list>
 #include <vector>
 #include <range/v3/core.hpp>
+#include <range/v3/utility/copy.hpp>
 #include <range/v3/utility/unreachable.hpp>
 #include <range/v3/view/all.hpp>
 #include "./simple_test.hpp"
@@ -20,85 +21,56 @@
 struct empty
 {};
 
-#ifndef RANGES_WORKAROUND_MSVC_209653
-static_assert(ranges::detail::broken_ebo || sizeof(ranges::iterator_range<int*, empty>) == sizeof(int*),
-    "Expected iterator_range to be compressed");
-
-static_assert(ranges::detail::broken_ebo || sizeof(ranges::sized_iterator_range<int*, empty>) == sizeof(int*) + sizeof(std::size_t),
-    "Expected sized_iterator_range to be compressed");
-#endif
-
-template<typename T, typename U = decltype(std::declval<T>().pop_front())>
-int test_pop_front(T & t)
-{
-    return 0;
-}
-
-char* test_pop_front(ranges::detail::any)
-{
-    return nullptr;
-}
-
 int main()
 {
     std::vector<int> vi{1,2,3,4};
 
-    ranges::iterator_range<std::vector<int>::iterator> r0 {vi.begin(), vi.end()};
-    ::models<ranges::concepts::SizedView>(r0);
+    using namespace ranges;
+    iterator_range<std::vector<int>::iterator> r0 {vi.begin(), vi.end()};
+    ::models<concepts::SizedView>(aux::copy(r0));
     CHECK(r0.size() == 4u);
-    CHECK(r0.first == vi.begin());
-    CHECK(r0.second == vi.end());
-    ++r0.first;
+    CHECK(r0.begin() == vi.begin());
+    CHECK(r0.end() == vi.end());
+    ++r0.begin();
     CHECK(r0.size() == 3u);
 
     std::pair<std::vector<int>::iterator, std::vector<int>::iterator> p0 = r0;
     CHECK(p0.first == vi.begin()+1);
     CHECK(p0.second == vi.end());
 
-    ranges::iterator_range<std::vector<int>::iterator, ranges::unreachable> r1 { r0.begin(), {} };
-#ifndef RANGES_WORKAROUND_MSVC_209653
-    static_assert(ranges::detail::broken_ebo || sizeof(r1) == sizeof(vi.begin()), "");
-#endif
-    ::models<ranges::concepts::View>(r1);
-    ::models_not<ranges::concepts::SizedView>(r1);
-    CHECK(r1.first == vi.begin()+1);
-    CHECK(r1.second == ranges::unreachable{});
-    r1.second = ranges::unreachable{};
+    iterator_range<std::vector<int>::iterator, unreachable> r1 { r0.begin(), {} };
+    ::models<concepts::View>(aux::copy(r1));
+    ::models_not<concepts::SizedView>(aux::copy(r1));
+    CHECK(r1.begin() == vi.begin()+1);
+    r1.end() = unreachable{};
 
-    r0.pop_front();
+    ++r0.begin();
     CHECK(r0.begin() == vi.begin()+2);
     CHECK(r0.size() == 2u);
-    r0.pop_back();
+    --r0.end();
     CHECK(r0.end() == vi.end()-1);
     CHECK(r0.size() == 1u);
     CHECK(r0.front() == 3);
     CHECK(r0.back() == 3);
 
-    std::pair<std::vector<int>::iterator, ranges::unreachable> p1 = r1;
+    std::pair<std::vector<int>::iterator, unreachable> p1 = r1;
     CHECK(p1.first == vi.begin()+1);
-    CHECK(p1.second == ranges::unreachable{});
-#ifndef RANGES_WORKAROUND_MSVC_209653
-    static_assert(ranges::detail::broken_ebo || sizeof(p1) > sizeof(r1), "");
-#endif
 
-    ranges::iterator_range<std::vector<int>::iterator, ranges::unreachable> r2 { p1 };
-    CHECK(r1.first == vi.begin()+1);
-    CHECK(r1.second == ranges::unreachable{});
+    iterator_range<std::vector<int>::iterator, unreachable> r2 { p1 };
+    CHECK(r1.begin() == vi.begin()+1);
 
     std::list<int> li{1,2,3,4};
-    ranges::sized_iterator_range<std::list<int>::iterator> l0 {li.begin(), li.end(), li.size()};
-    ::models<ranges::concepts::SizedView>(l0);
-    char* sz = test_pop_front(l0); (void) sz;
-    CHECK(l0.first == li.begin());
-    CHECK(l0.second == li.end());
-    CHECK(l0.third == li.size());
-    //++l0.first; // disallowed since it would violate the class invariant
+    sized_iterator_range<std::list<int>::iterator> l0 {li.begin(), li.end(), li.size()};
+    ::models<concepts::SizedView>(aux::copy(l0));
+    CHECK(l0.begin() == li.begin());
+    CHECK(l0.end() == li.end());
+    CHECK(l0.size() == li.size());
 
-    l0 = ranges::view::all(li);
+    l0 = view::all(li);
 
-    ranges::iterator_range<std::list<int>::iterator> l1 = l0;
-    CHECK(l1.first == li.begin());
-    CHECK(l1.second == li.end());
+    iterator_range<std::list<int>::iterator> l1 = l0;
+    CHECK(l1.begin() == li.begin());
+    CHECK(l1.end() == li.end());
 
     return ::test_result();
 }
