@@ -10,12 +10,13 @@ include_directories(include)
 
 enable_testing()
 include(CTest)
+
 find_program(MEMORYCHECK_COMMAND valgrind)
-if(MEMORYCHECK_COMMAND-NOTFOUND)
-  message("[W] Valgrind not found")
-else()
+if(MEMORYCHECK_COMMAND)
   message("Valgrind: ${MEMORYCHECK_COMMAND}")
   set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")
+else()
+  message("Valgrind not found")
 endif()
 
 # Select C++ standard to be used for compiling the tests,
