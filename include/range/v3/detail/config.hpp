@@ -104,6 +104,11 @@
 #define RANGES_CXX_GENERIC_LAMBDAS RANGES_CXX_GENERIC_LAMBDAS_14
 #endif
 
+#if _MSC_VER >= 1910
+// The 1910 compiler consumes vastly less memory with meta::void_ as a direct alias of void
+#define RANGES_WORKAROUND_MSVC_HATES_ALWAYS
+#endif
+
 #else // _MSC_VER < 1900
 #error Unsupported version of Visual C++
 #endif // _MSC_VER switch
