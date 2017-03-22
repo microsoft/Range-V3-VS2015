@@ -38,7 +38,7 @@ before_build:
           $env:generator="$env:generator Win64"
       }
       echo generator="$env:generator"
-      cmake .. -G "$env:generator" -T host=x64
+  - cmake .. -G "%generator%" -T host=x64
 
 build_script:
   - cmake --build . --config %CONFIGURATION% -- /m /v:minimal
