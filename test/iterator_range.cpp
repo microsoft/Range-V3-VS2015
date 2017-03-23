@@ -21,11 +21,11 @@ struct empty
 {};
 
 #ifndef RANGES_WORKAROUND_MSVC_209653
-static_assert(ranges::detail::broken_ebo || sizeof(ranges::range<int*, empty>) == sizeof(int*),
-    "Expected range to be compressed");
+static_assert(ranges::detail::broken_ebo || sizeof(ranges::iterator_range<int*, empty>) == sizeof(int*),
+    "Expected iterator_range to be compressed");
 
-static_assert(ranges::detail::broken_ebo || sizeof(ranges::sized_range<int*, empty>) == sizeof(int*) + sizeof(std::size_t),
-    "Expected sized_range to be compressed");
+static_assert(ranges::detail::broken_ebo || sizeof(ranges::sized_iterator_range<int*, empty>) == sizeof(int*) + sizeof(std::size_t),
+    "Expected sized_iterator_range to be compressed");
 #endif
 
 template<typename T, typename U = decltype(std::declval<T>().pop_front())>
@@ -43,7 +43,7 @@ int main()
 {
     std::vector<int> vi{1,2,3,4};
 
-    ranges::range<std::vector<int>::iterator> r0 {vi.begin(), vi.end()};
+    ranges::iterator_range<std::vector<int>::iterator> r0 {vi.begin(), vi.end()};
     ::models<ranges::concepts::SizedView>(r0);
     CHECK(r0.size() == 4u);
     CHECK(r0.first == vi.begin());
@@ -55,7 +55,7 @@ int main()
     CHECK(p0.first == vi.begin()+1);
     CHECK(p0.second == vi.end());
 
-    ranges::range<std::vector<int>::iterator, ranges::unreachable> r1 { r0.begin(), {} };
+    ranges::iterator_range<std::vector<int>::iterator, ranges::unreachable> r1 { r0.begin(), {} };
 #ifndef RANGES_WORKAROUND_MSVC_209653
     static_assert(ranges::detail::broken_ebo || sizeof(r1) == sizeof(vi.begin()), "");
 #endif
@@ -81,12 +81,12 @@ int main()
     static_assert(ranges::detail::broken_ebo || sizeof(p1) > sizeof(r1), "");
 #endif
 
-    ranges::range<std::vector<int>::iterator, ranges::unreachable> r2 { p1 };
+    ranges::iterator_range<std::vector<int>::iterator, ranges::unreachable> r2 { p1 };
     CHECK(r1.first == vi.begin()+1);
     CHECK(r1.second == ranges::unreachable{});
 
     std::list<int> li{1,2,3,4};
-    ranges::sized_range<std::list<int>::iterator> l0 {li.begin(), li.end(), li.size()};
+    ranges::sized_iterator_range<std::list<int>::iterator> l0 {li.begin(), li.end(), li.size()};
     ::models<ranges::concepts::SizedView>(l0);
     char* sz = test_pop_front(l0); (void) sz;
     CHECK(l0.first == li.begin());
@@ -96,7 +96,7 @@ int main()
 
     l0 = ranges::view::all(li);
 
-    ranges::range<std::list<int>::iterator> l1 = l0;
+    ranges::iterator_range<std::list<int>::iterator> l1 = l0;
     CHECK(l1.first == li.begin());
     CHECK(l1.second == li.end());
 

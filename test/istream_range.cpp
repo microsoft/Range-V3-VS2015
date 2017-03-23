@@ -1,5 +1,5 @@
 #include <range/v3/istream_range.hpp>
-#include <range/v3/range.hpp>
+#include <range/v3/iterator_range.hpp>
 #include <sstream>
 #include "simple_test.hpp"
 #include "test_utils.hpp"
