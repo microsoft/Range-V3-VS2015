@@ -40,7 +40,7 @@ namespace
     test_iter(Iter first, Sent last)
     {
         assert(first != last);
-        auto rng = ranges::make_range(first, last);
+        auto rng = ranges::make_iterator_range(first, last);
         auto res = ranges::minmax(rng);
         for (Iter i = first; i != last; ++i) {
             CHECK(!(*i < res.first));
@@ -77,7 +77,7 @@ namespace
         assert(first != last);
         typedef std::greater<int> Compare;
         Compare comp;
-        auto rng = ranges::make_range(first, last);
+        auto rng = ranges::make_iterator_range(first, last);
         auto res = ranges::minmax(rng, comp);
         for (Iter i = first; i != last; ++i) {
             CHECK(!comp(*i, res.first));

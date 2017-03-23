@@ -188,7 +188,7 @@ public:
       : n_(n), end_(end)
     {}
     auto get(range_iterator_t<Rng> it) const {
-        return view::take(make_range(std::move(it), end_), n_);
+        return view::take(make_iterator_range(std::move(it), end_), n_);
     }
     void next(range_iterator_t<Rng> &it) {
         ranges::advance(it, n_, end_);

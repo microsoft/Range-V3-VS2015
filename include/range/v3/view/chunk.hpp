@@ -96,11 +96,11 @@ namespace ranges
               : box<offset_t>{0}, n_(n), end_(end)
             {}
             auto get(range_iterator_t<Rng> it) const ->
-                decltype(view::take(make_range(std::move(it), end_), n_))
+                decltype(view::take(make_iterator_range(std::move(it), end_), n_))
             {
                 RANGES_ASSERT(it != end_);
                 RANGES_ASSERT(0 == offset());
-                return view::take(make_range(std::move(it), end_), n_);
+                return view::take(make_iterator_range(std::move(it), end_), n_);
             }
             void next(range_iterator_t<Rng> &it)
             {

@@ -28,6 +28,6 @@ int main()
     static const char test[] = "abcd3210";
     std::istringstream ss{test};
     ::check_equal(ranges::istream<moveonly>(ss),
-                  ranges::make_range(test, test + sizeof(test) - 1));
+                  ranges::make_iterator_range(test, test + sizeof(test) - 1));
     return ::test_result();
 }
