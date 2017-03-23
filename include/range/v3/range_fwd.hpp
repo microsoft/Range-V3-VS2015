@@ -269,6 +269,18 @@ namespace ranges
             {};
 #endif
 
+            #if RANGES_CXX_LIB_IS_FINAL > 0
+                #if defined(__clang__) && !defined(_LIBCPP_VERSION)
+                    template<typename T>
+                    using is_final = meta::bool_<__is_final(T)>;
+                #else
+                    using std::is_final;
+                #endif
+            #else
+                template<typename T>
+                using is_final = std::false_type;
+            #endif
+
             template<typename T>
             struct remove_rvalue_reference
             {
@@ -364,6 +376,12 @@ namespace ranges
         struct RANGES_BROKEN_EBO compressed_pair;
 
         struct as_function_fn;
+
+        template<typename T>
+        struct bind_element;
+
+        template<typename T>
+        using bind_element_t = meta::_t<bind_element<T>>;
 
         template<typename Derived, cardinality = finite>
         struct view_interface;

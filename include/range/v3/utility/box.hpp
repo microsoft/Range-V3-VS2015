@@ -156,7 +156,7 @@ namespace ranges
                 return box_compress::none;
             }
             template<typename T, typename = meta::if_<
-                meta::strict_and<std::is_empty<T>, meta::not_<detail::is_final<T>>
+                meta::fast_and<std::is_empty<T>, meta::not_<detail::is_final<T>>
 #if defined(__GNUC__) && !defined(__clang__) && __GNUC__ == 6 && __GNUC_MINOR__ < 2
                     // GCC 6.0 & 6.1 find empty lambdas' implicit conversion to function pointer
                     // when doing overload resolution for function calls. That causes hard errors.
@@ -172,7 +172,7 @@ namespace ranges
             // MSVC pukes passing non-constant-expression objects to constexpr
             // functions, so do not coalesce.
             template<typename T, typename = meta::if_<
-                meta::strict_and<std::is_empty<T>, std::is_trivial<T>, std::is_default_constructible<T>>>>
+                meta::fast_and<std::is_empty<T>, std::is_trivial<T>, std::is_default_constructible<T>>>>
             constexpr box_compress box_compression_(int)
             {
                 return box_compress::coalesce;

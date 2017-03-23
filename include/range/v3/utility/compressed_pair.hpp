@@ -56,14 +56,14 @@ namespace ranges
                 compressed_tuple_() = default;
 
                 template<typename... Args,
-                    meta::if_c<all_constructible<meta::list<Ts...>, meta::list<Args...>>::value, int> = 0>
+                    meta::if_<meta::fast_and<std::is_constructible<Ts, Args>...>, int> = 0>
                 constexpr compressed_tuple_(Args &&... args)
                     noexcept(meta::fast_and<std::is_nothrow_constructible<storage<Ts, Is, Ts...>, Args>...>::value)
                   : storage<Ts, Is, Ts...>{detail::forward<Args>(args)}...
                 {}
 
                 template<typename... Us,
-                    meta::if_c<all_constructible<meta::list<Us...>, meta::list<Ts const&...>>::value, int> = 0>
+                    meta::if_<meta::fast_and<std::is_constructible<Us, Ts const&>...>, int> = 0>
                 constexpr operator std::tuple<Us...> () const
                     noexcept(meta::fast_and<std::is_nothrow_constructible<Us, Ts const &>...>::value)
                 {
