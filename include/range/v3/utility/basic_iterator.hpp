@@ -533,7 +533,7 @@ namespace ranges
         /// @{
         ///
         template<typename T>
-        struct basic_mixin : private box<T>
+        struct basic_mixin : protected box<T>
         {
         public:
 #ifdef RANGES_WORKAROUND_MSVC_SFINAE_CONSTEXPR
@@ -548,18 +548,6 @@ namespace ranges
             basic_mixin(T t)
               : box<T>(std::move(t))
             {}
-        protected:
-            RANGES_CXX14_CONSTEXPR
-            T &get() noexcept
-            {
-                return ranges::get<T>(*this);
-            }
-            /// \overload
-            RANGES_CXX14_CONSTEXPR
-            T const &get() const noexcept
-            {
-                return ranges::get<T>(*this);
-            }
         };
 
         template<typename S>

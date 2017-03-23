@@ -40,10 +40,6 @@ int main()
     CHECK(p0.second == vi.end());
 
     iterator_range<std::vector<int>::iterator, unreachable> r1 { r0.begin(), {} };
-#if 1 // FIXME
-    ::models<concepts::SemiRegular>(aux::copy(r1));
-    ::models<concepts::Range>(aux::copy(r1));
-#else
     ::models<concepts::View>(aux::copy(r1));
     ::models_not<concepts::SizedView>(aux::copy(r1));
     CHECK(r1.begin() == vi.begin()+1);
@@ -73,6 +69,7 @@ int main()
 
     l0 = view::all(li);
 
+#if 0 // FIXME
     iterator_range<std::list<int>::iterator> l1 = l0;
     CHECK(l1.begin() == li.begin());
     CHECK(l1.end() == li.end());
