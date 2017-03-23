@@ -632,12 +632,16 @@ namespace ranges
 
         template<typename I, typename S>
         using IteratorRange = concepts::models<concepts::IteratorRange, I, S>;
+        template<typename S, typename I>
+        using Sentinel = IteratorRange<I, S>;
 
         template<typename I, typename S>
         using SizedIteratorRangeLike_ = concepts::models<concepts::SizedIteratorRangeLike_, I, S>;
 
         template<typename I, typename S>
         using SizedIteratorRange = concepts::models<concepts::SizedIteratorRange, I, S>;
+        template<typename S, typename I>
+        using SizedSentinel = SizedIteratorRange<I, S>;
 
         template<typename I, typename S = I>
         using sized_iterator_range_concept =

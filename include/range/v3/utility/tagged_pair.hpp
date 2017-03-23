@@ -65,7 +65,7 @@ namespace ranges
             /// \endcond
 
             template<typename Base, typename...Tags>
-            class RANGES_MSVC_EMPTY_BASES tagged
+            class RANGES_BROKEN_EBO tagged
               : public meta::_t<chain<Base, 0, Tags...>>
             {
                 CONCEPT_ASSERT(Same<Base, uncvref_t<Base>>());
@@ -169,7 +169,7 @@ namespace ranges
         struct NAME                                                                  \
         {                                                                            \
             template<typename Untagged, std::size_t I, typename Next>                \
-            class RANGES_MSVC_EMPTY_BASES getter : public Next                       \
+            class RANGES_BROKEN_EBO getter : public Next                             \
             {                                                                        \
             protected:                                                               \
                 ~getter() = default;                                                 \
@@ -222,7 +222,7 @@ namespace ranges
         struct NAME                                                                  \
         {                                                                            \
             template<typename Untagged, std::size_t I, typename Next>                \
-            class RANGES_MSVC_EMPTY_BASES getter : public Next                       \
+            class RANGES_BROKEN_EBO getter : public Next                             \
             {                                                                        \
             protected:                                                               \
                 ~getter() = default;                                                 \

@@ -26,6 +26,12 @@ int main()
     std::vector<int> vi{1,2,3,4};
 
     using namespace ranges;
+#if 1 // FIXME
+    tagged_compressed_tuple<tag::in(int)> tct; //{42};
+    //CHECK(*&get<0>(tct) == 42);
+    //get<0>(tct) = 13;
+    //CHECK(*&get<0>(tct) == 13);
+#else
     iterator_range<std::vector<int>::iterator> r0 {vi.begin(), vi.end()};
     ::models<concepts::SizedView>(aux::copy(r0));
     CHECK(r0.size() == 4u);
@@ -71,6 +77,7 @@ int main()
     iterator_range<std::list<int>::iterator> l1 = l0;
     CHECK(l1.begin() == li.begin());
     CHECK(l1.end() == li.end());
+#endif
 
     return ::test_result();
 }

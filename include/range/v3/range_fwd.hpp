@@ -363,9 +363,6 @@ namespace ranges
         template<typename First, typename Second>
         struct RANGES_BROKEN_EBO compressed_pair;
 
-        template<typename...Ts>
-        struct compressed_tuple;
-
         struct as_function_fn;
 
         template<typename Derived, cardinality = finite>
@@ -385,7 +382,11 @@ namespace ranges
         template<typename I, typename S = I>
         struct sized_iterator_range;
 
-        struct make_range_fn;
+        template<typename I, typename S = I>
+        struct iterator_range;
+
+        template<typename I, typename S = I>
+        struct sized_iterator_range;
 
         template<typename T, bool RValue = false>
         struct reference_wrapper;

@@ -36,9 +36,18 @@ namespace ranges
             template<typename T, std::size_t I, typename... Ts>
             using storage = box<T, meta::list<meta::size_t<I>, Ts...>>;
 
+            template<typename Targets, typename Args, typename Enable = void>
+            struct all_constructible
+            {};
+            template<typename... Ts, typename... Args>
+            struct all_constructible<meta::list<Ts...>, meta::list<Args...>, meta::if_c<sizeof...(Ts) == sizeof...(Args)>>
+            {
+                using type = meta::and_<std::is_constructible<Ts, Args>...>;
+            };
+
             template<typename List, typename Indices> struct compressed_tuple_;
             template<typename... Ts, std::size_t... Is>
-            struct RANGES_MSVC_EMPTY_BASES compressed_tuple_<meta::list<Ts...>, meta::index_sequence<Is...>>
+            struct RANGES_BROKEN_EBO compressed_tuple_<meta::list<Ts...>, meta::index_sequence<Is...>>
               : storage<Ts, Is, Ts...>...
             {
                 static_assert(Same<meta::index_sequence<Is...>,
@@ -47,14 +56,14 @@ namespace ranges
                 compressed_tuple_() = default;
 
                 template<typename... Args,
-                    meta::if_<meta::fast_and<std::is_constructible<Ts, Args>...>, int> = 0>
+                    meta::if_c<all_constructible<meta::list<Ts...>, meta::list<Args...>>::value, int> = 0>
                 constexpr compressed_tuple_(Args &&... args)
                     noexcept(meta::fast_and<std::is_nothrow_constructible<storage<Ts, Is, Ts...>, Args>...>::value)
                   : storage<Ts, Is, Ts...>{detail::forward<Args>(args)}...
                 {}
 
                 template<typename... Us,
-                    meta::if_<meta::fast_and<std::is_constructible<Us, Ts const &>...>, int> = 0>
+                    meta::if_c<all_constructible<meta::list<Us...>, meta::list<Ts const&...>>::value, int> = 0>
                 constexpr operator std::tuple<Us...> () const
                     noexcept(meta::fast_and<std::is_nothrow_constructible<Us, Ts const &>...>::value)
                 {
@@ -93,8 +102,6 @@ namespace ranges
         }
         /// \endcond
 
-#if 1 // FIXME
-#lse
         using compressed_tuple_detail::compressed_tuple;
 
         struct make_compressed_tuple_fn
@@ -108,7 +115,10 @@ namespace ranges
 
         /// \ingroup group-utility
         /// \sa `make_compressed_tuple_fn`
-        RANGES_INLINE_VARIABLE(make_compressed_tuple_fn, make_compressed_tuple)
+        namespace
+        {
+            constexpr auto&& make_compressed_tuple = static_const<make_compressed_tuple_fn>::value;
+        }
 
         template<typename... Ts>
         using tagged_compressed_tuple =
@@ -118,7 +128,7 @@ namespace ranges
         RANGES_DEFINE_TAG_SPECIFIER(second)
 
         template<typename First, typename Second>
-        struct compressed_pair
+        struct RANGES_BROKEN_EBO compressed_pair
             : tagged_compressed_tuple<tag::first(First), tag::second(Second)>
         {
             using base_t = tagged_compressed_tuple<tag::first(First), tag::second(Second)>;
@@ -155,7 +165,10 @@ namespace ranges
 
         /// \ingroup group-utility
         /// \sa `make_compressed_pair_fn`
-        RANGES_INLINE_VARIABLE(make_compressed_pair_fn, make_compressed_pair)
+        namespace
+        {
+            constexpr auto&& make_compressed_pair = static_const<make_compressed_pair_fn>::value;
+        }
     }
 }
 

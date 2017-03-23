@@ -189,8 +189,6 @@
 // class with operator() that privately inherits class with conversion to function pointer
 #define RANGES_WORKAROUND_MSVC_OPERATOR_ACCESS
 
-#define RANGES_MSVC_EMPTY_BASES __declspec(empty_bases)
-
 // Temporarily disable failing tests that still need workarounds.
 #define RANGES_DISABLE_MSVC_TEST_FAILURES
 
@@ -208,7 +206,7 @@
 
 #else // ^^^ defined(_MSC_VER) ^^^ / vvv !defined(_MSC_VER) vvv
 
-#define RANGES_MSVC_EMPTY_BASES
+#define RANGES_BROKEN_EBO
 
 // Generic configuration using SD-6 feature test macros with fallback to __cplusplus
 #if defined(__GNUC__) || defined(__clang__)
