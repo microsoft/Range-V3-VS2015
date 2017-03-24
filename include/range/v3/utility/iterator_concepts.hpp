@@ -168,11 +168,7 @@ namespace ranges
                         // through the CommonReference concept.
                         concepts::model_of<CommonReference, reference_t<I> &&, value_t<I> &>(),
                         concepts::model_of<CommonReference, reference_t<I> &&, rvalue_reference_t<I> &&>(),
-                        concepts::model_of<CommonReference, rvalue_reference_t<I> &&, value_t<I> const &>(),
-                        // Experimental additional tests. If nothing else, this is a good workout
-                        // for the common_reference code.
-                        concepts::model_of<Same, ranges::common_reference_t<reference_t<I>, value_t<I>>, value_t<I>>(),
-                        concepts::model_of<Same, ranges::common_reference_t<rvalue_reference_t<I>, value_t<I>>, value_t<I>>()
+                        concepts::model_of<CommonReference, rvalue_reference_t<I> &&, value_t<I> const &>()
                     ));
             };
 
@@ -303,8 +299,7 @@ namespace ranges
                 template<typename I>
                 auto requires_(I&& i) -> decltype(
                     concepts::valid_expr(
-                        concepts::model_of<DerivedFrom, category_t<I>, ranges::weak_input_iterator_tag>(),
-                        concepts::model_of<Readable>(i++)
+                        concepts::model_of<DerivedFrom, category_t<I>, ranges::weak_input_iterator_tag>()
                     ));
             };
 
