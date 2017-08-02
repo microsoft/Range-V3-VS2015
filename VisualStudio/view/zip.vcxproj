@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="ConfigHandy">
+    <CH_local>zip</CH_local>
+    <CH_folder>view\</CH_folder>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)VisualStudio\COMMON.vcxproj" />
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{506d5945-02c0-454f-aa32-9da422de8904}</ProjectGuid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ClCompile Remove="Generate.cpp" />
+    <ClCompile Include="$(SolutionDir)test\$(CH_folder)$(CH_local).cpp" />
+  </ItemGroup>
+
+</Project>

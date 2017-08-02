@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="ConfigHandy">
+    <CH_local>is_heap2</CH_local>
+    <CH_folder>algorithm\</CH_folder>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)VisualStudio\COMMON.vcxproj" />
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2023a28f-46da-43cf-9f08-b91bb65dd324}</ProjectGuid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ClCompile Remove="Generate.cpp" />
+    <ClCompile Include="$(SolutionDir)test\$(CH_folder)$(CH_local).cpp" />
+  </ItemGroup>
+
+</Project>

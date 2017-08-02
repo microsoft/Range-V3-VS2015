@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="ConfigHandy">
+    <CH_local>multiple2</CH_local>
+    <CH_folder>
+    </CH_folder>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)VisualStudio\COMMON.vcxproj" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{a24e32b6-c264-4d41-a0c2-7f1e9ae32548}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Remove="Generate.cpp" />
+    <ClCompile Include="$(SolutionDir)test\$(CH_folder)$(CH_local).cpp" />
+    <ClCompile Include="..\test\multiple1.cpp" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="ConfigHandy">
+    <CH_local>counted</CH_local>
+    <CH_folder>view\</CH_folder>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)VisualStudio\COMMON.vcxproj" />
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{c5b56309-bfe5-40fd-83d8-8bf0a0b01a76}</ProjectGuid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ClCompile Remove="Generate.cpp" />
+    <ClCompile Include="$(SolutionDir)test\$(CH_folder)$(CH_local).cpp" />
+  </ItemGroup>
+
+</Project>
