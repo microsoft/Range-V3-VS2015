@@ -1,5 +1,6 @@
 Range-V3-VS2015
 ===============
+[![NuGet](https://img.shields.io/nuget/v/Range-V3-VS2015.svg)](https://img.shields.io/nuget/v/Range-V3-VS2015.svg)  
 
 This is a fork of [Eric Niebler's range-v3 library](https://github.com/ericniebler/range-v3) with extensive (and somewhat invasive) workarounds to support the Visual C++ compiler as released in Microsoft Visual Studio 2015. Our intent is to evolve both this fork and upstream range-v3 toward each other by upstreaming less invasive workarounds and removing those that become unnecessary as the compiler evolves to be more standard conformant. Eventually [the two streams will merge](https://www.youtube.com/watch?v=jyaLZHiJJnE) and Visual C++ users will be well-served by unmodified upstream range-v3. This fork will then exist only to provide support for users of older less-conforming versions of Visual C++.
 
