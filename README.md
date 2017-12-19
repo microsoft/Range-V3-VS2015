@@ -1,7 +1,9 @@
 Range-V3-VS2015
 ===============
 
-This is a fork of [Eric Niebler's range-v3 library](https://github.com/ericniebler/range-v3) with extensive (and somewhat invasive) workarounds to support the Visual C++ compiler as released in Microsoft Visual Studio 2015. Our intent is to evolve both this fork and upstream range-v3 toward each other by upstreaming less invasive workarounds and removing those that become unnecessary as the compiler evolves to be more standard conformant. Eventually [the two streams will merge](https://www.youtube.com/watch?v=jyaLZHiJJnE) and Visual C++ users will be well-served by unmodified upstream range-v3. This fork will then exist only to provide support for users of older less-conforming versions of Visual C++.
+This is a fork of [Eric Niebler's range-v3 library](https://github.com/ericniebler/range-v3) from late 2015 with extensive (and somewhat invasive) workarounds to support the Visual C++ compiler as released in Microsoft Visual Studio 2015. As MSVC becomes more conforming throughout the VS2017 series, it is our hope that this separate fork will become unnecessary and that it will be possible for upstream range-v3 to support MSVC directly. Given that goal, there is little motivation for diverging development in this fork. (Note that despite the "VS2015" in the title, this library is intended to work with VS2017 as well.)
+
+Please post any problems you have with this codebase in the [Github issues forum](https://github.com/Microsoft/Range-V3-VS2015/issues) and not in the upstream range-v3 forum. There's no need to bother the range-v3 maintainers with issues and/or bugs in this two-year-old code that may have already been fixed upstream.
 
 About (excerpted from [the upstream README](https://github.com/ericniebler/range-v3/blob/master/README.md)):
 ------
@@ -13,7 +15,7 @@ Range v3 forms the basis of a proposal to add range support to the standard libr
 Documentation:
 --------------
 
-Check out the (woefully incomplete) documentation [here](https://ericniebler.github.io/range-v3/).
+Check out the (woefully incomplete) documentation [here](https://microsoft.github.io/Range-V3-VS2015/).
 
 License:
 --------
