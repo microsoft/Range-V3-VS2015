@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="ConfigHandy">
+    <CH_local>drop_while</CH_local>
+    <CH_folder>action\</CH_folder>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)VisualStudio\COMMON.vcxproj" />
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3dd71041-142a-4949-8bb5-72e2fd6ba1b3}</ProjectGuid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ClCompile Remove="Generate.cpp" />
+    <ClCompile Include="$(SolutionDir)test\$(CH_folder)$(CH_local).cpp" />
+  </ItemGroup>
+
+</Project>

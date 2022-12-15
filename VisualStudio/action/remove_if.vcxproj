@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="ConfigHandy">
+    <CH_local>remove_if</CH_local>
+    <CH_folder>action\</CH_folder>
+  </PropertyGroup>
+
+  <Import Project="$(SolutionDir)VisualStudio\COMMON.vcxproj" />
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{97098351-7c99-4cf7-8bcf-9d0f85a13cc8}</ProjectGuid>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ClCompile Remove="Generate.cpp" />
+    <ClCompile Include="$(SolutionDir)test\$(CH_folder)$(CH_local).cpp" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,5 @@
+The file "tests.sln" in this (top) directory is a Visual Studio solution that contains all the individual vcxproj files, one for each separate EXE that make up the test suite.
+
+Other than the sln file and this note, everything Visual Studio related is under the VisualStudio directory and not mixed in with the base distribution files at all.  This includes the compiler output: Look in VisualStudio\exe\* for the result of compiling.  Likewise, VisualStudio\obj\* contain intermediate files.  Both of these directories can be deleted and the only effect will be to clean the VisualStudio builds.
+
+Note that the many, many separate vcxproj files all refer to COMMON.vcxproj for all build options.  This allows settings to be changed in just one place, and they apply uniformly to all the projects.  And, this is a fully-working project by itself (rather than a property sheet) so it can be edited in the IDE in the normal way: right-click COMMON in the Solution Explorer and choose Properties from the menu.
