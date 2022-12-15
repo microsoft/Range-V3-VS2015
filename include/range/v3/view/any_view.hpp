@@ -107,53 +107,53 @@ namespace ranges
             template<typename S, typename I>
             struct any_sentinel_impl;
 
-            template<typename I, category Cat>
+            template<typename I, typename Ref, category Cat>
             struct any_cursor_impl
-              : any_cursor_interface<iterator_reference_t<I>, Cat>
+              : any_cursor_interface<Ref, Cat>
             {
             private:
                 template<typename S, typename II>
                 friend struct any_sentinel_impl;
-                using Ref = iterator_reference_t<I>;
+                CONCEPT_ASSERT(ConvertibleTo<iterator_reference_t<I>, Ref>());
                 object<I> it_;
             public:
                 any_cursor_impl() = default;
                 any_cursor_impl(I it)
                   : it_{std::move(it)}
                 {}
-                object<I> const &iter() const
+                object<I> const &iter() const // override
                 {
                     return it_;
                 }
-                Ref get() const
+                Ref get() const // override
                 {
                     return *it_.get();
                 }
-                bool equal(any_cursor_interface<Ref, category::input> const &that) const
+                bool equal(any_cursor_interface<Ref, category::input> const &that) const // override
                 {
                     any_cursor_impl const *pthat =
                         dynamic_cast<any_cursor_impl const *>(&that);
                     RANGES_ASSERT(pthat != nullptr);
                     return pthat->it_.get() == it_.get();
                 }
-                void next()
+                void next() // override
                 {
                     ++it_.get();
                 }
-                any_cursor_impl *clone_() const
+                any_cursor_impl *clone_() const // override
                 {
                     return new any_cursor_impl{it_.get()};
                 }
-                void prev()
+                void prev() // override (sometimes; it's complicated)
                 {
                     --it_.get();
                 }
-                void advance(std::ptrdiff_t n)
+                void advance(std::ptrdiff_t n) // override-ish
                 {
                     it_.get() += n;
                 }
                 std::ptrdiff_t distance_to(
-                    any_cursor_interface<Ref, category::random_access> const &that) const
+                    any_cursor_interface<Ref, category::random_access> const &that) const // override-ish
                 {
                     any_cursor_impl const *pthat =
                         dynamic_cast<any_cursor_impl const *>(&that);
@@ -180,13 +180,13 @@ namespace ranges
                 any_sentinel_impl(S s)
                   : s_(std::move(s))
                 {}
-                bool equal(any_object const &that) const
+                bool equal(any_object const &that) const override
                 {
                     object<I> const *pthat = dynamic_cast<object<I> const *>(&that);
                     RANGES_ASSERT(pthat != nullptr);
                     return s_ == pthat->get();
                 }
-                any_sentinel_impl *clone() const
+                any_sentinel_impl *clone() const override
                 {
                     return new any_sentinel_impl{s_};
                 }
@@ -214,7 +214,7 @@ namespace ranges
                                       ConvertibleTo<range_reference_t<Rng>, Ref>())>
 #endif
                 any_cursor(Rng &&rng, begin_tag)
-                  : ptr_{new any_cursor_impl<range_iterator_t<Rng>, Cat>{begin(rng)}}
+                  : ptr_{new any_cursor_impl<range_iterator_t<Rng>, Ref, Cat>{begin(rng)}}
                 {}
                 any_cursor(any_cursor &&) = default;
                 any_cursor(any_cursor const &that)
@@ -256,8 +256,8 @@ namespace ranges
                 CONCEPT_REQUIRES(Cat >= category::random_access)
                 std::ptrdiff_t distance_to(any_cursor const &that) const
                 {
-                    RANGES_ASSERT(ptr_ && that.ptr_);
-                    return ptr_->distance_to(*that.ptr_);
+                    RANGES_ASSERT(!ptr_ == !that.ptr_);
+                    return !ptr_ ? 0 : ptr_->distance_to(*that.ptr_);
                 }
             };
 
@@ -306,29 +306,29 @@ namespace ranges
                 virtual any_view_interface *clone() const = 0;
             };
 
-            template<typename Rng, category Cat>
+            template<typename Rng, typename Ref, category Cat>
             struct any_view_impl
-              : any_view_interface<range_reference_t<Rng>, Cat>
+              : any_view_interface<Ref, Cat>
             {
             private:
-                using Ref = range_reference_t<Rng>;
+                CONCEPT_ASSERT(ConvertibleTo<range_reference_t<Rng>, Ref>());
                 Rng rng_;
             public:
                 any_view_impl() = default;
                 any_view_impl(Rng rng)
                   : rng_(std::move(rng))
                 {}
-                any_cursor<Ref, Cat> begin_cursor()
+                any_cursor<Ref, Cat> begin_cursor() override
                 {
                     return {rng_, begin_tag{}};
                 }
-                any_sentinel end_cursor()
+                any_sentinel end_cursor() override
                 {
                     return {rng_, end_tag{}};
                 }
-                any_view_interface<Ref, Cat> *clone() const
+                any_view_interface<Ref, Cat> *clone() const override
                 {
-                    return new any_view_impl<Rng, Cat>{rng_};
+                    return new any_view_impl{rng_};
                 }
             };
 
@@ -358,12 +358,11 @@ namespace ranges
             }
             template<typename Rng>
             any_view(Rng && rng, std::true_type)
-              : ptr_{new detail::any_view_impl<view::all_t<Rng>, Cat>{
+              : ptr_{new detail::any_view_impl<view::all_t<Rng>, Ref, Cat>{
                     view::all(std::forward<Rng>(rng))}}
             {}
             template<typename Rng>
             any_view(Rng &&, std::false_type)
-              : ptr_{}
             {
                 static_assert(detail::to_cat_(range_concept<Rng>{}) >= Cat,
                     "The range passed to any_view() does not model the requested category");
